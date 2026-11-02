@@ -373,7 +373,8 @@ input[type=search]{background:var(--inset)}
 
 /* Daily 1.3: logo de entrada */
 .login .logo{margin:0;line-height:0}
-.login .logo img{width:min(220px,58vw);height:auto;border-radius:22%;box-shadow:0 18px 50px rgba(0,0,0,.45)}
+.login .logo{display:flex;flex-direction:column;align-items:center;gap:18px;line-height:1}.login .logo img{width:min(160px,42vw);height:auto;border-radius:22%;box-shadow:0 18px 50px rgba(0,0,0,.45);image-rendering:auto}
+.login .lnom{font-size:40px;font-weight:500;letter-spacing:-.02em;color:var(--ink)}.login .lnom small{display:block;font-size:12px;font-weight:500;letter-spacing:.3em;text-transform:uppercase;color:var(--accent);margin-top:8px}
 /* 1.4: borrar y Apple */
 .peligro{background:#9b2c2c!important;color:#fff!important;border-color:#9b2c2c!important}
 .ghost.g.peligro{background:transparent!important;color:#e07a7a!important;border-color:rgba(224,122,122,.45)!important}
