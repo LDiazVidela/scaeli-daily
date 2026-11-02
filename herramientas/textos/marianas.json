@@ -1,0 +1,32 @@
+{
+  "text_entries": [
+    {
+      "id": "magnificat",
+      "title_es": "Magníficat",
+      "title_la": "Magnificat",
+      "content_es": "Proclama mi alma la grandeza del Señor, se alegra mi espíritu en Dios, mi salvador; porque ha mirado la humillación de su esclava. Desde ahora me felicitarán todas las generaciones, porque el Poderoso ha hecho obras grandes por mí: su nombre es santo, y su misericordia llega a sus fieles de generación en generación.\n\nÉl hace proezas con su brazo: dispersa a los soberbios de corazón, derriba del trono a los poderosos y enaltece a los humildes, a los hambrientos los colma de bienes y a los ricos los despide vacíos.\n\nAuxilia a Israel, su siervo, acordándose de la misericordia —como lo había prometido a nuestros padres— en favor de Abrahán y su descendencia por siempre.\n\nGloria al Padre, y al Hijo, y al Espíritu Santo. Como era en el principio, ahora y siempre, por los siglos de los siglos. Amén.",
+      "content_la": "Magníficat ánima mea Dóminum, et exsultávit spíritus meus in Deo salvatóre meo, quia respéxit humilitátem ancíllæ suæ. Ecce enim ex hoc beátam me dicent omnes generatiónes, quia fecit mihi magna, qui potens est, et sanctum nomen eius, et misericórdia eius in progénies et progénies timéntibus eum.\n\nFecit poténtiam in bráchio suo, dispérsit supérbos mente cordis sui; depósuit poténtes de sede et exaltávit húmiles; esuriéntes implévit bonis et dívites dimísit inánes.\n\nSuscépit Israel púerum suum, recordátus misericórdiæ, sicut locútus est ad patres nostros, Ábraham et sémini eius in sǽcula.\n\nGlória Patri, et Fílio, et Spirítui Sancto. Sicut erat in princípio, et nunc, et semper, et in sǽcula sæculórum. Amen."
+    },
+    {
+      "id": "memorare",
+      "title_es": "Acordaos",
+      "title_la": "Memorare",
+      "content_es": "Acordaos, oh piadosísima Virgen María, que jamás se ha oído decir que ninguno de los que han acudido a vuestra protección, implorando vuestra asistencia y reclamando vuestro socorro, haya sido abandonado de vos. Animado con esta confianza, a vos también acudo, oh Madre, Virgen de las vírgenes, y aunque gimiendo bajo el peso de mis pecados me atrevo a comparecer ante vuestra presencia soberana. No desechéis, oh Madre de Dios, mis humildes súplicas, antes bien, inclinad a ellas vuestros oídos y dignaos atenderlas favorablemente. Amén.",
+      "content_la": "Memoráre, o piíssima Virgo María, non esse audítum a sǽculo, quemquam ad tua curréntem præsídia, tua implorántem auxília, tua peténtem suffrágia, esse derelíctum. Ego tali animátus confidéntia, ad te, Virgo Vírginum, Mater, curro, ad te vénio, coram te gemens peccátor assísto. Noli, Mater Verbi, verba mea despícere; sed audi propítia et exáudi. Amen."
+    },
+    {
+      "id": "regina_caeli",
+      "title_es": "Reina del cielo",
+      "title_la": "Regina caeli",
+      "content_es": "Reina del cielo, alégrate, aleluya, porque el Señor, a quien mereciste llevar, aleluya, resucitó según su palabra, aleluya. Ruega al Señor por nosotros, aleluya.\n\nV. Gózate y alégrate, Virgen María, aleluya.\nR. Porque verdaderamente ha resucitado el Señor, aleluya.\n\nOremos: Oh Dios, que por la resurrección de tu Hijo, nuestro Señor Jesucristo, has llenado el mundo de alegría, concédenos, por intercesión de su Madre, la Virgen María, llegar a alcanzar los gozos eternos. Por Jesucristo nuestro Señor. Amén.\n\nSe reza en lugar del Ángelus durante el tiempo pascual.",
+      "content_la": "Regína cæli, lætáre, allelúia, quia quem meruísti portáre, allelúia, resurréxit, sicut dixit, allelúia. Ora pro nobis Deum, allelúia.\n\nV. Gaude et lætáre, Virgo María, allelúia.\nR. Quia surréxit Dóminus vere, allelúia.\n\nOrémus: Deus, qui per resurrectiónem Fílii tui Dómini nostri Iesu Christi mundum lætificáre dignátus es, præsta, quǽsumus, ut per eius Genetrícem Vírginem Maríam perpétuæ capiámus gáudia vitæ. Per Christum Dóminum nostrum. Amen."
+    },
+    {
+      "id": "ave_regina",
+      "title_es": "Oración de Fátima",
+      "title_la": "Oratio Fatimae",
+      "content_es": "Oh Jesús mío, perdona nuestros pecados, líbranos del fuego del infierno, lleva al cielo a todas las almas, especialmente a las más necesitadas de tu misericordia. Amén.",
+      "content_la": "O mi Iesu, dimítte nobis débita nostra, líbera nos ab igne inférni, perduc in cælum omnes ánimas, præsértim eas quæ misericórdiæ tuæ máxime indígent. Amen."
+    }
+  ]
+}

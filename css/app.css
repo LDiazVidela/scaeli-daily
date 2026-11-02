@@ -785,3 +785,32 @@ svg.anillo .halo{fill:none;stroke:var(--accent-line);stroke-width:2;animation:rh
 .sbanner.gban .gt{position:absolute;left:16px;right:16px;bottom:14px;color:#F3F1EC;display:flex;flex-direction:column;gap:2px}.sbanner.gban .gt b{font-size:22px;font-weight:600;letter-spacing:-.02em;text-shadow:0 1px 3px rgba(0,0,0,.7)}.sbanner.gban .gt small{font-size:12px;opacity:.85;letter-spacing:.06em}
 
 .fondos-d summary{list-style:none;display:flex;align-items:center;gap:10px;cursor:pointer}.fondos-d summary::-webkit-details-marker{display:none}.fondos-d summary b{flex:1;font-weight:500}.fondos-d summary svg.i{width:18px;height:18px;transition:transform .2s}.fondos-d[open] summary svg.i{transform:rotate(180deg)}
+/* ── 1.9 ── */
+.acentro b svg.i{width:40px;height:40px;stroke-width:1.4;color:var(--accent)}
+/* pantalla completa: el alto no sigue al teclado (100% del documento, no 100dvh) y el pie va con el contenido, así no tiembla al escribir */
+.sheet.full{height:100%;overflow:hidden}
+.sheet.full .in{overflow-y:auto;-webkit-overflow-scrolling:touch;display:flex;flex-direction:column;min-height:100%}
+.sheet.full .fcuerpo{flex:1 0 auto;min-height:0}
+.sheet.full .fpie{position:static;flex:none;margin-top:auto}
+body.enfoque{overflow:hidden}
+.gdes .hd{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:10px}.gdes .gt{margin:0 0 10px;line-height:1.3}
+.sheet .scroll>.card:first-child{margin-top:4px}.gban+.card{margin-top:0}
+.grow.yo{margin-top:12px}.grow .acts{margin-top:2px}
+.gali{margin-bottom:0}
+/* 1.9 · latín */
+.lat-seg{margin:0 0 14px;max-width:260px}
+.pray .q.lat,.rora.lat{font-style:italic;letter-spacing:.005em}
+.solo-row{display:flex;justify-content:center;gap:18px}.solo-row .lnk.solo-t{margin:12px 0 0}
+/* 1.9 · muro, portada */
+.gport{position:absolute;top:12px;right:12px;width:38px;height:38px;border-radius:999px;background:rgba(12,13,16,.55);color:#F3F1EC;display:flex;align-items:center;justify-content:center;cursor:pointer;backdrop-filter:blur(6px)}.gport input{display:none}.gport svg.i{width:18px;height:18px}
+.card.muro .hd .lnk{font-size:13px;padding:0;display:inline-flex;align-items:center;gap:5px}
+.mrec{margin:0 0 10px}.mrec button{text-align:left;white-space:normal;line-height:1.25;height:auto;padding:7px 12px}
+.msgs{display:flex;flex-direction:column;gap:8px;margin-top:12px}
+.msg{background:var(--inset);border-radius:16px;padding:10px 12px}.msg.mio{background:var(--accent-dim)}.msg.rec{border:1px solid var(--accent-line)}
+.msg .mh{display:flex;justify-content:space-between;align-items:center;gap:8px}.msg .mh b{font-weight:600;font-size:13px;display:inline-flex;align-items:center;gap:4px}.msg .mh small{color:var(--muted);font-size:11px;white-space:nowrap}
+.msg p{margin:4px 0 6px;font-size:15px;line-height:1.35;overflow-wrap:anywhere}
+.msg .mf{display:flex;align-items:center;justify-content:space-between;gap:8px}
+.msg .amen{height:28px;padding:0 10px;border-radius:999px;border:1px solid var(--line2);background:transparent;color:var(--muted);font:inherit;font-size:12px;font-weight:600;display:inline-flex;align-items:center;gap:5px}.msg .amen svg.i{width:14px;height:14px}.msg .amen.on{border-color:var(--accent-line);background:var(--accent-dim);color:var(--accent)}
+.msg .sm{opacity:.6}
+.card.grupoc .mnue{color:#F2B544!important;display:inline-flex;align-items:center;gap:5px;margin-top:2px}.card.grupoc .mnue svg.i{width:14px;height:14px;flex:none}.card.grupoc .mnue b{font-size:inherit;font-weight:600}
+.card.grupoc.port .bg.foto,.sbanner img.foto{image-rendering:auto}

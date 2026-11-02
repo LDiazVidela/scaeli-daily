@@ -1,6 +1,8 @@
 // La biblioteca de hábitos y virtudes de Daily: propuestas para agregar a «Tu día» con un toque.
 // Cada una: t = el hábito, v = la virtud que trabaja (data/plus.js VIRTUDES), a = el área, d = 1 si va como diaria (se hace una vez por día) o 0 si va como hábito (se suma cada vez).
-export const AREAS=[["oracion","Oración"],["familia","Familia y casa"],["amigos","Amigos y prójimo"],["estudio","Estudio y trabajo"],["cuerpo","Cuerpo"],["pantallas","Pantallas"],["interior","Vida interior"]];
+// g = público: "j" jóvenes, "a" adultos; sin g vale para todos.
+export const AREAS=[["oracion","Oración"],["familia","Familia y casa"],["amigos","Amigos y prójimo"],["estudio","Estudio y trabajo"],["cuerpo","Cuerpo"],["pantallas","Pantallas"],["interior","Vida interior"],["matrimonio","Matrimonio"],["hijos","Hijos"],["parroquia","Parroquia y servicio"],["dinero","Dinero y sobriedad"]];
+export const PUBLICOS=[["","Todos"],["j","Jóvenes"],["a","Adultos"]];
 export const BIBLIOTECA=[
   // Oración
   {t:"Rezar al levantarme",v:"fe",a:"oracion",d:1},
@@ -19,14 +21,14 @@ export const BIBLIOTECA=[
   {t:"Cinco minutos de silencio con Dios",v:"fe",a:"oracion",d:1},
   // Familia y casa
   {t:"Ayudar en casa sin que me lo pidan",v:"caridad",a:"familia",d:0},
-  {t:"Hacer mi cama al levantarme",v:"fortaleza",a:"familia",d:1},
-  {t:"Dejar mi cuarto ordenado",v:"prudencia",a:"familia",d:1},
+  {g:"j",t:"Hacer mi cama al levantarme",v:"fortaleza",a:"familia",d:1},
+  {g:"j",t:"Dejar mi cuarto ordenado",v:"prudencia",a:"familia",d:1},
   {t:"Comer en familia sin el celular",v:"templanza",a:"familia",d:0},
   {t:"Decir «gracias» en casa",v:"justicia",a:"familia",d:0},
-  {t:"Obedecer a la primera",v:"justicia",a:"familia",d:0},
-  {t:"Llamar a mis abuelos",v:"caridad",a:"familia",d:0},
+  {g:"j",t:"Obedecer a la primera",v:"justicia",a:"familia",d:0},
+  {g:"j",t:"Llamar a mis abuelos",v:"caridad",a:"familia",d:0},
   {t:"Pedir perdón cuando me equivoco",v:"justicia",a:"familia",d:0},
-  {t:"Jugar con mis hermanos",v:"caridad",a:"familia",d:0},
+  {g:"j",t:"Jugar con mis hermanos",v:"caridad",a:"familia",d:0},
   {t:"Cocinar o poner la mesa",v:"caridad",a:"familia",d:0},
   // Amigos y prójimo
   {t:"Escuchar sin interrumpir",v:"caridad",a:"amigos",d:0},
@@ -45,12 +47,12 @@ export const BIBLIOTECA=[
   {t:"Hacer primero lo que más me cuesta",v:"fortaleza",a:"estudio",d:0},
   {t:"Terminar lo que empiezo",v:"fortaleza",a:"estudio",d:0},
   {t:"Planear el día a la mañana",v:"prudencia",a:"estudio",d:1},
-  {t:"Hacer la tarea el mismo día",v:"prudencia",a:"estudio",d:0},
-  {t:"Estudiar veinticinco minutos seguidos",v:"fortaleza",a:"estudio",d:0},
+  {g:"j",t:"Hacer la tarea el mismo día",v:"prudencia",a:"estudio",d:0},
+  {g:"j",t:"Estudiar veinticinco minutos seguidos",v:"fortaleza",a:"estudio",d:0},
   {t:"Ofrecer el estudio por alguien",v:"esperanza",a:"estudio",d:0},
-  {t:"Preguntar lo que no entiendo",v:"prudencia",a:"estudio",d:0},
+  {g:"j",t:"Preguntar lo que no entiendo",v:"prudencia",a:"estudio",d:0},
   // Cuerpo
-  {t:"Levantarme a la primera alarma",v:"fortaleza",a:"cuerpo",d:1},
+  {g:"j",t:"Levantarme a la primera alarma",v:"fortaleza",a:"cuerpo",d:1},
   {t:"Hacer ejercicio",v:"fortaleza",a:"cuerpo",d:0},
   {t:"Tomar agua en vez de gaseosa",v:"templanza",a:"cuerpo",d:0},
   {t:"No comer entre comidas",v:"templanza",a:"cuerpo",d:0},
@@ -65,7 +67,7 @@ export const BIBLIOTECA=[
   {t:"Menos de una hora de redes",v:"templanza",a:"pantallas",d:1},
   {t:"Celular en otro cuarto mientras estudio",v:"fortaleza",a:"pantallas",d:0},
   {t:"No mirar nada impuro",v:"templanza",a:"pantallas",d:1},
-  {t:"Un día sin videojuegos",v:"templanza",a:"pantallas",d:0},
+  {g:"j",t:"Un día sin videojuegos",v:"templanza",a:"pantallas",d:0},
   {t:"No contestar enojado por chat",v:"prudencia",a:"pantallas",d:0},
   {t:"Compartir algo bueno en las redes",v:"fe",a:"pantallas",d:0},
   // Vida interior
@@ -77,5 +79,69 @@ export const BIBLIOTECA=[
   {t:"Reconocer un error en voz alta",v:"justicia",a:"interior",d:0},
   {t:"Alegrarme por el éxito de otro",v:"caridad",a:"interior",d:0},
   {t:"Hacer algo bueno sin que nadie se entere",v:"caridad",a:"interior",d:0},
+  // Adultos · Oración
+  {g:"a",t:"Rezar Laudes o Vísperas",v:"fe",a:"oracion",d:1},
+  {g:"a",t:"Quince minutos de oración mental",v:"fe",a:"oracion",d:1},
+  {g:"a",t:"Rezar el Rosario completo",v:"fe",a:"oracion",d:1},
+  {g:"a",t:"Ir a Misa un día de semana",v:"fe",a:"oracion",d:0},
+  {g:"a",t:"Hacer una hora santa en la semana",v:"fe",a:"oracion",d:0},
+  {g:"a",t:"Leer un rato las Escrituras con calma",v:"fe",a:"oracion",d:1},
+  {g:"a",t:"Rezar por mis difuntos",v:"esperanza",a:"oracion",d:0},
+  {g:"a",t:"Buscar dirección espiritual",v:"prudencia",a:"oracion",d:0},
+  // Adultos · Matrimonio
+  {g:"a",t:"Rezar juntos antes de dormir",v:"fe",a:"matrimonio",d:1},
+  {g:"a",t:"Un gesto de cariño sin motivo",v:"caridad",a:"matrimonio",d:1},
+  {g:"a",t:"Escuchar a mi esposo/a sin el celular",v:"caridad",a:"matrimonio",d:0},
+  {g:"a",t:"Decirle algo que valoro de él/ella",v:"justicia",a:"matrimonio",d:0},
+  {g:"a",t:"Pedir perdón antes de que termine el día",v:"justicia",a:"matrimonio",d:0},
+  {g:"a",t:"Una salida juntos en la semana",v:"caridad",a:"matrimonio",d:0},
+  {g:"a",t:"No discutir delante de los chicos",v:"prudencia",a:"matrimonio",d:0},
+  {g:"a",t:"Ceder en algo pequeño sin que se note",v:"templanza",a:"matrimonio",d:0},
+  // Adultos · Hijos
+  {g:"a",t:"Bendecir a mis hijos a la noche",v:"fe",a:"hijos",d:1},
+  {g:"a",t:"Rezar con los chicos antes de comer",v:"fe",a:"hijos",d:1},
+  {g:"a",t:"Contarles un pasaje del Evangelio",v:"fe",a:"hijos",d:0},
+  {g:"a",t:"Jugar con mis hijos sin apuro",v:"caridad",a:"hijos",d:0},
+  {g:"a",t:"Corregir sin gritar",v:"templanza",a:"hijos",d:0},
+  {g:"a",t:"Preguntarle a cada hijo cómo estuvo su día",v:"caridad",a:"hijos",d:1},
+  {g:"a",t:"Cumplir lo que les prometí",v:"justicia",a:"hijos",d:0},
+  {g:"a",t:"Llevar a los chicos a Misa",v:"fe",a:"hijos",d:0},
+  // Adultos · Familia
+  {g:"a",t:"Llamar a mis padres",v:"caridad",a:"familia",d:0},
+  {g:"a",t:"Visitar a un familiar mayor",v:"caridad",a:"familia",d:0},
+  {g:"a",t:"Cenar en familia sin pantallas",v:"templanza",a:"familia",d:0},
+  {g:"a",t:"Llegar a casa a la hora que dije",v:"justicia",a:"familia",d:0},
+  // Adultos · Trabajo
+  {g:"a",t:"Ofrecer el trabajo del día a Dios",v:"esperanza",a:"estudio",d:1},
+  {g:"a",t:"Trabajar sin mirar el celular una hora",v:"fortaleza",a:"estudio",d:0},
+  {g:"a",t:"No hablar mal de un colega",v:"justicia",a:"estudio",d:0},
+  {g:"a",t:"Cortar a horario y volver a casa",v:"templanza",a:"estudio",d:1},
+  {g:"a",t:"Hacer bien lo que nadie va a ver",v:"justicia",a:"estudio",d:0},
+  {g:"a",t:"Tratar con paciencia a quien me carga",v:"templanza",a:"estudio",d:0},
+  // Adultos · Parroquia y servicio
+  {g:"a",t:"Participar en un grupo de la parroquia",v:"fe",a:"parroquia",d:0},
+  {g:"a",t:"Visitar a un enfermo",v:"caridad",a:"parroquia",d:0},
+  {g:"a",t:"Ayudar en Cáritas o en un comedor",v:"caridad",a:"parroquia",d:0},
+  {g:"a",t:"Rezar por mi párroco y por los sacerdotes",v:"fe",a:"parroquia",d:1},
+  {g:"a",t:"Invitar a alguien alejado a volver a Misa",v:"fe",a:"parroquia",d:0},
+  {g:"a",t:"Dar testimonio de fe cuando toca",v:"fortaleza",a:"parroquia",d:0},
+  // Adultos · Dinero y sobriedad
+  {g:"a",t:"No comprar nada que no necesite",v:"templanza",a:"dinero",d:1},
+  {g:"a",t:"Dar el diezmo o una limosna fija",v:"justicia",a:"dinero",d:0},
+  {g:"a",t:"Pagar lo que debo a tiempo",v:"justicia",a:"dinero",d:0},
+  {g:"a",t:"Anotar los gastos del día",v:"prudencia",a:"dinero",d:1},
+  {g:"a",t:"Un día sin delivery ni gastos de más",v:"templanza",a:"dinero",d:0},
+  {g:"a",t:"Agradecer lo que tengo antes de pedir más",v:"esperanza",a:"dinero",d:0},
+  // Adultos · Cuerpo e interior
+  {g:"a",t:"Acostarme antes de las doce",v:"templanza",a:"cuerpo",d:1},
+  {g:"a",t:"No tomar alcohol entre semana",v:"templanza",a:"cuerpo",d:1},
+  {g:"a",t:"Caminar media hora",v:"fortaleza",a:"cuerpo",d:0},
+  {g:"a",t:"Ayunar o abstinencia los viernes",v:"templanza",a:"cuerpo",d:0},
+  {g:"a",t:"No revisar el trabajo después de cenar",v:"templanza",a:"pantallas",d:1},
+  {g:"a",t:"Dejar el celular fuera del dormitorio",v:"templanza",a:"pantallas",d:1},
+  {g:"a",t:"Aceptar una contrariedad sin quejarme",v:"fortaleza",a:"interior",d:0},
+  {g:"a",t:"Hacer un examen de conciencia al mediodía",v:"prudencia",a:"interior",d:1},
+  {g:"a",t:"Perdonar a alguien de mi pasado",v:"caridad",a:"interior",d:0},
+  {g:"a",t:"Decidir algo importante después de rezar",v:"prudencia",a:"interior",d:0},
   {t:"Escribir en el diario",v:"prudencia",a:"interior",d:1}
 ];
