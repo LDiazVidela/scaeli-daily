@@ -814,3 +814,5 @@ body.enfoque{overflow:hidden}
 .msg .sm{opacity:.6}
 .card.grupoc .mnue{color:#F2B544!important;display:inline-flex;align-items:center;gap:5px;margin-top:2px}.card.grupoc .mnue svg.i{width:14px;height:14px;flex:none}.card.grupoc .mnue b{font-size:inherit;font-weight:600}
 .card.grupoc.port .bg.foto,.sbanner img.foto{image-rendering:auto}
+/* 1.9.1 · iPhone como PWA: nunca menos de 44px arriba (barra de estado) aunque el inset llegue tarde */
+body.ios-pwa{padding-top:calc(16px + max(env(safe-area-inset-top,0px),44px))}
