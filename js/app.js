@@ -7,7 +7,7 @@ import { ORACIONES, SANTOS, MISTERIOS, ROS_MED, ROS_FATIMA, ROS_DIAS_N, CONFESIO
 import { HORA, IDEAS } from "../data/propio.js";
 import { ORACIONES_MAS } from "../data/oraciones_mas.js";
 import { NOVENAS } from "../data/novenas.js";
-import { CAPITALES, CAPITALES_N } from "../data/examen.js";
+import { CAPITALES, CAPITALES_N, VIDA, CONF_CIERRE } from "../data/examen.js";
 import { BIBLIOTECA, AREAS, PUBLICOS } from "../data/habitos.js";
 import { LIBROS } from "../data/libros.js";
 import { MISA_ORDINARIO, PREF_SANTOS, PREF_PROPIO } from "../data/misa.js";
@@ -15,7 +15,7 @@ import { SANTOS_MAS, tipoSanto, oracionSanto } from "../data/santos.js";
 import { SANTORAL } from "../data/santoral.js";
 import * as PJ from "./personaje.js";
 
-export const VERSION="1.9.2";
+export const VERSION="1.9.3";
 const LOGO_GOOGLE='<svg class="logo-g" viewBox="0 0 48 48" aria-hidden="true"><path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/><path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/><path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/><path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/></svg>';
 const LOGO_APPLE='<svg class="logo-a" viewBox="0 0 814 1000" aria-hidden="true"><path fill="currentColor" d="M788.1 340.9c-5.8 4.5-108.2 62.2-108.2 190.5 0 148.4 130.3 200.9 134.2 202.2-.6 3.2-20.7 71.9-68.7 141.9-42.8 61.6-87.5 123.1-155.5 123.1s-85.5-39.5-164-39.5c-76.5 0-103.7 40.8-165.9 40.8s-105.6-57-155.5-127C46.7 790.7 0 663 0 541.8c0-194.4 126.4-297.5 250.8-297.5 66.1 0 121.2 43.4 162.7 43.4 39.5 0 101.1-46 176.3-46 28.5 0 130.9 2.6 198.3 99.2zm-234-181.5c31.1-36.9 53.1-88.1 53.1-139.3 0-7.1-.6-14.3-1.9-20.1-50.6 1.9-110.8 33.7-147.1 75.8-28.5 32.4-55.1 83.6-55.1 135.5 0 7.8 1.3 15.6 1.9 18.1 3.2.6 8.4 1.3 13.6 1.3 45.4 0 102.5-30.4 135.5-71.3z"/></svg>';
 /* la dirección publicada: la app de las tiendas lee de acá los Evangelios del día (los genera la GitHub Action cada noche) */
@@ -971,30 +971,32 @@ function hojaLeer(){ let h; try{ h=JSON.parse(localStorage.getItem(HOJA_K)||"nul
   /* las hojas de antes se guardaban por número de mandamiento: pasan a guardarse por nombre */
   for(const g of ["m","n"]) for(const k of Object.keys(h[g]||{})) if(/^\d+$/.test(k)&&CONFESION[+k]){ h[g][CONFESION[+k].n]=h[g][k]; delete h[g][k]; }
   return h; }
-const exLista=()=>{ const ni=sheet&&sheet.ninos, modo=(sheet&&sheet.modo)||"dos", M=ni?CONFESION_N:CONFESION, C=ni?CAPITALES_N:CAPITALES; return modo==="man"?M:modo==="cap"?C:[...M,...C]; };
+const exLista=()=>{ const ni=sheet&&sheet.ninos, modo=(sheet&&sheet.modo)||"vida", M=ni?CONFESION_N:CONFESION, C=ni?CAPITALES_N:CAPITALES, V=ni?CONFESION_N:VIDA; return modo==="man"?M:modo==="cap"?C:V; };
 function hojaGuardar(h){ try{ localStorage.setItem(HOJA_K,JSON.stringify(h)); }catch(e){} }
 function hojaVacia(h){ return !Object.values(h.m||{}).some(a=>a&&a.length)&&!Object.values(h.n||{}).some(t=>String(t||"").trim()); }
-function shExConf(){ const L=exLista(), h=sheet.h, p=sheet.p, N=L.length+2, modo=sheet.modo||"dos";
-  if(p===0) return fullTop(0,N,"Para confesarme")+'<div class="scroll fcuerpo"><div class="fcen"><div class="fla">Antes de empezar</div><h2 class="fh">Examen de conciencia</h2><p class="fq">Ven, Espíritu Santo.\nMostrame mi vida como Vos la ves, con verdad y con misericordia.</p><p class="fhint">Vas a ver preguntas por mandamiento y por pecado capital. Tocá las que te tocan y escribí con tus palabras lo que quieras recordar. Al final te queda una hoja para llevar a la confesión.</p><p class="fhint chico">'+ic("lock")+' La hoja queda solo en este teléfono: no se guarda en tu cuenta ni la ve nadie. La podés borrar cuando quieras.</p>'+
+function shExConf(){ const L=exLista(), h=sheet.h, p=sheet.p, N=L.length+2, modo=sheet.modo||"vida";
+  if(p===0) return fullTop(0,N,"Para confesarme")+'<div class="scroll fcuerpo"><div class="fcen"><div class="fla">Antes de empezar</div><h2 class="fh">Examen de conciencia</h2><p class="fq">Ven, Espíritu Santo.\nMostrame mi vida como Vos la ves, con verdad y con misericordia.</p><p class="fhint">No se trata de buscar errores por buscar ni de sentir culpa por todo: es mirar tu vida delante de Dios con sinceridad. Tocá las preguntas que te tocan y escribí con tus palabras lo que quieras recordar. Al final te queda una hoja para llevar a la confesión.</p><p class="fhint chico">'+ic("lock")+' La hoja queda solo en este teléfono: no se guarda en tu cuenta ni la ve nadie. La podés borrar cuando quieras.</p>'+
    '<div class="seg" style="margin-top:6px"><button data-a="confNinosF" data-p="0" aria-pressed="'+!sheet.ninos+'">Jóvenes y adultos</button><button data-a="confNinosF" data-p="1" aria-pressed="'+!!sheet.ninos+'">Chicos</button></div>'+
-   '<div class="sect" style="margin-top:6px">Examen por</div><div class="seg"><button data-a="confModo" data-p="man" aria-pressed="'+(modo==="man")+'">Mandamientos</button><button data-a="confModo" data-p="cap" aria-pressed="'+(modo==="cap")+'">Pecados capitales</button><button data-a="confModo" data-p="dos" aria-pressed="'+(modo==="dos")+'">Los dos</button></div>'+
+   '<div class="sect" style="margin-top:6px">Examen por</div><div class="seg"><button data-a="confModo" data-p="vida" aria-pressed="'+(modo==="vida")+'">Mi vida</button><button data-a="confModo" data-p="man" aria-pressed="'+(modo==="man")+'">Mandamientos</button><button data-a="confModo" data-p="cap" aria-pressed="'+(modo==="cap")+'">Capitales</button></div>'+
    '<label class="f" style="margin-top:8px">Mi última confesión fue hace…<input type="text" id="hojaU" value="'+esc(h.u||"")+'" placeholder="Por ejemplo: dos meses"></label></div></div>'+fullPie(null,"hojaPaso","Empezar",1);
   if(p<=L.length){ const c=L[p-1], k=c.n, m=h.m[k]||[];
-    return fullTop(p,N,c.n)+'<div class="scroll fcuerpo"><div class="fla">'+esc(c.n)+'</div><h2 class="fh">'+esc(c.s)+'</h2><div class="hq">'+c.q.map((q,i)=>'<button data-a="hojaQ" data-p="'+i+'" class="'+(m.includes(i)?"on":"")+'"><span class="cb">'+(m.includes(i)?ic("check"):"")+'</span><span>'+esc(q)+'</span></button>').join("")+'</div>'+
+    return fullTop(p,N,c.n)+'<div class="scroll fcuerpo"><div class="fla">'+esc(c.n)+'</div><h2 class="fh">'+esc(c.s)+'</h2>'+(c.d?'<p class="fhint">'+esc(c.d)+'</p>':'')+'<div class="hq">'+c.q.map((q,i)=>'<button data-a="hojaQ" data-p="'+i+'" class="'+(m.includes(i)?"on":"")+'"><span class="cb">'+(m.includes(i)?ic("check"):"")+'</span><span>'+esc(q)+'</span></button>').join("")+'</div>'+
      '<label class="f">Con mis palabras<textarea class="fta chico" id="hojaN" placeholder="Lo que quiero decir en la confesión">'+esc(h.n[k]||"")+'</textarea></label></div>'+fullPie('data-a="hojaPaso" data-p="-1"',"hojaPaso","Seguir",1); }
   const items=L.map(c=>({c,m:(h.m[c.n]||[]).map(i=>c.q[i]).filter(Boolean),n:String(h.n[c.n]||"").trim()})).filter(x=>x.m.length||x.n);
   return fullTop(N-1,N,"Tu hoja")+'<div class="scroll fcuerpo"><div class="hoja"><div class="fla">Para confesarme</div>'+(h.u?'<p class="hint">Mi última confesión: hace '+esc(h.u)+'.</p>':'')+
-   (items.length?items.map(x=>'<div class="hoja-g"><b>'+esc(x.c.n)+'</b>'+x.m.map(q=>'<p>· '+esc(q.replace(/^¿|\?$/g,""))+'</p>').join("")+(x.n?'<p class="mia">'+esc(x.n)+'</p>':'')+'</div>').join(""):'<p class="hint">No marcaste nada. Si querés, volvé atrás y repasá con calma.</p>')+
+   (items.length?'<p class="hint">'+esc(CONF_CIERRE.nota)+'</p>'+items.map(x=>'<div class="hoja-g"><b>'+esc(x.c.n)+'</b>'+x.m.map(q=>'<p>· '+esc(q.replace(/^¿|\?$/g,""))+'</p>').join("")+(x.n?'<p class="mia">'+esc(x.n)+'</p>':'')+'</div>').join(""):'<p class="hint">No marcaste nada. Si querés, volvé atrás y repasá con calma.</p>')+
    '<div class="hoja-g"><b>Cómo es la confesión</b><p>Saludá al sacerdote y hacé la señal de la cruz. Decí cuánto hace de tu última confesión y tus pecados, con claridad. Escuchá el consejo y la penitencia. Rezá el acto de contrición y recibí la absolución.</p></div>'+
-   '<div class="hoja-g"><b>Acto de contrición</b><p>'+esc(oraTxt("Acto de contrición"))+'</p></div></div>'+
+   '<div class="hoja-g"><b>Acto de contrición</b><p>'+esc(oraTxt("Acto de contrición"))+'</p></div>'+
+   '<div class="hoja-g"><b>Para terminar</b><p>'+esc(CONF_CIERRE.oracion)+'</p><p class="hint">'+esc(CONF_CIERRE.recorda)+'</p></div></div>'+
    '<button class="lnk peligro-t" data-a="hojaBorrar">Borrar la hoja</button></div>'+fullPie('data-a="hojaPaso" data-p="-1"',"cerrar","Listo"); }
 function hojaNotas(){ if(!sheet||!sheet.h) return; const t=$("#hojaN"), u=$("#hojaU"), c=exLista()[sheet.p-1]; if(t&&c) sheet.h.n[c.n]=t.value; if(u) sheet.h.u=u.value.trim(); hojaGuardar(sheet.h); }
 function shConfesion(){ const ninos=!!sheet.ninos, L=ninos?CONFESION_N:CONFESION;
   return shTop("Confesión","Los pasos y el examen")+'<div class="scroll"><div class="sbanner"><img src="'+ilu("confesion")+'" alt=""><span class="g"></span></div><div class="steps">'+PASOS_CONFESION.map((x,i)=>'<div class="step on"><i>'+(i+1)+'</i><div><b>'+esc(x[0])+'</b><p>'+esc(x[1])+'</p></div></div>').join("")+'</div>'+
    '<button class="primary" data-a="exConf" style="margin-top:14px">'+ic("pen")+' Hacer mi examen y armar la hoja</button>'+(dayOf(hoy()).cj?'<p class="hint" style="text-align:center;margin:10px 0 0">Hoy te confesaste: el ánimo volvió a 100. '+desLink("cj","Sacar la marca")+'</p>':'<button class="ghost g" data-a="confHoy" style="margin:10px auto 0;display:flex">'+ic("heart")+' Hoy me confesé</button>')+'<p class="hint" style="text-align:center;margin:6px 0 0">Pantalla completa, sin distracciones. La hoja queda solo en este teléfono.</p>'+
-   '<div class="sect" style="margin-top:16px">Examen por mandamientos</div><div class="seg" style="margin:8px 0"><button data-a="confNinos" data-p="0" aria-pressed="'+!ninos+'">Jóvenes y adultos</button><button data-a="confNinos" data-p="1" aria-pressed="'+ninos+'">Chicos</button></div>'+
-   L.map(c=>'<details><summary><b>'+esc(c.n)+'</b> <small class="muted">'+esc(c.s)+'</small></summary><p class="texto chico">'+c.q.map(esc).join("<br>")+'</p></details>').join("")+
-   '<div class="sect" style="margin-top:16px">Por pecados capitales</div>'+(ninos?CAPITALES_N:CAPITALES).map(c=>'<details><summary><b>'+esc(c.n)+'</b> <small class="muted">'+esc(c.s)+'</small></summary><p class="texto chico">'+c.q.map(esc).join("<br>")+'</p></details>').join("")+
+   '<p class="hint" style="margin-top:16px;font-style:italic">'+esc(CONF_CIERRE.cita)+'</p><div class="sect" style="margin-top:12px">Examen</div><div class="seg" style="margin:8px 0"><button data-a="confNinos" data-p="0" aria-pressed="'+!ninos+'">Jóvenes y adultos</button><button data-a="confNinos" data-p="1" aria-pressed="'+ninos+'">Chicos</button></div>'+
+   (ninos?'':'<div class="sect" style="margin-top:12px">Por áreas de mi vida</div>'+VIDA.map(c=>'<details><summary><b>'+esc(c.n)+'</b> <small class="muted">'+esc(c.s)+'</small></summary><p class="texto chico">'+c.q.map(esc).join("<br>")+'</p></details>').join(""))+
+   '<div class="sect" style="margin-top:16px">'+(ninos?'Con Dios, con los demás y conmigo':'Por mandamientos')+'</div>'+L.map(c=>'<details><summary><b>'+esc(c.n)+'</b> <small class="muted">'+esc(c.s)+'</small></summary><p class="texto chico">'+c.q.map(esc).join("<br>")+'</p></details>').join("")+
+   '<div class="sect" style="margin-top:16px">Por pecados capitales</div>'+(ninos?CAPITALES_N:CAPITALES).map(c=>'<details><summary><b>'+esc(c.n)+'</b> <small class="muted">'+esc(c.s)+'</small></summary><p class="texto chico">'+(c.d?'<i>'+esc(c.d)+'</i><br>':'')+c.q.map(esc).join("<br>")+'</p></details>').join("")+
    '<div class="sect" style="margin-top:16px">Para decir al confesarte</div><p class="texto chico">'+esc(oraTxt("Yo confieso"))+'</p><div class="sect">Acto de contrición</div><p class="texto chico">'+esc(oraTxt("Acto de contrición"))+'</p></div><button class="primary ink" data-a="cerrar">Volver</button>'; }
 /* ── la Misa de hoy: guía del celebrante (calendario de la Argentina, data/ordo/AAAA.json, de GCatholic.org) ── */
 const ORDO={}, ordoCarga={};
@@ -1295,6 +1297,7 @@ let invitado=false; try{ invitado=localStorage.getItem("daily_invitado")==="1"; 
 if(invitado){ startSession({uid:"local",displayName:""},true); }
 finishRedirect().then(()=>{ watchAuth(u=>{ if(u){ try{ localStorage.removeItem("daily_invitado"); }catch(e){} startSession(u,false); } else if(!invitado&&!(backend&&backend.mode==="local")){ endSession(); } }); }).catch(()=>{});
 /* iPhone instalado desde Safari: la barra de estado tapa la fecha si env(safe-area-inset-top) todavía vale 0 al arrancar */
-try{ if(navigator.standalone&&/iPhone|iPad/.test(navigator.userAgent)) document.body.classList.add("ios-pwa"); }catch(e){}
+try{ if(navigator.standalone&&/iPhone|iPad/.test(navigator.userAgent)){ const H=Math.max(screen.width,screen.height), notch=H>=812, isla=H>=852&&!/iPad/.test(navigator.userAgent);
+  const r=document.documentElement; r.classList.add("ios-pwa"); r.style.setProperty("--sat-min",(isla?59:notch?47:20)+"px"); r.style.setProperty("--sab-min",(notch?34:0)+"px"); } }catch(e){}
 /* para las pruebas */
 window.DAILY={get:()=>({view,sheet,days,profile,rosario,intents,propositos,novenas,evHoy,backend:backend&&backend.mode,grupo}),ACC,openSheet,closeSheet,render,tiempoLit,ir:irA,grupoBE:()=>grupoBE,miFicha};
