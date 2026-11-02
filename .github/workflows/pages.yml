@@ -25,8 +25,10 @@ jobs:
       - uses: actions/configure-pages@v5
         with:
           enablement: true
+      - name: Armar la carpeta a publicar (sin la app nativa ni las herramientas)
+        run: rsync -a --exclude .git --exclude .github --exclude app-nativa --exclude herramientas --exclude tienda --exclude docs ./ _site/
       - uses: actions/upload-pages-artifact@v3
         with:
-          path: .
+          path: _site
       - id: deployment
         uses: actions/deploy-pages@v4
