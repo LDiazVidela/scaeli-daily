@@ -1,0 +1,37 @@
+name: Evangelio del día
+
+on:
+  schedule:
+    - cron: "23 7 * * *"    # todos los días a las 4:23 de Buenos Aires
+    - cron: "41 19 * * *"   # y otra vez a las 16:41, por si la primera falló
+  workflow_dispatch:          # y cuando lo corras a mano desde la pestaña Actions
+
+permissions:
+  contents: write
+
+concurrency:
+  group: evangelio
+  cancel-in-progress: false
+
+jobs:
+  traer:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Traer las lecturas del próximo mes
+        env:
+          TZ: America/Argentina/Buenos_Aires
+        run: node herramientas/evangelio.mjs
+      - name: Traer la Liturgia de las Horas
+        env:
+          TZ: America/Argentina/Buenos_Aires
+        run: node herramientas/horas.mjs || true
+      - name: Guardar en el repositorio
+        run: |
+          git config user.name "scala-bot"
+          git config user.email "scala-bot@users.noreply.github.com"
+          git add evangelio horas
+          git diff --cached --quiet && exit 0
+          git commit -m "Evangelio y Horas de los próximos días"
+          git pull --rebase --autostash || true
+          git push

@@ -1,0 +1,43 @@
+{
+  "appId": "io.github.ldiazvidela.scaelidaily",
+  "appName": "Scaeli Daily",
+  "webDir": "www",
+  "backgroundColor": "#0C0D10",
+  "android": {
+    "allowMixedContent": false
+  },
+  "ios": {
+    "contentInset": "never",
+    "backgroundColor": "#0C0D10"
+  },
+  "plugins": {
+    "FirebaseAuthentication": {
+      "skipNativeAuth": true,
+      "providers": [
+        "google.com",
+        "apple.com"
+      ]
+    },
+    "LocalNotifications": {
+      "smallIcon": "ic_stat_vela",
+      "iconColor": "#F5B83A"
+    }
+  },
+  "experimental": {
+    "ios": {
+      "spm": {
+        "swiftToolsVersion": "6.1",
+        "packageOptions": {
+          "@capacitor-firebase/authentication": {
+            "symlink": true
+          }
+        },
+        "packageTraits": {
+          "@capacitor-firebase/authentication": [
+            "Google"
+          ]
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,7 @@
+app-nativa/node_modules/
+app-nativa/www/
+app-nativa/android/build/
+app-nativa/android/app/build/
+app-nativa/android/.gradle/
+app-nativa/android/app/.cxx/
+.DS_Store

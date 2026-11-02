@@ -1,0 +1,14 @@
+<!doctype html><meta charset="utf-8"><body style="background:#15171C;margin:0">
+<div id="g" style="display:grid;grid-template-columns:repeat(8,128px);gap:6px;padding:6px"></div>
+<script type="module">
+import {cargar,pintar} from "../js/personaje.js";
+await cargar("../assets/personaje/");
+const casos=[
+ ...[0,1,2,3,4,5,6,7,8].map(i=>[{sx:"m",pelo:i},"south"]),
+ [{sx:"m",pelo:5},"north"],[{sx:"m",pelo:8,peinado:"largo"},"east"],[{sx:"m",prenda:"remera:azul",peinado:"corto"},"south"],[{sx:"m",prenda:"buzo:bordo",piel:5},"south"],[{sx:"m",prenda:"camisa:negro",alt:"alta"},"south"],[{sx:"m",prenda:"camisa:blanco",peinado:"largo",pelo:5},"west"],[{sx:"m",prenda:"remera:negro",alt:"baja"},"south"],
+ ...[0,1,2,3,4,5,6,7,8].map(i=>[{sx:"f",pelo:i},"south"]),
+ [{sx:"f",pelo:5,peinado:"suelto"},"north"],[{sx:"f",prenda:"pollera:azul",peinado:"corto"},"south"],[{sx:"f",prenda:"buzo:blanco",pelo:8},"east"],[{sx:"f",prenda:"remera:bordo",piel:6},"south"],[{sx:"f",prenda:"pollera:negro",alt:"alta"},"south"],[{sx:"f",prenda:"remera:blanco",peinado:"suelto",pelo:6},"south"],[{sx:"f",prenda:"buzo:negro",peinado:"corto",pelo:2},"west"],
+];
+for(const [p,v] of casos){ const c=document.createElement("canvas"); c.style.cssText="width:128px;height:128px;image-rendering:pixelated;background:#1E2027"; document.getElementById("g").append(c); pintar(c,p,v); }
+window.HECHO=1;
+</script>
