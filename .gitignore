@@ -5,3 +5,4 @@ app-nativa/android/app/build/
 app-nativa/android/.gradle/
 app-nativa/android/app/.cxx/
 .DS_Store
+pruebas/salida/

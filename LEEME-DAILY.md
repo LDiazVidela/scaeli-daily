@@ -1,0 +1,47 @@
+# Scaeli Daily · LEEME para seguir en otro chat
+
+Pegale esto al chat nuevo (o decile «leé LEEME-DAILY.md del proyecto»). Estado al **3/11/2026, versión 1.9.3**.
+
+## Qué es
+App de oración diaria de Scaeli (PWA + app nativa con Capacitor), hermana de Scaeli Fit y del juego. Lema «Tu fe, a otro nivel». Español rioplatense con voseo. Estilo: grafito + ámbar, sobrio, católico; pixel art de PixelLab en personaje e ilustraciones (no se retoca por código). Guía visual: doc del proyecto `claude/estilo-scaeli.md`.
+
+## Dónde está todo
+- **Código**: GitHub `LDiazVidela/scaeli-daily`, rama `main`. El chat nuevo lo clona (no hace falta zip): `gh repo clone LDiazVidela/scaeli-daily` (si no tiene acceso, agregar el repo a la sesión).
+- **App publicada**: https://ldiazvidela.github.io/scaeli-daily/ — cada push a `main` despliega solo (`.github/workflows/pages.yml`). Si el despliegue da error 500 de GitHub, relanzar: `gh api repos/LDiazVidela/scaeli-daily/actions/workflows/pages.yml/dispatches --method POST -f ref=main`.
+- **Vista previa**: Artifact https://claude.ai/artifact/P66mHh3tnxMV1vLUqQin9x (versión 27). Se publica con `root` = carpeta del repo y `files` = solo los archivos cambiados; label «Daily X.Y · vista previa».
+- **Historia completa versión por versión**: doc del proyecto `LEEME-PRIMERO.md`, en el párrafo que empieza «**Daily 1.4.1**» (todo lo de Daily está ahí, en orden).
+- **Firebase**: proyecto `scaeli` (compartido con Fit y el juego). Contrato de Scaeli+ y reglas: `docs/SCAELI_PLUS_COMPARTIDO.md` (copia idéntica del repo de Fit, no se modifica).
+
+## Cómo está hecha
+- `index.html` (íconos SVG `<symbol id="i-…">`), `css/app.css`, `js/app.js` (todo: vistas, `ACC` = acciones de `data-a`, `openSheet/renderSheet`), `js/firebase.js` (backend Firestore y local sin cuenta, grupos, `plusBackend`), `js/nativo.js` (Capacitor, RevenueCat), `js/personaje.js`.
+- Datos: `data/juego.js` (ORACIONES con `lat`, CONFESION, misterios…), `data/oraciones_mas.js` (GENERADO por `herramientas/texto_extra.py` desde `herramientas/textos/*.json`), `data/examen.js` (CAPITALES, VIDA, CONF_CIERRE), `data/habitos.js` (126, `g` j/a), `data/novenas.js` + `novenas/`, `data/libros.js` + `libros/`, `biblia/`, `evangelio/`, `horas/`, `data/ordo/` (hay que sumar 2029 antes de fin de 2028).
+- Service worker `sw.js`: **subir `scaeli-daily-vN` en cada entrega** (hoy v22) y `VERSION` en `js/app.js` (hoy "1.9.3").
+- No cambiar claves internas con «scala»/«scaeli-daily» de localStorage ni de caché.
+
+## Cómo se prueba (todo verde o no se entrega)
+```
+node --experimental-vm-modules <chequeo de sintaxis>   # node --check no detecta strings rotos
+bash pruebas/todo.sh                                     # levanta el servidor en :8765 y corre t11–t26
+```
+- Pases visuales: `pruebas/v19.js`, `v19b.js` (Lectio con teclado), `v193.js` (iPhone instalado: márgenes). Capturas en `pruebas/salida/`.
+- Al cambiar versión, actualizar en `t25.js` y `t26.js` el texto «Scaeli Daily X.Y» y en `t26.js` el `scaeli-daily-vN`.
+- Ruido esperado en t11: 2–3 «Failed to load resource» (ya filtrado).
+
+## Cómo se entrega
+1. Pruebas verdes. 2. Commit (co-autor Claude) y push a `main` → Pages. 3. Publicar el Artifact. 4. `scaeli-app.zip` (el sitio sin `.git .github app-nativa herramientas tienda docs pruebas`) y `scaeli-paquete-vX.Y.zip` (repo sin node_modules ni builds nativos). 5. Sumar la versión al párrafo de Daily de `LEEME-PRIMERO.md` y subirlo al proyecto. 6. Resumen corto con lo que se decidió.
+
+## Reglas de Lorenzo
+- Se programa/publica cuando Lorenzo dice «programar» (o «dale»); si no, se mandan propuestas.
+- Listas largas: todo en una sola entrega. Respuestas cortas.
+- Personaje: solo dibujos de PixelLab tal cual (`herramientas/pj_crudo.py`); nada de pegar caras por código.
+- Examen y textos de oración: tono sobrio, sin malas palabras ni lunfardo.
+- Scaeli+ y `firestore.rules` siguen el contrato compartido: las reglas se publican enteras (users + grupos con miembros y mensajes + codes), nunca por partes.
+
+## Pendientes
+- **Lorenzo**: publicar `firestore.rules` con la sección `mensajes` (muro del grupo; prompt ya pasado para el chat de Fit). Habilitar Actions y correr una vez «Evangelio del día». Crear `codes/SCAELI-PRUEBA` si lo quiere. Claves de RevenueCat (`RC_CLAVES`). `google-services.json` / `GoogleService-Info.plist`. Correo a participa@catholic.net por las novenas. Compilar nativo con `npm run iconos` (ícono nuevo).
+- **Más adelante**: caras iguales en todos los dibujos (`claude/pixellab-tanda-1.8.md`, cuando haya créditos de PixelLab); poses de oración; audio guiado; insignias del grupo leídas por el juego.
+
+## Últimas versiones (detalle en LEEME-PRIMERO.md)
+- **1.9**: oraciones en latín (selector y Rosario), 8 oraciones nuevas, muro del grupo con recordatorios, portada del grupo desde la galería, 56 hábitos para adultos, pie estático en pantalla completa, sin emoji en el rosario.
+- **1.9.1**: ícono nuevo (libro sobre la escalera). **1.9.2**: el ícono en la pantalla de entrada.
+- **1.9.3**: examen de conciencia con el material «La Reconciliación» de Lorenzo (modo Mi vida, capitales con explicación, cierre), sin «putear»; márgenes seguros en iPhone instalado y pie siempre visible.

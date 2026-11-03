@@ -1,0 +1,11 @@
+const { chromium } = require('playwright');
+(async () => { const b = await chromium.launch(); const errs=[]; const ctx=await b.newContext({ viewport:{width:390,height:844}, deviceScaleFactor:2, colorScheme:'light' }); const p=await ctx.newPage();
+  p.on('pageerror', e => errs.push('PAGEERROR '+e.message));
+  await p.goto('http://localhost:8765/index.html'); await p.evaluate(()=>localStorage.clear()); await p.reload(); await p.waitForTimeout(1500); await p.click('#invitado'); await p.waitForTimeout(1500);
+  const A = async (a, q, ms = 400) => { await p.evaluate(([a, q]) => window.DAILY.ACC[a](q), [a, q]); await p.waitForTimeout(ms); };
+  const tema=await p.evaluate(()=>document.documentElement.getAttribute('data-theme')); if(tema!=='light') await A('tema');
+  await A('rosario'); await A('rosEmpezar','gozosos'); await A('rosAv'); await A('rosAv'); await A('rosAv'); await A('rosAv'); await p.screenshot({path:'l_ros.png'}); await A('cerrar'); await p.click('.dlg [data-r="1"]'); await p.waitForTimeout(300);
+  await A('misa',null,1500); await p.screenshot({path:'l_misa.png'}); await A('cerrar');
+  await A('horaLH','visperas',2500); await p.screenshot({path:'l_lh.png'}); await A('cerrar');
+  await A('novena','jose',1000); await p.screenshot({path:'l_nov.png'});
+  console.log('T24',errs.join('\n')||'OK'); await b.close(); })();

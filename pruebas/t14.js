@@ -1,0 +1,14 @@
+const { chromium } = require('playwright');
+(async () => { const b = await chromium.launch(); const p = await b.newPage({ viewport: { width: 390, height: 844 } }); const errs=[]; p.on('pageerror', e => errs.push('PAGEERROR '+e.message));
+  const ok=(c,m)=>{ if(!c) errs.push('FALLA '+m); };
+  await p.goto('http://localhost:8765/index.html'); await p.evaluate(()=>localStorage.clear()); await p.reload(); await p.waitForTimeout(1500); await p.click('#invitado'); await p.waitForTimeout(1500);
+  const A = async (a, q, ms = 300) => { await p.evaluate(([a, q]) => window.DAILY.ACC[a](q), [a, q]); await p.waitForTimeout(ms); };
+  const T = async () => (await p.textContent('#sheetIn') || '').replace(/\s+/g, ' ');
+  await A('novenas'); ok((await T()).includes('Las de '),'seg'); ok((await T()).includes('San Juan de la Cruz'),'todas por defecto'); await A('novTodas','1'); ok((await T()).includes('San Expedito'),'todas');
+  await A('novena','lorenzo',900); ok((await T()).includes('Empezar hoy'),'empezar btn'); await A('novEmpezar','lorenzo',500); await A('novena','lorenzo',900); ok((await T()).includes('hoy es el día 1 de 9'),'dia 1 libre');
+  await A('novOk','lorenzo|1',500); await A('novena','lorenzo',900); ok((await T()).includes('Hoy ya rezada'),'ya rezada');
+  const nv=await p.evaluate(()=>window.DAILY.get().novenas.find(x=>x.id==='lorenzo')); ok(nv&&nv.libre===1&&nv.dias[0]===1,'doc '+JSON.stringify(nv));
+  await A('novenas'); ok((await T()).includes('La empezaste vos'),'en curso libre');
+  await A('cerrar'); await p.click('#nav button[data-view="hoy"]'); await p.waitForTimeout(400); ok((await p.textContent('#app')).includes('San Lorenzo'),'hoy muestra libre');
+  await p.screenshot({path:'nov.png'});
+  console.log('NOVENAS',errs.join('\n')||'OK'); await b.close(); })();

@@ -26,7 +26,7 @@ jobs:
         with:
           enablement: true
       - name: Armar la carpeta a publicar (sin la app nativa ni las herramientas)
-        run: rsync -a --exclude .git --exclude .github --exclude app-nativa --exclude herramientas --exclude tienda --exclude docs ./ _site/
+        run: rsync -a --exclude .git --exclude .github --exclude app-nativa --exclude herramientas --exclude tienda --exclude docs --exclude pruebas --exclude LEEME-DAILY.md ./ _site/
       - uses: actions/upload-pages-artifact@v3
         with:
           path: _site

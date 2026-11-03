@@ -1,0 +1,31 @@
+const { chromium } = require('playwright');
+(async () => {
+  const b = await chromium.launch(); const p = await b.newPage({ viewport: { width: 390, height: 844 } });
+  const errs = []; p.on('pageerror', e => errs.push('PAGEERROR ' + e.message));
+  const ok=(c,m)=>{ if(!c) errs.push('FALLA '+m); };
+  await p.goto('http://localhost:8765/index.html'); await p.evaluate(()=>localStorage.clear()); await p.reload(); await p.waitForTimeout(2000);
+  ok(await p.$('#loginApple'),'boton apple'); ok((await p.textContent('#app')).includes('Política de privacidad'),'link privacidad');
+  await p.click('#invitado'); await p.waitForTimeout(1500);
+  const A = async (a, q, ms = 300) => { await p.evaluate(([a, q]) => window.DAILY.ACC[a](q), [a, q]); await p.waitForTimeout(ms); };
+  await A('horaOk','m'); await p.click('#nav button[data-view="mas"]'); await p.waitForTimeout(400);
+  ok((await p.textContent('#app')).includes('Borrar mis datos'),'borrar en más');
+  await A('borrar','datos'); ok((await p.textContent('#sheetIn')).includes('No se puede deshacer'),'confirmación');
+  await A('borrarOk',undefined,800); ok(await p.$('#invitado'),'vuelve al login');
+  ok((await p.evaluate(()=>localStorage.getItem('scaeli-daily-local')))==='{}','datos borrados');
+  await p.goto('http://localhost:8765/privacidad.html'); ok((await p.textContent('h1')).includes('privacidad'),'pag privacidad');
+  await p.goto('http://localhost:8765/borrar-cuenta.html'); await p.waitForTimeout(1500); ok(await p.$('#entrar button[data-q="apple"]'),'pag borrar');
+  // santoral con extras de prueba
+  await p.goto('http://localhost:8765/index.html'); await p.waitForTimeout(1200); await p.click('#invitado'); await p.waitForTimeout(1500);
+  await A('santoral',undefined,800); ok(await p.$('#salQ'),'santoral'); await A('salVer','11-13',500); ok((await p.textContent('#sheetIn')).includes('Pedile hoy'),'ficha');
+  console.log(errs.join('\n')||'TODO OK'); await b.close(); })();
+(async () => { const b = await chromium.launch(); const p = await b.newPage({ viewport: { width: 390, height: 844 } }); const errs=[]; p.on('pageerror', e => errs.push(e.message));
+  const ok=(c,m)=>{ if(!c) errs.push('FALLA '+m); };
+  await p.goto('http://localhost:8765/index.html'); await p.evaluate(()=>localStorage.clear()); await p.reload(); await p.waitForTimeout(1500); await p.click('#invitado'); await p.waitForTimeout(1500);
+  const A = async (a, q, ms = 300) => { await p.evaluate(([a, q]) => window.DAILY.ACC[a](q), [a, q]); await p.waitForTimeout(ms); };
+  const T = async () => (await p.textContent('#sheetIn') || '').replace(/\s+/g, ' ');
+  await A('santoral',undefined,1200); ok((await T()).includes('más'),'y N más');
+  await p.fill('#salQ','homobono'); await p.waitForTimeout(500); ok((await T()).includes('Homobono'),'buscar extra');
+  await A('salVer','11-13',500); ok((await T()).includes('También se recuerda hoy')||(await T()).includes('Ese mismo día'),'otros del día');
+  await A('salVer','11-13|0',500); ok((await T()).includes('Martirologio Romano'),'ficha extra');
+  await p.screenshot({path:'extra.png'});
+  console.log('SANTORAL', errs.join('\n')||'OK'); await b.close(); })();
