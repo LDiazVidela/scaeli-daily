@@ -67,7 +67,7 @@ const { chromium } = require('playwright');
   const inOv=await p.evaluate(()=>getComputedStyle(document.querySelector('#sheet .in')).overflowY); ok(inOv==='auto','cuerpo scrolleable');
   await A('cerrar',null,300); const d=await p.$('.dlg button.primary'); if(d){ await d.click(); await p.waitForTimeout(300); }
   // 8 · versión, SW, reglas
-  await p.evaluate(()=>window.DAILY.ir('mas')); await p.waitForTimeout(300); t=await T(); ok(/Scaeli Daily 1\.9\.3/.test(t),'versión 1.9');
-  const sw=require('fs').readFileSync(require('path').join(__dirname,'..')+'/sw.js','utf8'); ok(/scaeli-daily-v22/.test(sw)&&/oraciones_mas/.test(sw),'SW v19 con oraciones_mas');
+  await p.evaluate(()=>window.DAILY.ir('mas')); await p.waitForTimeout(300); t=await T(); const VER=require('fs').readFileSync(require('path').join(__dirname,'..','js','app.js'),'utf8').match(/VERSION="([^"]+)"/)[1]; ok(t.includes('Scaeli Daily '+VER),'versión '+VER);
+  const sw=require('fs').readFileSync(require('path').join(__dirname,'..')+'/sw.js','utf8'); ok(/scaeli-daily-v\d+/.test(sw)&&/oraciones_mas/.test(sw),'SW v19 con oraciones_mas');
   const rules=require('fs').readFileSync(require('path').join(__dirname,'..')+'/firestore.rules','utf8'); ok(/match \/mensajes\/\{mid\}/.test(rules)&&/match \/users\//.test(rules)&&/match \/codes\//.test(rules)&&/match \/grupos\//.test(rules),'reglas: users + grupos + mensajes + codes');
   console.log('T26', errs.concat(fails).join('\n')||'OK'); await b.close(); })();

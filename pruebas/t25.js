@@ -83,5 +83,5 @@ const { chromium } = require('playwright');
   await p.evaluate(()=>window.DAILY.ir('yo')); await p.waitForTimeout(400); t=await T(); ok(/Clergyman/.test(t)&&/Corto/.test(t)&&/Medio/.test(t)&&!/Largo/.test(t)&&!/Despeinado/.test(t),'menú con clergyman, corto y medio');
   await A('pjSet','sx|f',300); await A('pjSet','prenda|buzo:negro',300); await A('pjSet','peinado|suelto',400); const pf=await p.evaluate(()=>window.DAILY.get().profile); ok(pf.peinado==='suelto'&&pf.prenda==='buzo:negro','ella: buzo negro con pelo suelto');
   t=await T(); ok(/Versión|Scaeli Daily/.test(t)||true,'');
-  await p.evaluate(()=>window.DAILY.ir('mas')); await p.waitForTimeout(300); t=await T(); ok(/Scaeli Daily 1\.9\.3/.test(t),'versión 1.9');
+  await p.evaluate(()=>window.DAILY.ir('mas')); await p.waitForTimeout(300); t=await T(); const VER=require('fs').readFileSync(require('path').join(__dirname,'..','js','app.js'),'utf8').match(/VERSION="([^"]+)"/)[1]; ok(t.includes('Scaeli Daily '+VER),'versión '+VER);
   console.log('T25', errs.concat(fails).join('\n')||'OK'); await b.close(); })();
