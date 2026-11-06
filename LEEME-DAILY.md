@@ -1,6 +1,6 @@
 # Scaeli Daily · LEEME para seguir en otro chat
 
-Pegale esto al chat nuevo (o decile «leé LEEME-DAILY.md del proyecto»). Estado al **4/11/2026, versión 1.9.4**.
+Pegale esto al chat nuevo (o decile «leé LEEME-DAILY.md del proyecto»). Estado al **6/11/2026, versión 1.10**.
 
 ## Qué es
 App de oración diaria de Scaeli (PWA + app nativa con Capacitor), hermana de Scaeli Fit y del juego. Lema «Tu fe, a otro nivel». Español rioplatense con voseo. Estilo: grafito + ámbar, sobrio, católico; pixel art de PixelLab en personaje e ilustraciones (no se retoca por código). Guía visual: doc del proyecto `claude/estilo-scaeli.md`.
@@ -15,13 +15,13 @@ App de oración diaria de Scaeli (PWA + app nativa con Capacitor), hermana de Sc
 ## Cómo está hecha
 - `index.html` (íconos SVG `<symbol id="i-…">`), `css/app.css`, `js/app.js` (todo: vistas, `ACC` = acciones de `data-a`, `openSheet/renderSheet`), `js/firebase.js` (backend Firestore y local sin cuenta, grupos, `plusBackend`), `js/nativo.js` (Capacitor, RevenueCat), `js/personaje.js`.
 - Datos: `data/juego.js` (ORACIONES con `lat`, CONFESION, misterios…), `data/oraciones_mas.js` (GENERADO por `herramientas/texto_extra.py` desde `herramientas/textos/*.json`), `data/examen.js` (CAPITALES, VIDA, CONF_CIERRE), `data/habitos.js` (126, `g` j/a), `data/novenas.js` + `novenas/`, `data/libros.js` + `libros/`, `biblia/`, `evangelio/`, `horas/`, `data/ordo/` (hay que sumar 2029 antes de fin de 2028).
-- Service worker `sw.js`: **subir `scaeli-daily-vN` en cada entrega** (hoy v23) y `VERSION` en `js/app.js` (hoy "1.9.4").
+- Service worker `sw.js`: **subir `scaeli-daily-vN` en cada entrega** (hoy v24) y `VERSION` en `js/app.js` (hoy "1.10").
 - No cambiar claves internas con «scala»/«scaeli-daily» de localStorage ni de caché.
 
 ## Cómo se prueba (todo verde o no se entrega)
 ```
 node --experimental-vm-modules <chequeo de sintaxis>   # node --check no detecta strings rotos
-bash pruebas/todo.sh                                     # levanta el servidor en :8765, corre t11–t26 y el barrido estético
+bash pruebas/todo.sh                                     # levanta el servidor en :8765, corre t11–t27 y el barrido estético
 ```
 - Pases visuales: `pruebas/v19.js`, `v19b.js` (Lectio con teclado), `v193.js` (iPhone instalado: márgenes). Capturas en `pruebas/salida/`.
 - `pruebas/barrido.js`: abre todas las vistas y paneles en 360/390 px, oscuro y claro, y avisa desbordes, cosas que se pisan y texto cortado. Capturas en `pruebas/salida/barrido/` (mirarlas antes de entregar).
@@ -40,10 +40,12 @@ bash pruebas/todo.sh                                     # levanta el servidor e
 
 ## Pendientes
 - **Lorenzo**: publicar `firestore.rules` con la sección `mensajes` (muro del grupo; prompt ya pasado para el chat de Fit). Habilitar Actions y correr una vez «Evangelio del día». Crear `codes/SCAELI-PRUEBA` si lo quiere. Claves de RevenueCat (`RC_CLAVES`). `google-services.json` / `GoogleService-Info.plist`. Correo a participa@catholic.net por las novenas. Compilar nativo con `npm run iconos` (ícono nuevo).
-- **Más adelante**: caras iguales en todos los dibujos (`claude/pixellab-tanda-1.8.md`, cuando haya créditos de PixelLab); poses de oración; audio guiado; insignias del grupo leídas por el juego.
+- **Lorenzo**: el ícono nuevo de la app hecho a mano (PNG 1024×1024, sin texto ni esquinas redondeadas).
+- **Más adelante**: retratos de los santos del álbum en PixelLab; caras iguales en todos los dibujos (`claude/pixellab-tanda-1.8.md`, cuando haya créditos de PixelLab); poses de oración; audio guiado; insignias del grupo leídas por el juego.
 
 ## Últimas versiones (detalle en LEEME-PRIMERO.md)
 - **1.9**: oraciones en latín (selector y Rosario), 8 oraciones nuevas, muro del grupo con recordatorios, portada del grupo desde la galería, 56 hábitos para adultos, pie estático en pantalla completa, sin emoji en el rosario.
 - **1.9.1**: ícono nuevo (libro sobre la escalera). **1.9.2**: el ícono en la pantalla de entrada.
+- **1.10**: botones en tres medidas y todo centrado, logo nuevo en la entrada, avatar → personalización, Palabra del día, misiones diarias del grupo (suman y restan), premios semanales (rosarios y colores de la app) y álbum de santos con sobres, canje y regalos.
 - **1.9.4**: pulido estético con barrido automático (tareas fecha/hora, bordes en pantalla completa, selectores, pies parejos, desplegables, vela en modo claro, santoral, textos cortados).
 - **1.9.3**: examen de conciencia con el material «La Reconciliación» de Lorenzo (modo Mi vida, capitales con explicación, cierre), sin «putear»; márgenes seguros en iPhone instalado y pie siempre visible.

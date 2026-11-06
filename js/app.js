@@ -5,6 +5,7 @@ import { esNativo, plataforma, pedirPermisoAvisos, programarAvisosNativos, compr
 import { VIRTUDES, PISTAS_VIRTUD, CAMINOS } from "../data/plus.js";
 import { ORACIONES, SANTOS, MISTERIOS, ROS_MED, ROS_FATIMA, ROS_DIAS_N, CONFESION, CONFESION_N, PASOS_CONFESION, PASOS_EXAMEN, LECTIO, MJ_POOL, MISA_PARTES, LH_HORAS, EX9_LUZ, EX9_GRACIAS, MISIONES_MES } from "../data/juego.js";
 import { HORA, IDEAS } from "../data/propio.js";
+import { PALABRA } from "../data/palabra.js";
 import { ORACIONES_MAS } from "../data/oraciones_mas.js";
 import { NOVENAS } from "../data/novenas.js";
 import { CAPITALES, CAPITALES_N, VIDA, CONF_CIERRE } from "../data/examen.js";
@@ -15,7 +16,7 @@ import { SANTOS_MAS, tipoSanto, oracionSanto } from "../data/santos.js";
 import { SANTORAL } from "../data/santoral.js";
 import * as PJ from "./personaje.js";
 
-export const VERSION="1.9.4";
+export const VERSION="1.10";
 const LOGO_GOOGLE='<svg class="logo-g" viewBox="0 0 48 48" aria-hidden="true"><path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/><path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/><path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/><path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/></svg>';
 const LOGO_APPLE='<svg class="logo-a" viewBox="0 0 814 1000" aria-hidden="true"><path fill="currentColor" d="M788.1 340.9c-5.8 4.5-108.2 62.2-108.2 190.5 0 148.4 130.3 200.9 134.2 202.2-.6 3.2-20.7 71.9-68.7 141.9-42.8 61.6-87.5 123.1-155.5 123.1s-85.5-39.5-164-39.5c-76.5 0-103.7 40.8-165.9 40.8s-105.6-57-155.5-127C46.7 790.7 0 663 0 541.8c0-194.4 126.4-297.5 250.8-297.5 66.1 0 121.2 43.4 162.7 43.4 39.5 0 101.1-46 176.3-46 28.5 0 130.9 2.6 198.3 99.2zm-234-181.5c31.1-36.9 53.1-88.1 53.1-139.3 0-7.1-.6-14.3-1.9-20.1-50.6 1.9-110.8 33.7-147.1 75.8-28.5 32.4-55.1 83.6-55.1 135.5 0 7.8 1.3 15.6 1.9 18.1 3.2.6 8.4 1.3 13.6 1.3 45.4 0 102.5-30.4 135.5-71.3z"/></svg>';
 /* la dirección publicada: la app de las tiendas lee de acá los Evangelios del día (los genera la GitHub Action cada noche) */
@@ -82,7 +83,7 @@ const amenToast=(k,txt)=>toast(txt||"Amén",()=>desmarcar(k));
 const desLink=(k,txt)=>'<button class="lnk des" data-a="desmarcar" data-p="'+k+'">'+ic("x")+' '+(txt||"Marcar como no rezado")+'</button>';
 
 /* la racha y la semana: un día cuenta si rezaste algo (las oraciones del día, Evangelio, rosario, horas, examen, santo) */
-const rezoAlgo=d=>!!(d&&(d.m||d.a||d.ta||d.e||d.r||d.x||d.n||d.s||d.cj||(d.h&&Object.keys(d.h).length)));
+const rezoAlgo=d=>!!(d&&(d.m||d.a||d.ta||d.e||d.r||d.x||d.n||d.s||d.cj||(d.pal&&(d.pal.q||d.pal.v))||(d.h&&Object.keys(d.h).length)));
 function racha(){ let n=0, s=hoy(); if(!rezoAlgo(dayOf(s))) s=addDays(s,-1); while(rezoAlgo(dayOf(s))){ n++; s=addDays(s,-1); if(n>3650) break; } return n; }
 function semanaHTML(){ const d=parse(hoy()); const lun=addDays(hoy(),-((d.getDay()+6)%7)); let o='<div class="week">';
   for(let i=0;i<7;i++){ const s=addDays(lun,i), x=dayOf(s), full=rezoAlgo(x)&&(x.m||x.n)&&(x.e||x.r), half=rezoAlgo(x)&&!full; const fut=s>hoy();
@@ -179,10 +180,10 @@ const medallaSVG=(t,on)=>{ const C={oro:["#F5C542","#B8860B"],plata:["#D9DCE3","
    Experiencia: diaria 10 · hábito 5 · Rosario 15 · Evangelio 10 · examen 10 · oración de la mañana/noche 10 · novena 10 · hora de la Liturgia 5 · santo 5 · Misa 10 · camino 10.
    Ánimo (0–100): −5 por cada caída (− en un hábito), −3 por cada diaria sin hacer al cerrar el día (hasta −15), +10 por cada día con Dios, 100 al confesarte.
    Si llega a 0, bajás un nivel (nunca menos del 1) y vuelve a 50. ── */
-const XP={m:10,n:10,e:10,x:10,r:15,nov:10,s:5,misa:10,dd:10,hab:5,h:5,cam:10};
+const XP={m:10,n:10,e:10,x:10,r:15,nov:10,s:5,misa:10,dd:10,hab:5,h:5,cam:10,pal:10};
 function xpDia(f){ const d=dayOf(f); if(!d) return 0; let p=0; ["m","n","e","x","s","nov","misa"].forEach(k=>{ if(d[k]) p+=XP[k]; }); if(d.r) p+=XP.r*Math.max(1,d.rn||1);
   p+=XP.dd*Object.values(d.dd||{}).filter(Boolean).length; p+=XP.h*Object.values(d.h||{}).filter(Boolean).length; p+=XP.cam*Object.values(d.cam||{}).filter(Boolean).length;
-  Object.values(d.hb||{}).forEach(x=>{ p+=XP.hab*(x.p||0); }); return p; }
+  Object.values(d.hb||{}).forEach(x=>{ p+=XP.hab*(x.p||0); }); if(d.pal&&(d.pal.q||d.pal.v)) p+=XP.pal; return p; }
 const xpNivel=n=>Math.round(100*Math.pow(n,1.3));   // lo que cuesta pasar del nivel n al n+1
 const TITULOS=[[1,"Peregrino","Peregrina"],[5,"Discípulo","Discípula"],[10,"Servidor","Servidora"],[20,"Testigo","Testigo"],[30,"Apóstol","Apóstol"],[50,"Santo en camino","Santa en camino"]];
 function nivelDe(){ const ks=Object.keys(days).filter(k=>/^\d{4}-\d\d-\d\d$/.test(k)).sort(); let xp=0, an=100, caidas=0; const ini=ks[0];
@@ -242,7 +243,7 @@ function renderHoy(){ cargarEvangelio(); const d=dayOf(hoy()), nom=(profile&&pro
   const lh=horaLHahora(), LHn=LH_HORAS.find(x=>x[0]===lh)||["","",""], lhOk=!!((d.h||{})[lh]);
   const mes=MISIONES_MES[new Date().getMonth()], nv=novenaEnCurso();
   return cab(cap(fLarga(hoy()))+' · '+esc(L.l),saludo()+(nom?',<br>'+esc(nom):''),rachaChip())+
-   '<div class="hero2"><img class="bg" src="'+ilu(fondoActual()||mo)+'" alt=""><span class="sh"></span>'+personajeHTML("vivo","south",150)+
+   '<div class="hero2"><img class="bg" src="'+ilu(fondoActual()||mo)+'" alt=""><span class="sh"></span><button class="pjbtn" data-a="pjIr" aria-label="Personalizar tu personaje">'+personajeHTML("vivo","south",150)+'</button>'+
      heroTexto(mo,d,ev)+'</div>'+nivelHTML("card")+
    (anioListo()?'<button class="card anioc" data-a="anio"><span class="n"><span class="eyebrow">Cristo Rey · termina el año litúrgico</span><b>Tu año con Dios · '+hoy().slice(0,4)+'</b><small>Mirá tu año en historias y compartilo</small></span>'+(esPlus()?ic("right"):'<span class="plus-mini">'+ic("lock")+' Scaeli+</span>')+'</button>':'')+
    '<button class="card lhnow" data-a="horaLH" data-p="'+lh+'"><span class="n"><span class="eyebrow">Ahora · Liturgia de las Horas</span><b>'+esc(LHn[1])+'</b><small>'+esc(LHn[2])+'</small></span><span class="ghost">Rezar</span></button>'+caminoHoyHTML()+
@@ -253,7 +254,7 @@ function renderHoy(){ cargarEvangelio(); const d=dayOf(hoy()), nom=(profile&&pro
      (nv?cov("novena","novenas","Novena",esc(nv.n.n)+" · día "+nv.D.dia,0,"",nv.n.id):cov("orar","noche","Tu oración de la noche","¿Cómo estuvo tu día con Dios?","","","noche"))+
      (santo?cov("santo","santo",esc(santo[0].split(",")[0]),"Santo del día"+(fichaSanto(mm).p?" · "+esc(fichaSanto(mm).p[0]):""),0,"w"):'')+
    '</div>'+
-   habitosHoyHTML()+grupoCardHTML()+
+   habitosHoyHTML()+grupoCardHTML()+(sobresHay()?albumCard():'')+
    '<div class="card"><div class="eyebrow" style="margin-bottom:12px">Tu semana con Dios</div>'+semanaHTML()+'<p class="hint" style="margin-top:12px">'+esc(mes[0])+'. '+esc(mes[1])+'</p></div>'; }
 
 function renderRezar(){ const d=dayOf(hoy()); const nv=novenaEnCurso(); const lh=horaLHahora(), LHn=LH_HORAS.find(x=>x[0]===lh)||["",""];
@@ -261,6 +262,7 @@ function renderRezar(){ const d=dayOf(hoy()); const nv=novenaEnCurso(); const lh
    (caminoActivo()?cov("camino","noche","Camino de "+esc(caminoActivo()[1].n),esc(caminoActivo()[1].sub)+(esPlus()?"":" · Scaeli+"),0,"w",caminoActivo()[0]):'')+
    cov("rosario","rosario","Santo Rosario",MISTERIOS[misteriosHoy()].n+" · 20 min",0,"w")+
    cov("evangelio","evangelio","Evangelio del día","5 min")+
+   cov("palabra","biblia","Palabra del día",palHecha(d)?"Ya la rezaste hoy":"Un pasaje y lo que te dice · 5 min")+
    cov("horas","horas","Liturgia de las Horas","Ahora: "+esc(LHn[1]))+
    cov("oraciones","oraciones","Oraciones","Las de siempre")+
    cov("novenas","novenas","Novenas",nv?esc(nv.n.n)+" · día "+nv.D.dia:"Nueve días con un santo")+
@@ -346,7 +348,7 @@ function renderYo(){ const raw=profile||{}, P=PJ.normal(raw), nom=raw.nombre||(u
   const ropa=f=>'<div class="chips">'+OP.prendas.filter(f).map(x=>'<button data-a="pjSet" data-p="prenda|'+(PJ.CON_COLOR.includes(x[0])?x[0]+":"+(P.tipo===x[0]?P.color:"gris"):x[0])+'" aria-pressed="'+(P.tipo===x[0])+'">'+esc(x[1])+'</button>').join("")+'</div>';
   const sw=(campo,L,val)=>'<div class="sw">'+L.map((c,i)=>'<button data-a="pjSet" data-p="'+campo+'|'+i+'" aria-pressed="'+(val===i)+'" aria-label="'+esc(c[0])+'" title="'+esc(c[0])+'"'+(c[1]?' style="background:'+c[1]+'"':' class="orig"')+'></button>').join("")+'</div>';
   return cab("Tu personaje",esc(nom),rachaChip())+
-   '<div class="card big'+(fondoActual()?' confondo':'')+'">'+(fondoActual()?'<img class="bg" src="'+ilu(fondoActual())+'" alt=""><span class="sh"></span>':'')+personajeHTML("vivo","south",256)+'</div>'+
+   '<div class="card big'+(fondoActual()?' confondo':'')+'" id="pjsec">'+(fondoActual()?'<img class="bg" src="'+ilu(fondoActual())+'" alt=""><span class="sh"></span>':'')+personajeHTML("vivo","south",256)+'</div>'+
    '<details class="card opt fondos-d"'+(sheet&&sheet.view==="x"?"":"")+'><summary><span class="eyebrow">Fondo</span><b>'+esc((FONDOS.find(x=>x[0]===fondoActual())||["","Mañana"])[1])+'</b><span class="muted">'+ic("down")+'</span></summary><p class="hint" style="margin:8px 0 10px">Se desbloquean con tu nivel y tus logros. El elegido va también al inicio de Hoy.</p>'+fondosHTML()+'</details>'+
    '<div class="card opt">'+
      '<div class="eyebrow">Soy</div><div class="seg">'+[["m","Varón"],["f","Mujer"]].map(x=>'<button data-a="pjSet" data-p="sx|'+x[0]+'" aria-pressed="'+(P.sx===x[0])+'">'+x[1]+'</button>').join("")+'</div>'+
@@ -364,7 +366,8 @@ function renderYo(){ const raw=profile||{}, P=PJ.normal(raw), nom=raw.nombre||(u
    '<a class="tile" href="https://ldiazvidela.github.io/scaeli/" target="_blank" rel="noopener" style="text-decoration:none"><div class="ic">'+ic("game")+'</div><b>Jugar Scaeli</b><small>Lo que ganás en el juego aparece acá</small></a></div>'+
    '<div class="card"><div class="eyebrow" style="margin-bottom:10px">Tu nivel</div>'+nivelHTML()+'<p class="hint" style="margin:8px 0 0">Cada diaria, hábito u oración suma experiencia. Las caídas y las diarias sin hacer bajan el ánimo; si llega a 0, bajás un nivel. La Confesión lo restaura entero.</p></div>'+
    '<div class="card"><div class="eyebrow" style="margin-bottom:10px">Tus logros</div>'+logrosHTML(true)+'</div>'+
-   '<div class="card"><div class="eyebrow" style="margin-bottom:12px">Tu camino</div><div class="grid2">'+st.map(x=>'<div class="stat"><div class="v">'+x[1]+'</div><small class="d">'+x[0]+'</small></div>').join("")+'</div>'+
+   albumCard()+premiosHTML()+
+   '<div class="card"><div class="eyebrow" style="margin-bottom:12px">Tu camino</div><div class="grid2 stcam">'+st.map(x=>'<div class="stat"><div class="v">'+x[1]+'</div><small class="d">'+x[0]+'</small></div>').join("")+'</div>'+
      '<button class="plusrow" data-a="anio"><span class="n"><b>Tu año con Dios</b><small>'+(esPlus()?"Tu año en historias, para ver y compartir":"Con Scaeli+")+'</small></span>'+(esPlus()?ic("right"):'<span class="plus-mini">'+ic("lock")+' Scaeli+</span>')+'</button></div>'+
    '<div class="card"><div class="eyebrow">Intenciones</div><p class="hint" style="margin:6px 0 10px">Por quién rezás estos días. Aparecen en el Rosario y en las Horas.</p><div class="chips">'+intents.map((t,i)=>'<button class="on" data-a="intDel" data-p="'+i+'">'+esc(t)+' ✕</button>').join("")+'</div><form data-f="int" style="margin-top:10px"><div class="grid2" style="grid-template-columns:1fr auto"><input type="text" name="t" placeholder="Por mi familia…" maxlength="40" required><button class="iconbtn acc" type="submit" aria-label="Agregar">'+ic("plus")+'</button></div></form></div>'; }
 
@@ -380,7 +383,7 @@ function renderMas(){ const claro=document.documentElement.getAttribute("data-th
    '<div class="row"><div class="n"><b>Importar</b><small>Desde un archivo exportado</small></div><button class="ghost g" data-a="importar">Importar</button><input type="file" id="impFile" accept="application/json" hidden></div></div>'+
    '<div class="card list"><div class="row"><div class="n"><b>Scaeli Fit</b><small>Ordenar el cuerpo desde la templanza</small></div><a class="ghost g" href="https://ldiazvidela.github.io/scaeli-fit/" target="_blank" rel="noopener">Abrir</a></div>'+
    '<div class="row"><div class="n"><b>Scaeli</b><small>El juego</small></div><a class="ghost g" href="https://ldiazvidela.github.io/scaeli/" target="_blank" rel="noopener">Abrir</a></div></div>'+
-   '<div class="card list"><div class="row"><div class="n"><b>'+(backend&&backend.mode==="firestore"?esc(user.displayName||user.email||"Tu cuenta"):"Sin cuenta")+'</b><small>'+(backend&&backend.mode==="firestore"?"Guardado en tu cuenta de Google":"Guardado solo en este dispositivo")+'</small></div>'+(backend&&backend.mode==="firestore"?'<button class="ghost g" id="logout">'+ic("out")+' Salir</button>':'<button class="ghost g" id="login" data-q="google">'+LOGO_GOOGLE+' Entrar con Google</button>')+'</div>'+
+   '<div class="card list"><div class="row"><div class="n"><b>'+(backend&&backend.mode==="firestore"?esc(user.displayName||user.email||"Tu cuenta"):"Sin cuenta")+'</b><small>'+(backend&&backend.mode==="firestore"?"Guardado en tu cuenta de Google":"Guardado solo en este dispositivo")+'</small></div>'+(backend&&backend.mode==="firestore"?'<button class="ghost g" id="logout">'+ic("out")+' Salir</button>':'<button class="ghost g" id="login" data-q="google">'+LOGO_GOOGLE+' Entrar</button>')+'</div>'+
      (backend&&backend.mode==="firestore"?'<div class="row"><div class="n"><b>Borrar mis datos de Daily</b><small>Tu cuenta sigue</small></div><button class="ghost g" data-a="borrar" data-p="datos">Borrar</button></div><div class="row"><div class="n"><b>Borrar mi cuenta</b><small>La cuenta y todos sus datos (Daily, Fit y el juego)</small></div><button class="ghost g peligro" data-a="borrar" data-p="cuenta">Borrar</button></div>'
        :'<div class="row"><div class="n"><b>Borrar mis datos</b><small>Lo guardado en este dispositivo</small></div><button class="ghost g peligro" data-a="borrar" data-p="datos">Borrar</button></div>')+
      '<div class="row"><div class="n"><b>Política de privacidad</b><small>Qué guardamos y para qué</small></div><a class="ghost g" href="privacidad.html" target="_blank" rel="noopener">Leer</a></div>'+
@@ -413,7 +416,7 @@ function shBiblia(){ const m=sheet.m||"libros";
   const buscador='<form class="bibq" data-f="bibBuscar"><input type="search" id="bibQ" placeholder="Jn 3,16 · Sal 23 · palabra" value="'+esc(sheet.q||"")+'" enterkeyhint="search" autocomplete="off"><button class="primary" type="submit" aria-label="Buscar">Buscar</button></form>';
   if(m==="libros"){ const g=bibGuardado(), gL=g&&BIB.idx.find(x=>x.id===g.b);
     const grupo=(t,gs)=>'<div class="sect">'+t+'</div>'+gs.map(gn=>'<div class="bibg"><small>'+gn+'</small><div class="bibl">'+BIB.idx.filter(b=>b.g===gn).map(b=>'<button data-a="bibLibro" data-p="'+b.id+'">'+esc(b.n)+'</button>').join("")+'</div></div>').join("");
-    return shTop("La Biblia","Biblia Platense · Mons. Juan Straubinger")+'<div class="scroll"><div class="sbanner"><img src="'+ilu("biblia")+'" alt=""><span class="g"></span></div>'+buscador+
+    return shTop("La Biblia","Biblia Platense · Mons. Juan Straubinger")+'<div class="scroll"><div class="sbanner"><img src="'+ilu("biblia")+'" alt=""><span class="g"></span></div>'+buscador+palabraCard()+
      (gL?'<button class="card lhnow" data-a="bibIr" data-p="'+g.b+'|'+g.c+'"><span class="n"><span class="eyebrow">Seguir leyendo</span><b>'+esc(gL.n)+' '+(g.b==="Ps"?salmoHoy(g.c):g.c)+'</b></span>'+ic("right")+'</button>':'')+
      grupo("Antiguo Testamento",GRUPOS_AT)+grupo("Nuevo Testamento",GRUPOS_NT)+'<p class="hint" style="margin-top:14px">Texto: Biblia Platense o Biblia Comentada, traducción católica hecha en La Plata por Mons. Juan Straubinger (1948). Los Salmos llevan la numeración de esta Biblia y, entre paréntesis, la de hoy.</p></div>'+
      '<button class="primary ink" data-a="cerrar">Volver</button>'; }
@@ -514,15 +517,15 @@ const semanaDe=f=>lunesDe(f||hoy());
 const nSemana=f=>Math.floor((parse(semanaDe(f))-parse("2024-01-01"))/864e5/7);
 const desafioDe=f=>DESAFIOS[((nSemana(f)%DESAFIOS.length)+DESAFIOS.length)%DESAFIOS.length];
 const puntosDia=f=>{ const d=dayOf(f); let c=0; Object.values(d.hb||{}).forEach(x=>{ c+=5*(x.m||0); }); return Math.max(0,xpDia(f)-c); };   // la misma experiencia de la app, menos las caídas
-function statsSemana(lun){ const o={r:0,e:0,d:0,x:0,o:0,p:0}; for(let i=0;i<7;i++){ const f=addDays(lun,i); if(f>hoy()) break; const d=dayOf(f); if(d.r) o.r+=Math.max(1,d.rn||1); if(d.e) o.e++; if(d.x) o.x++; if(rezoAlgo(d)) o.d++; const or=d.or||{}; if(or.m) o.o++; if(or.n) o.o++; o.p+=puntosDia(f); } return o; }
+function statsSemana(lun){ const o={r:0,e:0,d:0,x:0,o:0,p:0,mi:0}; for(let i=0;i<7;i++){ const f=addDays(lun,i); if(f>hoy()) break; const d=dayOf(f); if(d.r) o.r+=Math.max(1,d.rn||1); if(d.e) o.e++; if(d.x) o.x++; if(rezoAlgo(d)) o.d++; const or=d.or||{}; if(or.m) o.o++; if(or.n) o.o++; o.p+=puntosDia(f)+misPts(f); if(f>=MIS_INICIO&&misDia(f).n===3) o.mi++; } return o; }
 function miFicha(){ const P=PJ.normal(profile||{}), raw=profile||{}; const nom=(raw.nombre||(user&&user.displayName&&user.displayName.split(" ")[0])||(P.sx==="f"?"Peregrina":"Peregrino")).slice(0,24);
-  const s={}; [0,1,2,3,4,5].forEach(i=>{ const l=addDays(semanaDe(),-7*i); s[l]=statsSemana(l); }); return {n:nom,av:{sx:P.sx,prenda:P.prenda,peinado:P.peinado},s}; }
+  const s={}; [0,1,2,3,4,5].forEach(i=>{ const l=addDays(semanaDe(),-7*i); s[l]=statsSemana(l); }); return {n:nom,av:{sx:P.sx,prenda:P.prenda,peinado:P.peinado},s,mh:{f:hoy(),n:misDia(hoy()).n},alb:albTengo(),reg:(album.env||[]).slice(-20)}; }
 function grupoSync(){ if(!grupo.gid||!grupoBE||!grupo.meta) return; clearTimeout(gsyncT); gsyncT=setTimeout(async()=>{ const f=miFicha(), k=JSON.stringify(f); if(k===gUltimo) return; gUltimo=k; try{ await grupoBE.setMiembro(grupo.gid,f); }catch(e){} },800); }
 function grupoAbrir(gid){ grupoCerrar(); if(!gid||!grupoBE) return; grupo={gid,meta:null,L:null,unsub:null,err:""};
   grupo.unsub=grupoBE.watch(gid,(meta,L,err)=>{ if(err){ grupo.err="No se pudo leer el grupo."; render(); return; } if(meta===false){ grupo.meta=false; grupo.L=[]; render(); if(sheet&&sheet.view==="grupo") renderSheetQuieto(); return; }
     if(meta&&meta.tipo){ grupo.meta=false; grupo.L=[]; render(); return; }   // los grupos de Scaeli Fit (tipo: entreno) no se muestran acá
     grupo.meta=meta; grupo.L=L; if(meta&&!muroUnsub&&grupoBE.watchMuro) muroUnsub=grupoBE.watchMuro(gid,M=>{ muro=M||[]; if(sheet&&sheet.view==="grupo") renderSheetQuieto(); else render(); muroPodar(); });
-    if(meta&&L&&L.length&&!L.some(x=>x.uid===(user&&user.uid))&&!grupo.saliendo){ grupo.saliendo=1; backend.setDoc("daily_settings/grupo",{gid:null}).catch(()=>{}); toast("Ya no estás en el grupo «"+meta.n+"»"); return; } render(); if(sheet&&sheet.view==="grupo") renderSheetQuieto(); grupoSync(); }); }
+    if(meta&&L&&L.length&&!L.some(x=>x.uid===(user&&user.uid))&&!grupo.saliendo){ grupo.saliendo=1; backend.setDoc("daily_settings/grupo",{gid:null}).catch(()=>{}); toast("Ya no estás en el grupo «"+meta.n+"»"); return; } render(); if(sheet&&sheet.view==="grupo") renderSheetQuieto(); grupoSync(); albRecibir(); premiosRevisar(); }); }
 function muroPodar(){ if(!grupo.meta||grupo.meta.creador!==yo()||muro.length<100) return; muro.slice(100).forEach(m=>grupoBE.borrarMsg(grupo.gid,m.id).catch(()=>{})); }
 function grupoCerrar(){ if(muroUnsub){ try{ muroUnsub(); }catch(e){} muroUnsub=null; muro=[]; } if(grupo.unsub){ try{ grupo.unsub(); }catch(e){} } grupo={gid:null,meta:null,L:null,unsub:null,err:""}; gUltimo=""; }
 const yo=()=>user&&user.uid;
@@ -539,7 +542,7 @@ function grupoCardHTML(){ if(backend&&backend.mode==="local"&&!grupo.gid) return
   const E=desafioEstado(semanaDe()), R=rankingDe(semanaDe()), me=R.find(x=>x.uid===yo());
   const nuevo=muro.find(m=>m.u!==yo()&&m.t>muroVisto()&&!muroOculto(m));
   return '<button class="card grupoc port" data-a="grupo"><img class="bg'+(grupo.meta.portada?" foto":"")+'" src="'+gPortada()+'" alt=""><span class="sh"></span><span class="n"><span class="eyebrow">'+esc(grupo.meta.n)+' · '+R.length+(R.length===1?" miembro":" miembros")+'</span><b>'+esc(E.D[1])+': '+E.tot+' de '+E.meta+(E.ok?' · ¡meta cumplida!':'')+'</b>'+
-   '<span class="bar"><i style="width:'+Math.min(100,Math.round(E.tot/E.meta*100))+'%"></i></span><small>'+(me?'Vas '+me.rank+'.º con '+me.pts+' puntos':'')+(R[0]&&R[0].pts?' · primero: '+esc(R[0].n):'')+'</small>'+
+   '<span class="bar"><i style="width:'+Math.min(100,Math.round(E.tot/E.meta*100))+'%"></i></span><small>'+'Misiones de hoy: '+misDia(hoy()).n+' de 3'+(me?' · vas '+me.rank+'.º con '+me.pts+' pts':'')+(R[0]&&R[0].pts?' · primero: '+esc(R[0].n):'')+'</small>'+
    (nuevo?'<small class="mnue">'+ic("chat")+' <b>'+esc(nuevo.n)+'</b> escribió: «'+esc(nuevo.tx.length>60?nuevo.tx.slice(0,58)+'…':nuevo.tx)+'»</small>':'')+'</span>'+ic("right")+'</button>'; }
 const muroOculto=m=>{ const r=m.rep||{}; return !!r[yo()]||Object.keys(r).length>=2; };
 function shGrupo(){ const local=backend&&backend.mode==="local";
@@ -561,7 +564,7 @@ function shGrupo(){ const local=backend&&backend.mode==="local";
   const recibidos=R.filter(x=>x.uid!==u&&x.rece&&x.rece[u]&&x.rece[u].t>Date.now()-7*864e5).length, alientos=R.filter(x=>x.uid!==u&&x.al&&x.al[u]&&x.al[u][1]>Date.now()-3*864e5).map(x=>({n:x.n,t:ALIENTOS[x.al[u][0]]||""}));
   const podio=[R[1],R[0],R[2]].map((x,i)=>x?'<div class="pod p'+[2,1,3][i]+'">'+avatarHTML(x.av,[52,68,48][i])+'<b>'+esc(x.n)+'</b><small>'+x.pts+' pts</small><i>'+x.rank+'</i></div>':'<div class="pod vacio"></div>').join("");
   const fila=x=>{ const esYo=x.uid===u, oculta=x.int&&reportado(x), rece=me.rece&&me.rece[x.uid]&&me.rece[x.uid].t>Date.now()-864e5;
-    return '<div class="grow'+(esYo?" yo":"")+'"><span class="rk">'+x.rank+'</span>'+avatarHTML(x.av,40)+'<span class="n"><b>'+esc(x.n)+(esYo?' (vos)':'')+'</b>'+(x.int&&!oculta?'<small class="int">«'+esc(x.int)+'»</small>':x.int&&oculta?'<small class="int muted">Intención ocultada</small>':'<small class="muted">Sin intención todavía</small>')+'</span><span class="pts">'+x.pts+'<small>pts</small></span>'+
+    return '<div class="grow'+(esYo?" yo":"")+'"><span class="rk">'+x.rank+'</span>'+avatarHTML(x.av,40)+'<span class="n"><b>'+esc(x.n)+(esYo?' (vos)':'')+'</b>'+(x.int&&!oculta?'<small class="int">«'+esc(x.int)+'»</small>':x.int&&oculta?'<small class="int muted">Intención ocultada</small>':'<small class="muted">Sin intención todavía</small>')+'</span><span class="pts">'+x.pts+'<small>pts</small>'+(x.mh&&x.mh.f===hoy()?'<em class="mhc'+(x.mh.n>=3?' ok':'')+'">'+x.mh.n+'/3 hoy</em>':'')+'</span>'+
      (esYo?'':'<span class="acts">'+(x.int&&!oculta?'<button class="gb" data-a="gRece" data-p="'+x.uid+'" aria-pressed="'+!!rece+'">'+ic("rosary")+' '+(rece?"Rezaste ✓":"Recé")+'</button>':'')+'<button class="gb" data-a="gAliento" data-p="'+x.uid+'" aria-pressed="'+(sheet.al===x.uid)+'">'+ic("heart")+' Aliento</button>'+(x.int&&!oculta?'<button class="sm" data-a="gReportar" data-p="'+x.uid+'" aria-label="Reportar la intención" title="Reportar">'+ic("x")+'</button>':'')+(creador?'<button class="sm" data-a="gEchar" data-p="'+x.uid+'" aria-label="Sacar del grupo" title="Sacar del grupo">'+ic("trash")+'</button>':'')+'</span>')+
      (sheet.al===x.uid?'<div class="chips gal">'+ALIENTOS.map((a,i)=>'<button data-a="gAlientoOk" data-p="'+x.uid+'|'+i+'">'+esc(a)+'</button>').join("")+'</div>':'')+'</div>'; };
   const I=insignias(); if(muro.length) lsSet("daily_muro_visto",Date.now());
@@ -569,9 +572,9 @@ function shGrupo(){ const local=backend&&backend.mode==="local";
    (creador?'<label class="gport" title="Cambiar la portada">'+ic("image")+'<input type="file" accept="image/*" id="gPortada"></label>':'')+'<span class="gt"><b>'+esc(G.n)+'</b><small>'+R.length+(R.length===1?" miembro":" miembros")+' · código '+G.id+'</small></span></div>'+
    (alientos.length?'<div class="card gali">'+alientos.map(a=>'<p>'+ic("heart")+' <b>'+esc(a.n)+'</b> te manda: «'+esc(a.t)+'»</p>').join("")+'</div>':'')+
    '<div class="card gdes"><div class="hd"><div class="eyebrow">Desafío de la semana</div><span class="chip">'+ic(E.D[3])+' '+E.D[2]+' c/u</span></div><b class="gt">'+esc(E.D[1])+' entre todos: '+E.tot+' de '+E.meta+'</b><div class="bar3"><i style="width:'+Math.min(100,Math.round(E.tot/E.meta*100))+'%"></i></div><p class="hint">'+(E.ok?'¡Meta cumplida! Todos se llevan la insignia del equipo.':'Si llegan antes del domingo, todos ganan la insignia del equipo. Lo tuyo: '+(((me.s||{})[lun]||{})[E.D[0]]||0)+'.')+'</p></div>'+
-   muroHTML(u,creador)+
+   misionesHTML(R,u)+muroHTML(u,creador)+
    '<div class="card"><div class="hd"><div class="eyebrow">Ranking de la semana</div><span class="hint" style="margin:0">Se reinicia el lunes</span></div><div class="podio">'+podio+'</div>'+(ganador?'<p class="hint" style="text-align:center">La semana pasada ganó <b>'+esc(ganador.n)+'</b> con '+ganador.pts+' puntos.</p>':'')+
-     '<p class="hint" style="margin-top:6px">Los puntos son tu experiencia de la semana (lo que suma cada diaria, hábito u oración), menos las caídas.</p></div>'+
+     '<p class="hint" style="margin-top:6px">Los puntos son tu experiencia de la semana (lo que suma cada diaria, hábito u oración) más las misiones, menos las caídas y los días sin ninguna misión.</p></div>'+
    '<div class="card"><div class="hd"><div class="eyebrow">Intenciones</div>'+(recibidos?'<span class="hint" style="margin:0;color:var(--accent);display:inline-flex;align-items:center;gap:5px;white-space:nowrap">'+ic("heart")+' '+recibidos+' rezaron por vos</span>':'')+'</div>'+
      '<form data-f="grupoInt" class="add"><input type="text" name="i" placeholder="Por qué pedís esta semana…" maxlength="80" value="'+esc(me.int||"")+'" autocomplete="off"><button class="iconbtn acc" type="submit" aria-label="Guardar">'+ic("check")+'</button></form>'+
      R.map(fila).join("")+'</div>'+
@@ -588,6 +591,110 @@ function muroHTML(u,creador){ const M=muro.filter(m=>!muroOculto(m)), ver=sheet.
    (sheet.mrec?'<div class="chips mrec">'+RECORDATORIOS.map((r,i)=>'<button data-a="mRecOk" data-p="'+i+'">'+esc(r)+'</button>').join("")+'</div>':'')+
    '<form data-f="muro" class="add"><input type="text" name="m" placeholder="Escribile al grupo…" maxlength="140" autocomplete="off"><button class="iconbtn acc" type="submit" aria-label="Enviar">'+ic("send")+'</button></form>'+
    (L.length?'<div class="msgs">'+L.map(msg).join("")+'</div>'+(M.length>ver?'<button class="lnk" data-a="mMas" style="margin:8px auto 0;display:block">Ver más</button>':''):'<p class="hint" style="margin:6px 0 0">Todavía no escribió nadie. Un «buen día» o un recordatorio para rezar ya alcanza.</p>')+'</div>'; }
+
+/* ═════════ 1.10 · Palabra del día, misiones del grupo, premios semanales y álbum de santos ═════════ */
+
+/* ── Palabra del día: un pasaje por día (el mismo para todos) y lo que te dice ── */
+const nDia=f=>Math.round(parse(f||hoy())/864e5);
+const palDe=f=>PALABRA[((nDia(f)*37)%PALABRA.length+PALABRA.length)%PALABRA.length];
+function palCita(p){ const L=(BIB.idx||[]).find(x=>x.id===p[0]); const c=p[0]==="Ps"?salmoHoy(p[1]):p[1]; return (L?L.a:p[0])+" "+c+","+p[2]+(p[3]>p[2]?"-"+p[3]:""); }
+const palHecha=d=>!!(d&&d.pal&&(d.pal.q||d.pal.v));
+function shPalabra(){ const f=hoy(), p=palDe(f), d=dayOf(f), pal=d.pal||{};
+  if(!sheet.tx){ Promise.all([bibIndice(),bibLibro(p[0])]).then(([idx,L])=>{ if(!sheet||sheet.view!=="palabra") return; const ch=L.c[p[1]-1]||[]; sheet.tx=ch.slice(p[2]-1,p[3]).map((v,i)=>[p[2]+i,String(v).replace(/^[A-ZÁÉÍÓÚ]{2,6}\.\s+/,"")]); sheet.cita=palCita(p); renderSheet(); }).catch(()=>{ if(sheet){ sheet.err=1; renderSheet(); } });
+    return shTop("Palabra del día")+'<p class="hint">'+(sheet.err?"No se pudo abrir la Biblia. Revisá la conexión.":"Abriendo…")+'</p>'; }
+  return shTop("Palabra del día","Un pasaje para llevar a tu día")+'<div class="scroll">'+
+   '<div class="card pal"><div class="eyebrow">'+esc(cap(fLarga(f)))+'</div><h2 class="st">'+esc(sheet.cita)+'</h2><p class="paltx">'+sheet.tx.map(v=>'<sup>'+v[0]+'</sup>'+esc(v[1])).join(" ")+'</p></div>'+
+   '<div class="card palf"><div class="eyebrow">Para vos</div><p class="hint" style="margin:6px 0 12px">Leelo despacio, dos veces. Después escribí con tus palabras.</p>'+
+   '<label class="f">¿Qué me dice hoy?<textarea id="palQ" rows="3" maxlength="600" placeholder="Una frase o una palabra que te tocó…">'+esc(pal.q||"")+'</textarea></label>'+
+   '<label class="f">¿Cómo lo vivo hoy?<textarea id="palV" rows="3" maxlength="600" placeholder="Algo concreto: en casa, en el trabajo, con alguien…">'+esc(pal.v||"")+'</textarea></label>'+
+   '<p class="hint">'+ic("lock")+' Se guarda en Mis oraciones, solo para vos. Mañana te toca otro pasaje.</p></div></div>'+
+   '<div class="grid2"><button class="ghost g" data-a="biblia">'+ic("book")+' La Biblia</button><button class="primary" data-a="palOk">'+(palHecha(d)?"Guardar":"Amén")+'</button></div>'; }
+function palabraCard(){ const d=dayOf(hoy()), p=palDe(); return '<button class="card lhnow palc" data-a="palabra"><span class="n"><span class="eyebrow">'+ic("book")+' Palabra del día</span><b>'+(BIB.idx?esc(palCita(p)):"Un pasaje para hoy")+'</b><small>'+(palHecha(d)?"Ya la rezaste hoy · tocá para releer":"Leelo y escribí qué te dice")+'</small></span>'+(palHecha(d)?'<span class="okc">'+ic("check")+'</span>':ic("right"))+'</button>'; }
+
+/* ── Misiones diarias del grupo: tres por día, las mismas para todos ── */
+const MIS_INICIO="2026-11-06";
+const MISIONES=[["e","Leer el Evangelio del día","book",d=>!!d.e,"evangelio"],["r","Rezar el Rosario","rosary",d=>!!d.r,"rosario"],["x","Hacer el examen del día","check",d=>!!d.x,"examen"],
+  ["m","Rezar la oración de la mañana","sun",d=>!!d.m,"hora|manana"],["n","Rezar la oración de la noche","moon",d=>!!d.n,"hora|noche"],["or","Escribirle a Dios con tus palabras","pen",d=>!!(d.or&&(d.or.m||d.or.n)),"orar|m"],
+  ["pal","Rezar la Palabra del día","book",d=>palHecha(d),"palabra"],["s","Conocer al santo del día","star",d=>!!d.s,"santo"]];
+function misionesDe(f){ const n=nDia(f), out=[]; let k=n*7+3; while(out.length<3){ k=(k*1103515245+12345)%2147483648; const i=Math.floor(k/65536)%MISIONES.length; if(!out.includes(i)) out.push(i); } return out.map(i=>MISIONES[i]); }
+function misDia(f){ const d=dayOf(f)||{}, L=misionesDe(f).map(m=>({k:m[0],t:m[1],ic:m[2],ok:m[3](d),a:m[4]})); return {L,n:L.filter(x=>x.ok).length}; }
+const MIS_PTS=10, MIS_BONO=10, MIS_FALTA=15;
+function misPts(f){ if(f<MIS_INICIO||f>hoy()) return 0; const n=misDia(f).n; if(n===0) return f<hoy()?-MIS_FALTA:0; return n*MIS_PTS+(n===3?MIS_BONO:0); }
+function misionesHTML(R,u){ const M=misDia(hoy()), ya=(R||[]).filter(x=>x.mh&&x.mh.f===hoy()&&x.mh.n>=3);
+  return '<div class="card gmis"><div class="hd"><div class="eyebrow">Misiones de hoy</div><span class="chip'+(M.n===3?" ok":"")+'">'+M.n+' de 3</span></div>'+
+   M.L.map(m=>{ const [a,p]=String(m.a).split("|"); return '<button class="mrow'+(m.ok?" ok":"")+'" data-a="'+a+'"'+(p?' data-p="'+p+'"':'')+'><span class="mc">'+ic(m.ok?"check":m.ic)+'</span><span class="n"><b>'+esc(m.t)+'</b><small>'+(m.ok?"Hecha":"+"+MIS_PTS+" puntos")+'</small></span>'+(m.ok?'':ic("right"))+'</button>'; }).join("")+
+   '<p class="hint" style="margin-top:10px">Cada misión suma '+MIS_PTS+' puntos al ranking y las tres juntas, '+MIS_BONO+' más. Si un día no hacés ninguna, perdés '+MIS_FALTA+'. Cambian a la medianoche.</p>'+
+   (ya.length?'<p class="hint gya">'+ic("check")+' Ya cumplieron las tres: <b>'+ya.map(x=>esc(x.uid===u?"vos":x.n)).join(", ")+'</b></p>':'')+'</div>'; }
+
+/* ── Premios de la semana: rosarios y colores exclusivos ── */
+const ROSARIOS=[["clasico","Clásico","El de siempre"],["madera","Madera de olivo","Cuentas de madera, como las de Tierra Santa"],["nacar","Nácar","Cuentas de nácar, blancas y suaves"],["plata","Plata","Cuentas de plata"],["cristal","Cristal azul","Cuentas de cristal, azul mariano"],["rubi","Rubí","Cuentas rojas, por los mártires"],["oro","Oro","Cuentas de oro, el más difícil"]];
+const ACENTOS=[["ambar","Ámbar","#F2B544","#C8841A"],["oro","Oro viejo","#E3C26E","#A7841F"],["mariano","Azul mariano","#8DB4F2","#2F63B8"],["rubi","Rubí","#EE7D8C","#B5293F"],["plata","Plata","#CBD4E0","#5D6B7E"],["lila","Lila de Adviento","#BBA2EE","#6E4BB8"]];
+const PREMIOS=["ros:madera","ac:oro","ros:nacar","ac:mariano","ros:plata","ac:rubi","ros:cristal","ac:plata","ros:rubi","ac:lila","ros:oro"];
+let premios={items:[],vis:[]};
+const premioDe=lun=>PREMIOS[((nSemana(lun)%PREMIOS.length)+PREMIOS.length)%PREMIOS.length];
+const premioNom=k=>{ const [t,id]=k.split(":"); const x=(t==="ros"?ROSARIOS:ACENTOS).find(y=>y[0]===id); return x?(t==="ros"?"Rosario de "+x[1].toLowerCase().replace(/^de /,""):"Color "+x[1].toLowerCase()):k; };
+const tengo=k=>k==="ros:clasico"||k==="ac:ambar"||(premios.items||[]).includes(k);
+function ganoSemana(lun){ const s=statsSemana(lun); if(s.d>=7) return "7 días con Dios"; if(s.mi>=5) return "las misiones de 5 días";
+  if(grupo.L&&grupo.L.length>1){ const R=rankingDe(lun), me=R.find(x=>x.uid===yo()); if(me&&me.rank===1&&me.pts>0) return "el primer puesto del grupo"; } return ""; }
+let premT=null;
+function premiosRevisar(){ clearTimeout(premT); premT=setTimeout(async()=>{ if(!backend||!profile) return; const nuevos=[]; const it=new Set(premios.items||[]), vis=new Set(premios.vis||[]);
+  for(let i=1;i<=6;i++){ const lun=addDays(semanaDe(),-7*i); if(vis.has(lun)) continue; const por=ganoSemana(lun); if(!por) continue; const k=premioDe(lun); vis.add(lun); if(!it.has(k)){ it.add(k); nuevos.push([k,por]); } }
+  if(vis.size!==(premios.vis||[]).length){ premios={items:[...it],vis:[...vis].sort().slice(-30)}; await backend.setDoc("daily_settings/premios",premios); if(nuevos.length) toast("Ganaste: "+premioNom(nuevos[0][0])+" (por "+nuevos[0][1]+")"); } },1500); }
+const rosDis=()=>{ const r=(profile||{}).ros||"clasico"; return tengo("ros:"+r)?r:"clasico"; };
+function acentoAplicar(){ const a=(profile||{}).acento||"ambar", ok=tengo("ac:"+a)?a:"ambar"; if(ok==="ambar") document.documentElement.removeAttribute("data-acento"); else document.documentElement.setAttribute("data-acento",ok); }
+function premiosHTML(){ const lun=semanaDe(), k=premioDe(lun), r=rosDis(), a=(profile||{}).acento||"ambar";
+  const op=(t,L,sel)=>L.map(x=>{ const kk=t+":"+x[0], si=tengo(kk); return '<button class="prem'+(si?"":" lock")+'" data-a="'+(si?"premUsar":"premInfo")+'" data-p="'+kk+'" aria-pressed="'+(sel===x[0])+'">'+(t==="ros"?'<span class="rmues r-'+x[0]+'"><i></i><i></i><i></i><i></i><i></i></span>':'<span class="amues" style="--c:'+x[2]+'"></span>')+'<b>'+esc(x[1])+'</b>'+(si?'':'<small>'+ic("lock")+' Premio</small>')+'</button>'; }).join("");
+  return '<div class="card premc" id="premsec"><div class="eyebrow">Tus premios</div><p class="hint" style="margin:6px 0 12px">Cada semana hay un premio exclusivo. Se gana con <b>7 días con Dios</b>, con <b>las misiones del grupo 5 días</b> o <b>saliendo primero en tu grupo</b>. Esta semana: <b>'+esc(premioNom(k))+'</b>.</p>'+
+   '<div class="sect">Rosario</div><div class="premrow">'+op("ros",ROSARIOS,r)+'</div><div class="sect">Color de la app</div><div class="premrow">'+op("ac",ACENTOS,a)+'</div></div>'; }
+
+/* ── Álbum de santos: figuritas en sobres de a tres ── */
+const ALB_FUERA=["01-06","02-02","02-22","03-25","05-01","08-06","08-23","09-14","11-01","11-02","12-25"];
+const ALB_ORO=["03-19","06-29","09-29","12-08","08-15","01-01"];
+const ALBUM=Object.keys(SANTOS_MAS).filter(k=>SANTOS[k]&&!ALB_FUERA.includes(k)).sort().map((k,i)=>{ const S=SANTOS_MAS[k], p=S.p||[], txt=p.join(" ");
+  const r=ALB_ORO.includes(k)||p.includes("La Virgen")?"d":/Doctor|Apóstol|Apóstoles|Evangelista|Papa|Fundador|Arcángel|Precursor|Primer mártir|Patrona de la Argentina|Columnas/.test(txt)?"r":"c";
+  return {k,i:i+1,n:SANTOS[k][0],tag:p[0]||"",f:S.f||null,b:S.b||SANTOS[k][1]||"",r}; });
+const ALB_R={c:["Común","comunes"],r:["Rara","raras"],d:["Dorada","doradas"]};
+let album={c:{},ab:0,ini:"",cj:0,rec:[],env:[]};
+const albTengo=()=>Object.keys(album.c||{}).filter(k=>album.c[k]>0);
+const albRepes=()=>Object.values(album.c||{}).reduce((s,n)=>s+Math.max(0,n-1),0);
+const ALB_INICIO="2026-11-06";   // los sobres se cuentan desde que salió el álbum, o desde el primer día que usaste la app si empezaste después
+function albInicio(){ if(album.ini) return album.ini; const ks=Object.keys(days).filter(k=>/^\d{4}-\d\d-\d\d$/.test(k)).sort(); const pri=ks[0]||hoy(); return pri>ALB_INICIO?pri:ALB_INICIO; }
+function sobresGanados(){ const ini=albInicio(); let n=3+(album.cj||0); let f=ini, sem=0;
+  while(f<=hoy()){ const d=dayOf(f); if(rezoAlgo(d)){ n++; sem++; } else sem=0; if(f>=MIS_INICIO&&misDia(f).n===3) n++; if(new Date(parse(f)).getDay()===0&&sem>=7) n++; if(new Date(parse(f)).getDay()===0) sem=0; f=addDays(f,1); }
+  return n; }
+const sobresHay=()=>Math.max(0,sobresGanados()-(album.ab||0));
+async function albGuardar(){ if(!album.ini) album.ini=albInicio(); await backend.setDoc("daily_settings/album",album); grupoSync(); }
+function albSortear(){ const out=[]; for(let i=0;i<3;i++){ const x=Math.random(); let r=x<0.07?"d":x<0.33?"r":"c"; if(i===2&&r==="c"&&Math.random()<0.4) r="r";
+    let pool=ALBUM.filter(c=>c.r===r); const falta=pool.filter(c=>!(album.c||{})[c.k]&&!out.includes(c.k)); if(falta.length&&Math.random()<0.6) pool=falta; const c=pool[Math.floor(Math.random()*pool.length)]; out.push(c.k); } return out; }
+function figuHTML(c,n,cls){ const fe=c.k.split("-"); return '<span class="figu f-'+c.r+(cls?" "+cls:"")+'"><span class="fnum">N.º '+c.i+'</span><span class="fic">'+ic(c.r==="d"?"star":"cross")+'</span><b>'+esc(c.n)+'</b><small>'+esc(+fe[1]+" "+MESES[+fe[0]-1].slice(0,3))+'</small>'+(n>1?'<i class="fx">×'+n+'</i>':'')+'</span>'; }
+function shAlbum(){ const T=albTengo(), F=sheet.fr||"", L=ALBUM.filter(c=>!F||c.r===F), hay=sobresHay(), rep=albRepes();
+  return shTop("Álbum de santos",T.length+" de "+ALBUM.length+" figuritas")+'<div class="scroll">'+
+   '<div class="card albtop"><div class="albh"><div><div class="eyebrow">Tu colección</div><b class="big2">'+T.length+'<small> / '+ALBUM.length+'</small></b></div><div class="sobrebox'+(hay?" hay":"")+'">'+sobreSVG()+'<b>'+hay+'</b></div></div>'+
+   '<div class="bar3"><i style="width:'+Math.round(T.length/ALBUM.length*100)+'%"></i></div>'+
+   '<button class="primary" data-a="sobreAbrir"'+(hay?'':' disabled')+'>'+(hay?(hay===1?"Abrir tu sobre":"Abrir un sobre · tenés "+hay):"Sin sobres por ahora")+'</button>'+
+   '<p class="hint" style="margin-top:10px">Cada sobre trae 3 figuritas. Ganás uno por cada día con Dios, otro por cada día con las tres misiones del grupo y uno extra por cada semana completa.</p>'+
+   (rep>=4?'<button class="ghost g canje" data-a="albCanje">'+ic("star")+' Cambiar 4 repetidas por un sobre ('+rep+' repetidas)</button>':'')+'</div>'+
+   '<div class="chips albf">'+[["","Todas"],["c","Comunes"],["r","Raras"],["d","Doradas"]].map(x=>'<button data-a="albFiltro" data-p="'+x[0]+'" aria-pressed="'+(F===x[0])+'">'+x[1]+(x[0]?' · '+ALBUM.filter(c=>c.r===x[0]&&(album.c||{})[c.k]).length+'/'+ALBUM.filter(c=>c.r===x[0]).length:'')+'</button>').join("")+'</div>'+
+   '<div class="albgrid">'+L.map(c=>{ const n=(album.c||{})[c.k]||0; return n?'<button class="albcel" data-a="figu" data-p="'+c.k+'">'+figuHTML(c,n)+'</button>':'<span class="albcel"><span class="figu vacia f-'+c.r+'"><span class="fnum">N.º '+c.i+'</span><span class="fic">?</span><small>'+esc(+c.k.split("-")[1]+" "+MESES[+c.k.split("-")[0]-1].slice(0,3))+'</small></span></span>'; }).join("")+'</div></div>'+
+   '<button class="primary ink" data-a="cerrar">Volver</button>'; }
+function sobreSVG(){ return '<svg class="sobre" viewBox="0 0 64 80" aria-hidden="true"><rect x="4" y="4" width="56" height="72" rx="8" class="s1"/><path d="M4 18 L32 36 L60 18" class="s2"/><circle cx="32" cy="40" r="9" class="s3"/><path d="M32 34v12M27 39h10" class="s4"/></svg>'; }
+function shSobre(){ const L=(sheet.sale||[]).map(k=>ALBUM.find(c=>c.k===k)).filter(Boolean);
+  return '<div class="ftop"><button class="iconbtn ghost g" data-a="album" aria-label="Volver al álbum">'+ic("x")+'</button><span style="flex:1"></span><span class="ft">Sobre de santos</span></div>'+
+   '<div class="scroll fcuerpo fcen sobrev"><div class="sobrebox hay grande">'+sobreSVG()+'</div><div class="fla">'+(L.some(c=>c.r==="d")?"¡Salió una dorada!":L.some(c=>c.r==="r")?"¡Salió una rara!":"Tu sobre")+'</div><h2 class="fh" style="margin:6px 0 0">'+((sheet.nuevas||[]).length?((sheet.nuevas.length===1?"Una figurita nueva":sheet.nuevas.length+" figuritas nuevas")):"Todas repetidas: guardalas para cambiar")+'</h2><div class="salen">'+L.map((c,i)=>'<button class="sale" style="--d:'+(i*0.28)+'s" data-a="figu" data-p="'+c.k+'">'+figuHTML(c,0,"grande")+((sheet.nuevas||[]).includes(c.k)?'<span class="nueva">Nueva</span>':'<span class="nueva rep">Repetida</span>')+'</button>').join("")+'</div>'+
+   '<p class="fhint">Tocá una figurita para leer su historia.</p></div>'+
+   '<div class="fpie"><span></span><button class="primary" data-a="'+(sobresHay()?"sobreAbrir":"album")+'">'+(sobresHay()?"Abrir otro":"Al álbum")+'</button></div>'; }
+function shFigu(){ const c=ALBUM.find(x=>x.k===sheet.p); if(!c) return shTop("Figurita"); const n=(album.c||{})[c.k]||0, fe=c.k.split("-");
+  const G=grupo.L&&grupo.L.filter(x=>x.uid!==yo())||[];
+  return shTop(esc(c.n),ALB_R[c.r][0]+" · N.º "+c.i)+'<div class="scroll"><div class="figuwrap">'+figuHTML(c,n,"grande")+'</div>'+
+   '<div class="card"><div class="eyebrow">'+esc(+fe[1]+" de "+MESES[+fe[0]-1])+(c.tag?' · '+esc(c.tag):'')+'</div>'+(c.f?'<p class="q sm" style="margin:10px 0 4px">«'+esc(c.f[0])+'»</p><small class="muted">'+esc(c.f[1])+'</small>':'')+'<p class="texto" style="margin-top:12px">'+esc(c.b)+'</p></div>'+
+   (n>1&&G.length?'<div class="card"><div class="eyebrow">Regalar una repetida</div><p class="hint" style="margin:6px 0 10px">Tenés '+(n-1)+(n-1===1?" repetida":" repetidas")+'. Regalásela a alguien de tu grupo'+(G.some(x=>!(x.alb||[]).includes(c.k))?' (los marcados no la tienen)':'')+'.</p><div class="chips">'+G.map(x=>'<button data-a="figuRegalar" data-p="'+c.k+'|'+x.uid+'"'+(!(x.alb||[]).includes(c.k)?' class="on"':'')+'>'+esc(x.n)+'</button>').join("")+'</div></div>':'')+
+   '</div><div class="grid2"><button class="ghost g" data-a="album">'+ic("left")+' Álbum</button><button class="primary" data-a="cerrar">Listo</button></div>'; }
+function albumCard(){ const hay=sobresHay(), T=albTengo().length; return '<button class="card albc" data-a="album"><span class="sobrebox mini2'+(hay?" hay":"")+'">'+sobreSVG()+(hay?'<b>'+hay+'</b>':'')+'</span><span class="n"><b>Álbum de santos</b><small>'+(hay?(hay===1?"Tenés un sobre para abrir":"Tenés "+hay+" sobres para abrir"):T+" de "+ALBUM.length+" figuritas · ganá sobres rezando")+'</small></span>'+ic("right")+'</button>'; }
+/* regalos de figuritas: el que regala lo anota en su ficha del grupo; el que recibe lo suma a su álbum una sola vez */
+let albRecT=null;
+function albRecibir(){ clearTimeout(albRecT); albRecT=setTimeout(async()=>{ if(!grupo.L||!backend) return; const u=yo(); let cambio=0; album.rec=album.rec||[];
+  grupo.L.forEach(x=>{ if(x.uid===u) return; (x.reg||[]).forEach(g=>{ if(g.to===u&&!album.rec.includes(g.i)&&ALBUM.some(c=>c.k===g.k)){ album.c[g.k]=(album.c[g.k]||0)+1; album.rec.push(g.i); cambio++; toast(x.n+" te regaló a "+(ALBUM.find(c=>c.k===g.k)||{}).n); } }); });
+  if(cambio){ album.rec=album.rec.slice(-60); await albGuardar(); } },900); }
 
 /* ── Tu año con Dios (Scaeli+): el año en historias, como el resumen de fin de año de Spotify ── */
 const CRISTO_REY=y=>{ const d=new Date(y,11,3); d.setDate(3-d.getDay()-7); return iso(d); };   // el domingo anterior al 1.º de Adviento (el domingo entre el 27/11 y el 3/12)
@@ -659,10 +766,10 @@ function shOrar(){ const k=sheet.p==="noche"?"n":"m", d=dayOf(hoy()), prev=((d.o
    '<textarea class="fta" id="orTxt" placeholder="Señor…" aria-label="Tu oración">'+esc(txt)+'</textarea>'+
    '<p class="fhint chico">'+ic("lock")+' Solo vos la ves. Queda en tu historial para ver cómo vas creciendo.</p></div>'+
    '<div class="fpie"><button class="lnk" data-a="misOraciones">'+ic("book")+' Mis oraciones</button><button class="primary" data-a="orGuardar">'+(prev?"Guardar":"Amén")+'</button></div>'; }
-const OR_NOM={m:"Mañana",n:"Noche",lec:"Lectio"};
+const OR_NOM={m:"Mañana",n:"Noche",lec:"Lectio",pal:"Palabra del día"};
 function misOracionesLista(){ const L=[]; Object.keys(days).filter(f=>/^\d{4}-\d\d-\d\d$/.test(f)).forEach(f=>{ const d=days[f], o=d.or||{};
-  if(o.m) L.push({f,k:"m",t:o.m}); if(d.lec&&d.lec.t) L.push({f,k:"lec",t:d.lec.t}); if(o.n) L.push({f,k:"n",t:o.n}); });
-  const ord={n:0,lec:1,m:2}; return L.sort((a,b)=>b.f.localeCompare(a.f)||ord[a.k]-ord[b.k]); }
+  if(o.m) L.push({f,k:"m",t:o.m}); if(d.lec&&d.lec.t) L.push({f,k:"lec",t:d.lec.t}); if(d.pal&&(d.pal.q||d.pal.v)) L.push({f,k:"pal",t:(d.pal.r?d.pal.r+" · ":"")+[d.pal.q,d.pal.v].filter(Boolean).join(" — ")}); if(o.n) L.push({f,k:"n",t:o.n}); });
+  const ord={n:0,lec:1,pal:2,m:3}; return L.sort((a,b)=>b.f.localeCompare(a.f)||ord[a.k]-ord[b.k]); }
 function oracionCerca(L,dias,marg){ const obj=addDays(hoy(),-dias); let mejor=null, dm=1e9;
   L.forEach(x=>{ const dd=Math.abs((parse(x.f)-parse(obj))/864e5); if(dd<=marg&&dd<dm){ dm=dd; mejor=x; } }); return mejor; }
 function shMisOraciones(){ const L=misOracionesLista(), q=sinTilde(sheet.q||"").trim(), V=q?L.filter(x=>sinTilde(x.t).includes(q)):L;
@@ -757,7 +864,7 @@ function shDonar(){ const nat=esNativo(), D=sheet.dons;
 /* ── el panel inferior: las oraciones, el rosario, las horas, el examen… ── */
 function openSheet(s){ sheet=s; $("#scrim").hidden=false; $("#sheet").hidden=false; renderSheet(); window.scrollTo(0,0); }
 function closeSheet(){ if(sheet&&sheet.timer) clearTimeout(sheet.timer); sheet=null; $("#scrim").hidden=true; $("#sheet").hidden=true; $("#sheet").classList.remove("full"); document.body.classList.remove("enfoque"); render(); }
-function renderSheet(){ if(!sheet) return; const S={hora:shHora,evangelio:shEvangelio,rosario:shRosario,horas:shHoras,hora_lh:shHoraLH,oraciones:shOraciones,oracion:shOracion,novenas:shNovenas,novena:shNovena,examen:shExamen,confesion:shConfesion,misa:shMisa,santo:shSanto,santoral:shSantoral,lectio:shLectio,lectioGuia:shLectioGuia,exConf:shExConf,biblia:shBiblia,progreso:shProgreso,camino:shCamino,anio:shAnio,grupo:shGrupo,biblioteca:shBiblioteca,libros:shLibros,libro:shLibro,orar:shOrar,misOraciones:shMisOraciones,plus:shPlus,donar:shDonar,borrar:shBorrar}[sheet.view];
+function renderSheet(){ if(!sheet) return; const S={palabra:shPalabra,album:shAlbum,sobre:shSobre,figu:shFigu,hora:shHora,evangelio:shEvangelio,rosario:shRosario,horas:shHoras,hora_lh:shHoraLH,oraciones:shOraciones,oracion:shOracion,novenas:shNovenas,novena:shNovena,examen:shExamen,confesion:shConfesion,misa:shMisa,santo:shSanto,santoral:shSantoral,lectio:shLectio,lectioGuia:shLectioGuia,exConf:shExConf,biblia:shBiblia,progreso:shProgreso,camino:shCamino,anio:shAnio,grupo:shGrupo,biblioteca:shBiblioteca,libros:shLibros,libro:shLibro,orar:shOrar,misOraciones:shMisOraciones,plus:shPlus,donar:shDonar,borrar:shBorrar}[sheet.view];
   $("#sheetIn").innerHTML=S?S():""; pintarPersonajes(); $("#sheet").classList.toggle("short",!!sheet.short); $("#sheet").classList.toggle("full",!!sheet.full); document.body.classList.toggle("enfoque",!!sheet.full); const sc=$("#sheet .scroll"); if(sc&&sheet.top!==false) sc.scrollTop=0; }
 function renderSheetQuieto(){ const sc=$("#sheet .scroll"), y=sc?sc.scrollTop:0; renderSheet(); const s2=$("#sheet .scroll"); if(s2) s2.scrollTop=y; }
 const shTop=(t,sub)=>'<h3><span>'+t+(sub?'<small class="muted" style="display:block;font-size:12px;font-weight:400;letter-spacing:0">'+sub+'</small>':'')+'</span><button class="iconbtn ghost" data-a="cerrar" aria-label="Cerrar">'+ic("x")+'</button></h3>';
@@ -856,7 +963,7 @@ function rosIntro(act){ const d=dayOf(hoy()), hk=misteriosHoy(), sel=sheet.rset|
    '<details class="rprep"><summary>Para empezar: la señal de la cruz y el acto de contrición</summary><p>'+esc(oraTxt("Señal de la cruz"))+'</p><p>'+esc(oraTxt("Acto de contrición"))+'</p></details>'+intHTML()+'</div>'+
    '<div class="fpie"><span></span><button class="primary" data-a="rosEmpezar" data-p="'+sel+'">Empezar</button></div>'; }
 function rosAnillo(n,hechos,actual,padre,centro,sub){ const R=104, c=130, pos=k=>{ const ang=(n===10?-60+k*30:[-30,90,210][k])*Math.PI/180; return [c+R*Math.cos(ang),c+R*Math.sin(ang)]; };
-  let s='<svg class="anillo" viewBox="0 0 260 260" aria-hidden="true"><circle cx="130" cy="130" r="'+R+'" class="hilo"/>';
+  let s='<svg class="anillo r-'+rosDis()+'" viewBox="0 0 260 260" aria-hidden="true"><circle cx="130" cy="130" r="'+R+'" class="hilo"/>';
   for(let k=0;k<n;k++){ const [x,y]=pos(k), st=k<hechos?"ya":k===actual?"on":""; s+=(st==="on"?'<circle cx="'+x.toFixed(1)+'" cy="'+y.toFixed(1)+'" r="17" class="halo"/>':'')+'<circle cx="'+x.toFixed(1)+'" cy="'+y.toFixed(1)+'" r="'+(st==="on"?10:8)+'" class="cu '+st+'"/>'; }
   s+='<rect x="119" y="'+(c-R-11)+'" width="22" height="22" rx="6" class="cu p '+padre+'"/>'+(padre==="on"?'<rect x="111" y="'+(c-R-19)+'" width="38" height="38" rx="12" class="halo"/>':'');
   return s+'</svg><div class="acentro"><b>'+centro+'</b><span>'+sub+'</span></div>'; }
@@ -1077,22 +1184,24 @@ function shMisa(){ const ev=evHoy, f=hoy(), O=ordoDia(f), C=cicloDe(f);
 
 /* ── login ── */
 function renderLogin(){ $("#nav").hidden=true;
-  $("#app").innerHTML='<div class="login"><h1 class="logo"><img src="icons/icon-512.png" alt=""><span class="lnom">Scaeli <small>Daily</small></span></h1><p class="hint" style="font-size:15px;margin-top:-10px">Rezar todos los días.</p>'+
+  $("#app").innerHTML='<div class="login"><h1 class="logo"><img src="assets/logo-daily-2.webp" alt="Scaeli Daily" width="560" height="601"></h1><p class="hint" style="font-size:15px;margin-top:-10px">Rezar todos los días.</p>'+
    '<p style="margin:0;font-size:19px;font-weight:300;line-height:1.4;max-width:30ch">El Evangelio, el Rosario, las Horas y el examen del día. Tu semana con Dios, guardada en tu cuenta.</p>'+
-   '<div style="display:flex;flex-direction:column;gap:10px;width:100%;max-width:340px">'+(plataforma()!=="android"?'<button class="entrar apple" id="loginApple" data-q="apple">'+LOGO_APPLE+'<span>Continuar con Apple</span></button>':'')+'<button class="entrar google" id="login" data-q="google">'+LOGO_GOOGLE+'<span>Continuar con Google</span></button><button class="ghost g" id="invitado" style="justify-content:center;height:48px;margin-top:4px">Probar sin cuenta</button></div>'+
+   '<div style="display:flex;flex-direction:column;gap:10px;width:100%;max-width:340px">'+(plataforma()!=="android"?'<button class="entrar apple" id="loginApple" data-q="apple">'+LOGO_APPLE+'<span>Continuar con Apple</span></button>':'')+'<button class="entrar google" id="login" data-q="google">'+LOGO_GOOGLE+'<span>Continuar con Google</span></button><button class="ghost g" id="invitado" style="justify-content:center;height:52px;width:100%;margin-top:4px;font-size:15px">Probar sin cuenta</button></div>'+
    '<p class="hint" id="status">'+esc(statusTxt||"La misma cuenta que Scaeli Fit y el juego. Nada es público.")+'</p><p class="hint"><a href="privacidad.html" target="_blank" rel="noopener">Política de privacidad</a></p></div>'; }
 function startSession(u,local){ user=u; unsubs.forEach(f=>{try{f()}catch(e){}}); unsubs=[];
   backend=local?localBackend():userBackend(u.uid,e=>{ if(e&&e.code==="permission-denied") setStatus("La base de datos rechazó la operación: hay que publicar firestore.rules.",true); else setStatus("Sin conexión: los cambios se guardan y se sincronizan después."); });
   setStatus(local?"Guardado solo en este dispositivo":"Sincronizado · "+(u.displayName||u.email||"")); $("#nav").hidden=false;
   const w=(fn)=>{ const un=fn(); if(typeof un==="function") unsubs.push(un); };
   w(()=>backend.watchCol("daily_days",L=>{ days={}; L.forEach(d=>{ const {id,...r}=d; days[id]=r; }); render(); grupoSync(); nivelAviso(); }));
-  w(()=>backend.watchDoc("daily_settings/profile",p=>{ profile=p||{}; render(); if(sheet&&sheet.view==="rosario") renderSheet(); grupoSync(); }));
+  w(()=>backend.watchDoc("daily_settings/profile",p=>{ profile=p||{}; acentoAplicar(); premiosRevisar(); render(); if(sheet&&sheet.view==="rosario") renderSheet(); grupoSync(); }));
   w(()=>backend.watchDoc("daily_settings/recordatorios",r=>{ if(r) recordatorios=r; programarAvisos(); if(view==="mas") render(); }));
   w(()=>backend.watchDoc("daily_settings/intents",v=>{ intents=(v&&v.list)||[]; render(); }));
   w(()=>backend.watchDoc("daily_settings/rosario",r=>{ rosario=r||null; if(sheet&&sheet.view==="rosario") renderSheet(); }));
   w(()=>backend.watchCol("daily_novenas",L=>{ novenas=L; if(sheet&&/novena/.test(sheet.view)) renderSheet(); }));
   w(()=>backend.watchDoc("daily_settings/propositos",v=>{ propositos=(v&&v.list)||[]; if(view==="dia") render(); }));
   grupoBE=local?gruposLocal("local"):gruposBackend(u.uid); grupoCerrar(); plusBE=local?null:plusBackend(u.uid); plusDoc=null; w(()=>plusEscuchar());
+  w(()=>backend.watchDoc("daily_settings/premios",v=>{ premios={items:(v&&v.items)||[],vis:(v&&v.vis)||[]}; acentoAplicar(); if(view==="yo") render(); premiosRevisar(); }));
+  w(()=>backend.watchDoc("daily_settings/album",v=>{ album={c:{},ab:0,cj:0,rec:[],env:[],...(v||{})}; if(view==="hoy"||view==="yo") render(); if(sheet&&sheet.view==="album") renderSheet(); }));
   w(()=>backend.watchDoc("daily_settings/grupo",v=>{ const gid=v&&v.gid||null; if(gid!==grupo.gid) grupoAbrir(gid); else if(!gid) render(); }));
   w(()=>backend.watchDoc("daily_settings/rutina",v=>{ rutina={diarias:(v&&v.diarias)||[],habitos:(v&&v.habitos)||[]}; if(view==="dia"||view==="hoy") render(); if(sheet&&sheet.view==="progreso") renderSheetQuieto(); grupoSync(); }));
   ready=true; render(); cargarEvangelio(); plusRefrescar().catch(()=>{});
@@ -1121,7 +1230,7 @@ const ACC={
     if(t) or[k]=t; else delete or[k]; await setDay(hoy(),{[k]:1,or,t:Date.now()}); closeSheet(); amenToast(k,t?"Amén · quedó en tus oraciones":"Amén"); },
   misOraciones(){ openSheet({view:"misOraciones"}); },
   async orBorrar(p){ const [f,k]=String(p).split("|"); if(!(await confirmar("¿Borrar esta oración?","Se borra de tu historial y no se puede recuperar.","Borrar"))) return; const d=dayOf(f);
-    if(k==="lec"){ await setDay(f,{lec:{...(d.lec||{}),t:""},t:Date.now()}); } else { const or={...(d.or||{})}; delete or[k]; await setDay(f,{or,t:Date.now()}); } toast("Oración borrada"); },
+    if(k==="lec"){ await setDay(f,{lec:{...(d.lec||{}),t:""},t:Date.now()}); } else if(k==="pal"){ await setDay(f,{pal:{...(d.pal||{}),q:"",v:""},t:Date.now()}); } else { const or={...(d.or||{})}; delete or[k]; await setDay(f,{or,t:Date.now()}); } toast("Oración borrada"); },
   async horaOk(p){ await marcar(p); closeSheet(); amenToast(p); },
   async desmarcar(p){ await desmarcar(String(p)); toast("Marca sacada"); if(sheet) renderSheetQuieto(); },
   evangelio(){ openSheet({view:"evangelio"}); }, async evOk(){ await marcar("e"); closeSheet(); amenToast("e"); },
@@ -1233,6 +1342,20 @@ const ACC={
   async intDel(p){ intents.splice(+p,1); await backend.setDoc("daily_settings/intents",{list:intents}); },
   async recOn(){ if(esNativo()){ if(!recordatorios.on&&!(await pedirPermisoAvisos())){ toast("Sin permiso para avisar: activalo en los ajustes del teléfono"); return; } }
     else if("Notification" in window&&Notification.permission!=="granted"){ const r=await Notification.requestPermission(); if(r!=="granted"){ toast("Sin permiso para avisar"); return; } } recordatorios={...recordatorios,on:!recordatorios.on}; await backend.setDoc("daily_settings/recordatorios",recordatorios); programarAvisos(); },
+  palabra(){ openSheet({view:"palabra"}); },
+  async palOk(){ const q=(document.getElementById("palQ")||{}).value||"", v=(document.getElementById("palV")||{}).value||""; const p=palDe(), cita=sheet.cita||palCita(p); const antes=palHecha(dayOf(hoy()));
+    await setDay(hoy(),{pal:{r:cita,q:q.trim().slice(0,600),v:v.trim().slice(0,600),t:Date.now()},t:Date.now()}); closeSheet(); toast(q.trim()||v.trim()?(antes?"Guardado en Mis oraciones":"Amén · guardado en Mis oraciones"):"Amén"); grupoSync(); },
+  album(){ openSheet({view:"album"}); }, albFiltro(p){ sheet.fr=p||""; renderSheetQuieto(); },
+  figu(p){ openSheet({view:"figu",p}); },
+  async sobreAbrir(){ if(sobresHay()<1){ toast("Todavía no tenés sobres: se ganan rezando"); return; } const sale=albSortear(), nuevas=sale.filter((k,i)=>!(album.c||{})[k]&&sale.indexOf(k)===i);
+    album.c={...(album.c||{})}; sale.forEach(k=>{ album.c[k]=(album.c[k]||0)+1; }); album.ab=(album.ab||0)+1; await albGuardar(); openSheet({view:"sobre",full:1,sale,nuevas}); },
+  async albCanje(){ if(albRepes()<4) return; let falta=4; const c={...album.c}; Object.keys(c).sort((a,b)=>c[b]-c[a]).forEach(k=>{ while(falta>0&&c[k]>1){ c[k]--; falta--; } }); album.c=c; album.cj=(album.cj||0)+1; await albGuardar(); toast("Cambiaste 4 repetidas por un sobre"); renderSheet(); },
+  async figuRegalar(p){ const [k,to]=String(p).split("|"), x=(grupo.L||[]).find(y=>y.uid===to); if(!x||((album.c||{})[k]||0)<2) return; const c=ALBUM.find(y=>y.k===k);
+    if(!(await confirmar("¿Regalarle "+c.n+" a "+x.n+"?","Se va una de tus repetidas; a "+x.n+" le llega la próxima vez que abra la app.","Regalar"))) return;
+    album.c={...album.c,[k]:album.c[k]-1}; album.env=[...(album.env||[]),{i:newId("g"),to,k,t:Date.now()}].slice(-20); await albGuardar(); toast("Le regalaste "+c.n+" a "+x.n); renderSheet(); },
+  async premUsar(p){ const [t,id]=String(p).split(":"); if(!tengo(p)) return; await backend.setDoc("daily_settings/profile",{...(profile||{}),[t==="ros"?"ros":"acento"]:id}); toast(t==="ros"?"Vas a rezar con el "+premioNom(p).toLowerCase():"Listo: "+premioNom(p).toLowerCase()); },
+  premInfo(p){ toast(premioNom(p)+": premio semanal. Se gana con 7 días con Dios, las misiones 5 días o el primer puesto del grupo."); },
+  pjIr(){ irA("yo"); setTimeout(()=>{ const e=document.getElementById("pjsec"); if(e) e.scrollIntoView({behavior:"smooth",block:"start"}); },60); },
   tema(){ const claro=document.documentElement.getAttribute("data-theme")==="light"; if(claro) document.documentElement.removeAttribute("data-theme"); else document.documentElement.setAttribute("data-theme","light"); try{ localStorage.setItem("daily_theme",claro?"dark":"light"); }catch(e){} render(); },
   exportar(){ exportar(); }, importar(){ $("#impFile").click(); },
   borrar(p){ openSheet({view:"borrar",p}); },

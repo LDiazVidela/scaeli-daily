@@ -64,7 +64,7 @@ const { chromium } = require('playwright');
   // puntos: la fila mía con puntos de la semana > 0 (datos de prueba de esta semana)
   const pts=await p.evaluate(()=>{ const g=window.DAILY.get().grupo; const me=g.L.find(x=>x.uid==='local'); const lun=Object.keys(me.s).sort().pop(); return me.s[lun].p; }); ok(pts>0,'mis puntos de la semana: '+pts);
   p.evaluate(()=>window.DAILY.ACC.gEchar('ej1')); await p.waitForTimeout(400); await p.click('.dlg [data-r="1"]'); await p.waitForTimeout(500); ok((await p.evaluate(()=>window.DAILY.get().grupo.L.length))===4,'el creador saca a uno');
-  await A('cerrar'); t=await T(); ok(/Los de la parroquia · 4 miembros/i.test(t)&&/Vas \d\.º con/.test(t),'tarjeta de Hoy con el grupo');
+  await A('cerrar'); t=await T(); ok(/Los de la parroquia · 4 miembros/i.test(t)&&/vas \d\.º con/i.test(t),'tarjeta de Hoy con el grupo');
   await A('grupo'); p.evaluate(()=>window.DAILY.ACC.gSalir()); await p.waitForTimeout(400); await p.click('.dlg [data-r="1"]'); await p.waitForTimeout(600); ok(!(await p.evaluate(()=>window.DAILY.get().grupo.gid)),'salir del grupo'); t=await T(); ok(/Rezá con tus amigos/.test(t),'vuelve la tarjeta de invitación');
   // enlace de invitación
   await p.goto('http://localhost:8765/index.html?grupo=abcd2345'); await p.waitForTimeout(1800); const sh=await p.evaluate(()=>window.DAILY.get().sheet); ok(sh&&sh.view==='grupo','el enlace ?grupo= abre la pantalla del grupo'); ok(!/grupo=/.test(await p.evaluate(()=>location.search)),'la dirección queda limpia'); await A('cerrar');

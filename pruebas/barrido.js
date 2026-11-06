@@ -3,7 +3,7 @@
 // Uso: node pruebas/barrido.js [carpeta-salida]   (con el servidor en :8765)
 const { chromium } = require('playwright');
 const out = process.argv[2] || 'barrido'; require('fs').mkdirSync(out, { recursive: true });
-const SHEETS = [['hora',{p:'manana'}],['evangelio',{}],['rosario',{}],['horas',{}],['oraciones',{}],['oracion',{p:0}],['novenas',{}],['novena',{p:'jose'}],['examen',{ex:{p:0,no:[],prop:'',gracias:''},full:1}],['confesion',{}],['misa',{}],['santo',{}],['santoral',{}],['lectioGuia',{}],['lectio',{lp:0,full:1}],['exConf',{p:0,h:{m:{},n:{},u:''},full:1}],['biblia',{}],['progreso',{}],['camino',{}],['grupo',{}],['biblioteca',{a:'',v:''}],['libros',{}],['libro',{p:'moradas'}],['orar',{p:'m',full:1}],['misOraciones',{}],['plus',{}],['donar',{}],['borrar',{}]];
+const SHEETS = [['hora',{p:'manana'}],['evangelio',{}],['rosario',{}],['horas',{}],['oraciones',{}],['oracion',{p:0}],['novenas',{}],['novena',{p:'jose'}],['examen',{ex:{p:0,no:[],prop:'',gracias:''},full:1}],['confesion',{}],['misa',{}],['santo',{}],['santoral',{}],['lectioGuia',{}],['lectio',{lp:0,full:1}],['exConf',{p:0,h:{m:{},n:{},u:''},full:1}],['biblia',{}],['progreso',{}],['camino',{}],['grupo',{}],['biblioteca',{a:'',v:''}],['libros',{}],['libro',{p:'moradas'}],['orar',{p:'m',full:1}],['misOraciones',{}],['plus',{}],['donar',{}],['borrar',{}],['palabra',{}],['album',{}],['sobre',{full:1,sale:['04-23','12-08','10-04'],nuevas:['04-23']}],['figu',{p:'04-23'}]];
 (async () => {
   const b = await chromium.launch(); const informe = [];
   for (const [W, H, tema] of [[360, 740, 'dark'], [390, 844, 'dark'], [390, 844, 'light']]) {
@@ -36,6 +36,10 @@ const SHEETS = [['hora',{p:'manana'}],['evangelio',{}],['rosario',{}],['horas',{
             if (ix > 2 && iy > 2 && getComputedStyle(s).position !== 'absolute' && getComputedStyle(e).position !== 'absolute') prob.push('SE PISAN: ' + desc(e) + ' con ' + desc(s)); } }
         for (const e of all) { const s = getComputedStyle(e); if ((s.overflow === 'hidden' || s.overflowX === 'hidden') && s.textOverflow !== 'ellipsis' && e.scrollWidth > e.clientWidth + 2 && e.children.length === 0 && (e.innerText || '').trim()) prob.push('TEXTO CORTADO: ' + desc(e)); }
         for (const e of all) { if (!e.children.length && (e.innerText || '').trim()) { const r = e.getBoundingClientRect(); const pr = e.parentElement.getBoundingClientRect(); if (r.left < -1) prob.push('SALE por la izquierda: ' + desc(e)); } }
+        // sistema de botones (1.10): principal 52 px, de fila e ícono 40 px; los de fila de una misma tarjeta, del mismo ancho
+        for (const e of root.querySelectorAll('button.primary, .ghost, .iconbtn')) { if (!vis(e) || e.closest('.hero2,.lhnow,.cov,.chips,.seg')) continue; const h = Math.round(e.getBoundingClientRect().height);
+          const grande = e.classList.contains('primary') || e.matches('.sheet .in>.grid2>button, .dlgc .grid2>button'); const ok = grande ? (h >= 51 && h <= 53) : (h >= 39 && h <= 41); if (!ok) prob.push('BOTÓN fuera de medida (' + h + 'px): ' + desc(e)); }
+        for (const card of root.querySelectorAll('.card.list')) { const W = [...card.querySelectorAll(':scope>.row>.ghost, :scope>.row>a.ghost')].filter(vis).map(e => Math.round(e.getBoundingClientRect().width)); if (W.length > 1 && Math.max(...W) - Math.min(...W) > 2) prob.push('BOTONES DE FILA de distinto ancho: ' + W.join(', ')); }
         return [...new Set(prob)].slice(0, 25);
       });
       if (r.length) informe.push(`## ${W}${tema[0]} ${nombre}\n` + r.map(x => '- ' + x).join('\n'));
