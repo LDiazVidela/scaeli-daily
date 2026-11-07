@@ -1,0 +1,506 @@
+{
+"reymago": {
+"n": "Rey Mago",
+"f": "6 de enero",
+"r": "legendaria",
+"bio": "Vino de Oriente siguiendo una estrella, a adorar al Niño."
+},
+"pastor": {
+"n": "Pastor de Belén",
+"f": "25 de diciembre",
+"r": "especial",
+"bio": "El primero en llegar al pesebre, con lo puesto."
+},
+"cruzado": {
+"n": "Caballero cruzado",
+"f": "",
+"r": "epica",
+"bio": "Sobreveste blanca con la cruz, escudo templario y mandoble. «No a nosotros, Señor, sino a tu Nombre da la gloria»."
+},
+"miguel": {
+"n": "San Miguel Arcángel",
+"f": "29 de septiembre",
+"r": "angelical",
+"bio": "Príncipe de la milicia celestial. «¿Quién como Dios?»"
+},
+"gabriel": {
+"n": "San Gabriel Arcángel",
+"f": "29 de septiembre",
+"r": "angelical",
+"bio": "El mensajero de la Anunciación: «Alégrate, llena de gracia»."
+},
+"rafael": {
+"n": "San Rafael Arcángel",
+"f": "29 de septiembre",
+"r": "angelical",
+"bio": "«Medicina de Dios». Acompañó a Tobías en el camino."
+},
+"juanbautista": {
+"n": "San Juan Bautista",
+"f": "24 de junio",
+"r": "ultra",
+"bio": "La voz que grita en el desierto: «Preparen el camino del Señor»."
+},
+"pedro": {
+"n": "San Pedro",
+"f": "29 de junio",
+"r": "ultra",
+"bio": "El pescador de Galilea. «Tú eres Pedro, y sobre esta piedra edificaré mi Iglesia»."
+},
+"pablo": {
+"n": "San Pablo",
+"f": "29 de junio",
+"r": "ultra",
+"bio": "El apóstol de los gentiles. «Ya no vivo yo, es Cristo quien vive en mí»."
+},
+"juan": {
+"n": "San Juan Evangelista",
+"f": "27 de diciembre",
+"r": "ultra",
+"bio": "El discípulo amado, el que estuvo al pie de la cruz."
+},
+"abraham": {
+"n": "Abraham",
+"f": "9 de octubre",
+"r": "ultra",
+"bio": "Nuestro padre en la fe. Salió sin saber adónde iba."
+},
+"moises": {
+"n": "Moisés",
+"f": "4 de septiembre",
+"r": "ultra",
+"bio": "El que habló con Dios cara a cara y sacó al pueblo de Egipto."
+},
+"francisco": {
+"n": "San Francisco de Asís",
+"f": "4 de octubre",
+"r": "legendaria",
+"bio": "El pobre de Asís. Lo dejó todo, abrazó al leproso y llamó hermanas a todas las criaturas."
+},
+"carlo": {
+"n": "San Carlo Acutis",
+"f": "12 de octubre",
+"r": "ultra",
+"bio": "Un chico de jean y zapatillas que programaba, jugaba a la pelota e iba a Misa todos los días."
+},
+"teresita": {
+"n": "Santa Teresita del Niño Jesús",
+"f": "1 de octubre",
+"r": "legendaria",
+"bio": "Carmelita, doctora de la Iglesia. Enseñó el caminito: las cosas chicas hechas con amor grande."
+},
+"brochero": {
+"n": "Santo Cura Brochero",
+"f": "16 de marzo",
+"r": "legendaria",
+"bio": "El cura gaucho de Traslasierra. Recorrió las sierras a lomo de mula para llevar a su gente a Dios."
+},
+"bosco": {
+"n": "San Juan Bosco",
+"f": "31 de enero",
+"r": "legendaria",
+"bio": "Padre y maestro de la juventud. Educó a los chicos de la calle con razón, religión y cariño."
+},
+"jose": {
+"n": "San José",
+"f": "19 de marzo",
+"r": "ultra",
+"bio": "Esposo de María y custodio de Jesús. Hombre justo, carpintero, patrono de la Iglesia."
+},
+"teresa": {
+"n": "Santa Teresa de Calcuta",
+"f": "5 de septiembre",
+"r": "legendaria",
+"bio": "Madre Teresa. Sirvió a Jesús en los más pobres entre los pobres de Calcuta."
+},
+"antula": {
+"n": "Santa María Antonia de San José",
+"f": "7 de marzo",
+"r": "legendaria",
+"bio": "Mama Antula: caminó descalza medio país para sostener los Ejercicios Espirituales. Primera santa argentina."
+},
+"ceferino": {
+"n": "Beato Ceferino Namuncurá",
+"f": "26 de agosto",
+"r": "epica",
+"bio": "Hijo del cacique Namuncurá, alumno salesiano. Quería ser sacerdote para servir a su pueblo; murió a los 18 años."
+},
+"cayetano": {
+"n": "San Cayetano",
+"f": "7 de agosto",
+"r": "legendaria",
+"bio": "Sacerdote que confió sin medida en la Providencia. Patrono del pan y del trabajo."
+},
+"ignacio": {
+"n": "San Ignacio de Loyola",
+"f": "31 de julio",
+"r": "legendaria",
+"bio": "Soldado herido en Pamplona; convaleciente, se convirtió y fundó la Compañía de Jesús."
+},
+"javier": {
+"n": "San Francisco Javier",
+"f": "3 de diciembre",
+"r": "legendaria",
+"bio": "Compañero de San Ignacio; llevó el Evangelio a la India y al Japón. Patrono de las misiones."
+},
+"avila": {
+"n": "Santa Teresa de Jesús",
+"f": "15 de octubre",
+"r": "legendaria",
+"bio": "Reformadora del Carmelo, doctora de la Iglesia y maestra de oración."
+},
+"clara": {
+"n": "Santa Clara de Asís",
+"f": "11 de agosto",
+"r": "legendaria",
+"bio": "Dejó su casa noble para seguir a San Francisco y fundó a las Hermanas Pobres."
+},
+"rosa": {
+"n": "Santa Rosa de Lima",
+"f": "30 de agosto",
+"r": "legendaria",
+"bio": "Laica dominica limeña, primera santa de América y su patrona."
+},
+"porres": {
+"n": "San Martín de Porres",
+"f": "3 de noviembre",
+"r": "legendaria",
+"bio": "Hermano dominico de Lima, enfermero y barrendero del convento; amigo de pobres y de animales."
+},
+"tomas": {
+"n": "Santo Tomás de Aquino",
+"f": "28 de enero",
+"r": "ultra",
+"bio": "Dominico, doctor de la Iglesia; unió la fe y la razón. Patrono de los estudiantes."
+},
+"antonio": {
+"n": "San Antonio de Padua",
+"f": "13 de junio",
+"r": "legendaria",
+"bio": "Franciscano portugués, gran predicador; se lo invoca para encontrar lo perdido."
+},
+"benito": {
+"n": "San Benito",
+"f": "11 de julio",
+"r": "legendaria",
+"bio": "Padre de los monjes de Occidente; su Regla enseña a rezar y trabajar. Patrono de Europa."
+},
+"pio": {
+"n": "San Pío de Pietrelcina",
+"f": "23 de septiembre",
+"r": "legendaria",
+"bio": "El Padre Pío: capuchino, pasó la vida en el confesionario y llevó las llagas de Cristo."
+},
+"kolbe": {
+"n": "San Maximiliano Kolbe",
+"f": "14 de agosto",
+"r": "martir",
+"bio": "Franciscano polaco; en Auschwitz ofreció su vida en lugar de un padre de familia."
+},
+"faustina": {
+"n": "Santa Faustina Kowalska",
+"f": "5 de octubre",
+"r": "legendaria",
+"bio": "Religiosa polaca, apóstol de la Divina Misericordia."
+},
+"jp2": {
+"n": "San Juan Pablo II",
+"f": "22 de octubre",
+"r": "papa",
+"bio": "El papa polaco que recorrió el mundo; amigo de los jóvenes y de las familias."
+},
+"cristo": {
+"n": "Cristo Rey",
+"f": "último domingo del año litúrgico",
+"r": "divina",
+"bio": "«Ya no vivo yo, sino que Cristo vive en mí» (Ga 2, 20). La única vestimenta divina: corona imperial con la cruz, nimbo de luz, manto real con armiño, el Sagrado Corazón y el orbe del mundo en la mano. No se compra: se recibe."
+},
+"chiaracorbella": {
+"n": "Sierva de Dios Chiara Corbella",
+"f": "",
+"r": "especial",
+"bio": "Joven esposa y madre romana (1984-2012). Enferma de cáncer, postergó su tratamiento para que naciera su hijo. Vivía de «pequeños pasos posibles»."
+},
+"negromanuel": {
+"n": "Siervo de Dios Negro Manuel",
+"f": "",
+"r": "especial",
+"bio": "Traído como esclavo desde África en el siglo XVII, cuidó la imagen de la Virgen de Luján durante toda su vida. «Soy de la Virgen nomás»."
+},
+"gaudi": {
+"n": "Venerable Antoni Gaudí",
+"f": "",
+"r": "especial",
+"bio": "El arquitecto de la Sagrada Familia. «Mi cliente no tiene apuro», decía de Dios. Declarado venerable en 2025."
+},
+"lejeune": {
+"n": "Venerable Jérôme Lejeune",
+"f": "",
+"r": "especial",
+"bio": "Médico francés que descubrió la causa del síndrome de Down y dedicó su vida a defender a sus pacientes, los más frágiles."
+},
+"talbot": {
+"n": "Venerable Matt Talbot",
+"f": "",
+"r": "especial",
+"bio": "Obrero de Dublín. A los 28 años dejó el alcohol y no volvió a probarlo: Misa diaria, trabajo y oración. Amigo de quienes pelean una adicción."
+},
+"shaw": {
+"n": "Venerable Enrique Shaw",
+"f": "",
+"r": "especial",
+"bio": "Marino y empresario argentino, padre de nueve hijos. Trató a sus obreros como hermanos. Su beatificación ya fue aprobada."
+},
+"lauravicuna": {
+"n": "Beata Laura Vicuña",
+"f": "22 de enero",
+"r": "epica",
+"bio": "Nació en Chile y murió a los 12 años en Junín de los Andes, ofreciendo su vida por la conversión de su mamá."
+},
+"chiarabadano": {
+"n": "Beata Chiara Luce Badano",
+"f": "29 de octubre",
+"r": "epica",
+"bio": "Italiana, deportista, 18 años. Enferma, repetía: «Si lo querés vos, Jesús, yo también lo quiero»."
+},
+"pironio": {
+"n": "Beato Eduardo Pironio",
+"f": "",
+"r": "epica",
+"bio": "Cardenal argentino, nacido en Nueve de Julio. Amigo de los jóvenes e impulsor de las Jornadas Mundiales de la Juventud."
+},
+"esquiu": {
+"n": "Beato Mamerto Esquiú",
+"f": "",
+"r": "epica",
+"bio": "Fraile franciscano catamarqueño y obispo de Córdoba. Pobre entre los pobres, y orador de la Constitución."
+},
+"carlosaustria": {
+"n": "Beato Carlos de Austria",
+"f": "21 de octubre",
+"r": "epica",
+"bio": "El último emperador. En plena Primera Guerra Mundial buscó la paz cuando casi nadie la quería."
+},
+"juana": {
+"n": "Santa Juana de Arco",
+"f": "30 de mayo",
+"r": "legendaria",
+"bio": "Campesina de 17 años que condujo un ejército porque Dios se lo pidió. «Si no estoy en gracia, que Dios me ponga; si estoy, que Dios me guarde.»"
+},
+"agustin": {
+"n": "San Agustín",
+"f": "28 de agosto",
+"r": "ultra",
+"bio": "Padre de la Iglesia. Buscó la verdad por todos lados hasta encontrarla: «Nos hiciste para Ti, y nuestro corazón está inquieto hasta que descanse en Ti»."
+},
+"jeronimo": {
+"n": "San Jerónimo",
+"f": "30 de septiembre",
+"r": "ultra",
+"bio": "Padre de la Iglesia. Tradujo la Biblia al latín. «Ignorar las Escrituras es ignorar a Cristo»."
+},
+"ambrosio": {
+"n": "San Ambrosio",
+"f": "7 de diciembre",
+"r": "ultra",
+"bio": "Padre de la Iglesia y obispo de Milán. Con su predicación ganó a Agustín, y lo bautizó."
+},
+"crisostomo": {
+"n": "San Juan Crisóstomo",
+"f": "13 de septiembre",
+"r": "ultra",
+"bio": "Padre de la Iglesia. Lo llamaron «boca de oro» por cómo predicaba, y le costó el destierro decirle la verdad al poder."
+},
+"atanasio": {
+"n": "San Atanasio",
+"f": "2 de mayo",
+"r": "ultra",
+"bio": "Padre de la Iglesia. Defendió que Jesús es verdadero Dios cuando casi todos cedían. Lo desterraron cinco veces."
+},
+"andres": {
+"n": "San Andrés",
+"f": "30 de noviembre",
+"r": "ultra",
+"bio": "Apóstol, hermano de Pedro. Fue el primero en seguir a Jesús, y corrió a contárselo a su hermano."
+},
+"santiago": {
+"n": "Santiago Apóstol",
+"f": "25 de julio",
+"r": "ultra",
+"bio": "Apóstol, uno de los tres más cercanos a Jesús y el primero de los Doce en dar la vida. Patrono de los peregrinos."
+},
+"frassati": {
+"n": "San Pier Giorgio Frassati",
+"f": "4 de julio",
+"r": "ultra",
+"bio": "Estudiante, montañista y bromista de Turín. Gastaba lo suyo en los pobres sin que nadie supiera. «Hacia lo alto». Canonizado en 2025."
+},
+"josegregorio": {
+"n": "San José Gregorio Hernández",
+"f": "26 de octubre",
+"r": "legendaria",
+"bio": "El «médico de los pobres» de Venezuela: atendía gratis y dejaba él la plata para los remedios. Canonizado en 2025."
+},
+"rendiles": {
+"n": "Santa Carmen Rendiles",
+"f": "9 de mayo",
+"r": "legendaria",
+"bio": "Venezolana. Nació sin el brazo izquierdo y eso no la frenó: fundó las Siervas de Jesús y vivió para la Eucaristía. Canonizada en 2025."
+},
+"bartololongo": {
+"n": "San Bartolo Longo",
+"f": "5 de octubre",
+"r": "legendaria",
+"bio": "De joven se metió en el ocultismo y tocó fondo. Volvió, y dedicó la vida al Rosario y a los huérfanos de Pompeya. Canonizado en 2025."
+},
+"lorenzo": {
+"n": "San Lorenzo",
+"f": "10 de agosto",
+"r": "martir",
+"bio": "Diácono de Roma. Cuando le exigieron los tesoros de la Iglesia, presentó a los pobres. Murió en la parrilla, con humor hasta el final."
+},
+"esteban": {
+"n": "San Esteban",
+"f": "26 de diciembre",
+"r": "martir",
+"bio": "Diácono y primer mártir. Murió apedreado, perdonando: «Señor, no les tengas en cuenta este pecado»."
+},
+"sebastian": {
+"n": "San Sebastián",
+"f": "20 de enero",
+"r": "martir",
+"bio": "Soldado romano que ayudaba en secreto a los cristianos presos. Lo descubrieron y no se echó atrás."
+},
+"ines": {
+"n": "Santa Inés",
+"f": "21 de enero",
+"r": "martir",
+"bio": "Tenía unos doce años. Ni las promesas ni las amenazas la hicieron renegar de Cristo."
+},
+"cecilia": {
+"n": "Santa Cecilia",
+"f": "22 de noviembre",
+"r": "martir",
+"bio": "Mártir romana y patrona de los músicos: «cantaba a Dios en su corazón»."
+},
+"tarcisio": {
+"n": "San Tarcisio",
+"f": "15 de agosto",
+"r": "martir",
+"bio": "Un chico romano que llevaba la Eucaristía a los presos. Lo atacaron para quitársela, y la defendió con su vida."
+},
+"joselito": {
+"n": "San José Sánchez del Río",
+"f": "10 de febrero",
+"r": "martir",
+"bio": "Mexicano, 14 años. Lo torturaron para que renegara y murió gritando «¡Viva Cristo Rey!»."
+},
+"tomasmoro": {
+"n": "Santo Tomás Moro",
+"f": "22 de junio",
+"r": "martir",
+"bio": "Canciller de Inglaterra, padre de familia y amigo del buen humor. «Muero siendo buen servidor del rey, pero primero de Dios»."
+},
+"romero": {
+"n": "San Óscar Romero",
+"f": "24 de marzo",
+"r": "martir",
+"bio": "Arzobispo de San Salvador. Fue la voz de los que no tenían voz, y lo mataron mientras celebraba la Misa."
+},
+"angelelli": {
+"n": "Beato Enrique Angelelli",
+"f": "17 de julio",
+"r": "martir",
+"bio": "Obispo de La Rioja, «con un oído en el pueblo y otro en el Evangelio». Asesinado en 1976."
+},
+"torot": {
+"n": "San Pedro To Rot",
+"f": "7 de julio",
+"r": "martir",
+"bio": "Catequista y padre de familia de Papúa Nueva Guinea. Siguió enseñando la fe y defendiendo el matrimonio cuando estaba prohibido. Canonizado en 2025."
+},
+"lucia": {
+"n": "Santa Lucía",
+"f": "13 de diciembre",
+"r": "martir",
+"bio": "Joven de Siracusa. Repartió su dote entre los pobres y no renegó de Cristo. Su nombre viene de «luz»: es patrona de la vista."
+},
+"benitaarias": {
+"n": "Venerable María Benita Arias",
+"f": "",
+"r": "especial",
+"bio": "Nació en Córdoba en 1822 y creció en Buenos Aires. Fundó las Siervas de Jesús Sacramentado, para adorar la Eucaristía y educar a las chicas más pobres. Por eso lleva la custodia."
+},
+"camilarolon": {
+"n": "Venerable Madre Camila Rolón",
+"f": "",
+"r": "especial",
+"bio": "Camila de San José Rolón nació en San Isidro en 1842. Fundó en Mercedes las Hermanas Pobres Bonaerenses de San José, para cuidar huérfanos y enfermos. De hábito negro, con su cruz y su rosario."
+},
+"virgenmaria": {
+"n": "Santísima Virgen María",
+"f": "1 de enero",
+"r": "ultra",
+"bio": "La Madre de Dios y Madre nuestra. Lo último que dice en el Evangelio es un consejo: «Hagan lo que Él les diga» (Jn 2, 5)."
+},
+"isabel": {
+"n": "Santa Isabel",
+"f": "",
+"r": "ultra",
+"bio": "Prima de María y madre de Juan el Bautista. Fue la primera en reconocer al Señor antes de nacer: «¡Bendita tú entre las mujeres!» (Lc 1, 42)."
+},
+"marta": {
+"n": "Santa Marta",
+"f": "29 de julio",
+"r": "ultra",
+"bio": "De Betania, hermana de María y de Lázaro. Recibía a Jesús en su casa. «Yo creo que tú eres el Mesías, el Hijo de Dios» (Jn 11, 27)."
+},
+"mariabetania": {
+"n": "Santa María de Betania",
+"f": "29 de julio",
+"r": "ultra",
+"bio": "Se sentaba a los pies de Jesús para escucharlo. «María eligió la mejor parte, y no le será quitada» (Lc 10, 42)."
+},
+"lazaro": {
+"n": "San Lázaro",
+"f": "29 de julio",
+"r": "ultra",
+"bio": "El amigo de Jesús. Llevaba cuatro días en el sepulcro cuando oyó: «¡Lázaro, sal fuera!» (Jn 11, 43)."
+},
+"samaritana": {
+"n": "La Samaritana",
+"f": "",
+"r": "ultra",
+"bio": "Fue al pozo a buscar agua y se encontró con Jesús. Dejó el cántaro y corrió a contarlo: «Vengan a ver a un hombre que me dijo todo lo que hice» (Jn 4, 29)."
+},
+"magdalena": {
+"n": "Santa María Magdalena",
+"f": "22 de julio",
+"r": "ultra",
+"bio": "La primera en ver a Jesús resucitado, y la que se lo anunció a los apóstoles: «¡He visto al Señor!» (Jn 20, 18)."
+},
+"natanael": {
+"n": "San Bartolomé (Natanael)",
+"f": "24 de agosto",
+"r": "ultra",
+"bio": "«Ahí tienen a un israelita de verdad, sin doblez», dijo Jesús al verlo llegar (Jn 1, 47). Uno de los Doce."
+},
+"papafrancisco": {
+"n": "Papa Francisco",
+"f": "",
+"r": "papa",
+"bio": "Jorge Mario Bergoglio, del barrio de Flores, Buenos Aires. Primer papa americano y primer jesuita (2013-2025). A los jóvenes les pidió: «Hagan lío»."
+},
+"benedicto": {
+"n": "Benedicto XVI",
+"f": "",
+"r": "papa",
+"bio": "Joseph Ratzinger, teólogo bávaro. Papa de 2005 a 2013. Su primera encíclica se llama «Dios es amor»."
+},
+"leon14": {
+"n": "León XIV",
+"f": "",
+"r": "papa",
+"bio": "Robert Prevost, nacido en Chicago. Agustino, fue misionero y obispo en el Perú. Elegido papa el 8 de mayo de 2025. Sus primeras palabras: «La paz esté con todos ustedes»."
+}
+}
