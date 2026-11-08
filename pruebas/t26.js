@@ -18,7 +18,7 @@ const { chromium } = require('playwright');
   await A('oraciones'); await A('oracion',15); t=await SH(); ok(/Proclama mi alma/.test(t),'Magníficat en español'); await A('oraLat',1); t=await SH(); ok(/Magníficat ánima mea/.test(t),'Magníficat en latín');
   await A('oracion',22); t=await SH(); ok(/Te Deum laud/.test(t),'Te Deum en latín'); await A('cerrar');
   // 2 · rosario en latín y sin emoji
-  await A('rosario',null,600); await A('rosAv'); await A('rosAv'); t=await SH(); ok(/Padre nuestro, que est/.test(t)&&/Padrenuestro/i.test(t),'rosario: Padrenuestro en español');
+  await A('rosario',null,600); await A('rosAv'); await A('rosIrMis'); await A('rosAv'); t=await SH(); ok(/Padre nuestro, que est/.test(t)&&/Padrenuestro/i.test(t),'rosario: Padrenuestro en español');
   ok(!/✝|✦/.test(t),'sin emoji de cruz en el anillo'); ok(await p.$('.acentro svg.i')!==null,'ícono SVG en el centro del anillo');
   await A('rosLat',null,500); t=await SH(); ok(/Pater noster, qui/.test(t)&&/Pater noster/i.test(t)&&/En español/.test(t),'rosario en latín + botón «En español»');
   await A('rosAv'); t=await SH(); ok(/Ave María, grátia plena/.test(t)&&/Ave Maria/i.test(t),'Avemaría en latín, etiqueta Ave Maria');

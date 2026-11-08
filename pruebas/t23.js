@@ -7,7 +7,7 @@ const { chromium } = require('playwright');
   const A = async (a, q, ms = 350) => { await p.evaluate(([a, q]) => window.DAILY.ACC[a](q), [a, q]); await p.waitForTimeout(ms); };
   await A('rosario',null,600); let t=await p.textContent('#sheet'); ok(t.includes('¿Qué misterios querés rezar?')&&t.includes('Los de hoy'),'intro'); await p.screenshot({path:'r_in.png'});
   await A('rosElegir','luminosos'); ok((await p.textContent('#sheet')).includes('El Bautismo de Jesús')||(await p.textContent('#sheet')).includes('Bautismo'),'lista luminosos');
-  await p.click('[data-a="rosEmpezar"]'); await p.waitForTimeout(500); t=await p.textContent('#sheet'); ok(t.includes('1.er misterio luminoso'),'anuncio luminoso '+t.slice(0,200)); await p.screenshot({path:'r_an.png'});
+  await p.click('[data-a="rosEmpezar"]'); await p.waitForTimeout(500); ok((await p.textContent('#sheet')).includes('Credo de los Apóstoles'),'empieza con el Credo'); await A('rosIrMis'); t=await p.textContent('#sheet'); ok(t.includes('1.er misterio luminoso'),'anuncio luminoso '+t.slice(0,200)); await p.screenshot({path:'r_an.png'});
   await A('rosAv'); await p.screenshot({path:'r_padre.png'}); await A('rosAv'); for(let i=0;i<6;i++) await A('rosAv',null,120); await p.screenshot({path:'r_ave.png'}); ok((await p.textContent('#sheet')).includes('de 10'),'ave');
   // terminar todo
   let g=0; while(g++<120){ const v=await p.evaluate(()=>window.DAILY.get().sheet&&window.DAILY.get().sheet.view); if(v!=='rosario') break; const f=await p.evaluate(()=>window.DAILY.get().rosario&&window.DAILY.get().rosario.fase); if(f==='salve'&&!(await p.$('.shot_salve'))){ await p.screenshot({path:'r_salve.png'}); } await A('rosAv',null,60); }

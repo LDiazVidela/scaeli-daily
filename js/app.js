@@ -17,7 +17,7 @@ import { SANTORAL } from "../data/santoral.js";
 import { CARTAS } from "../data/cartas.js";
 import * as PJ from "./personaje.js";
 
-export const VERSION="1.11";
+export const VERSION="1.11.1";
 const LOGO_GOOGLE='<svg class="logo-g" viewBox="0 0 48 48" aria-hidden="true"><path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/><path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/><path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/><path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/></svg>';
 const LOGO_APPLE='<svg class="logo-a" viewBox="0 0 814 1000" aria-hidden="true"><path fill="currentColor" d="M788.1 340.9c-5.8 4.5-108.2 62.2-108.2 190.5 0 148.4 130.3 200.9 134.2 202.2-.6 3.2-20.7 71.9-68.7 141.9-42.8 61.6-87.5 123.1-155.5 123.1s-85.5-39.5-164-39.5c-76.5 0-103.7 40.8-165.9 40.8s-105.6-57-155.5-127C46.7 790.7 0 663 0 541.8c0-194.4 126.4-297.5 250.8-297.5 66.1 0 121.2 43.4 162.7 43.4 39.5 0 101.1-46 176.3-46 28.5 0 130.9 2.6 198.3 99.2zm-234-181.5c31.1-36.9 53.1-88.1 53.1-139.3 0-7.1-.6-14.3-1.9-20.1-50.6 1.9-110.8 33.7-147.1 75.8-28.5 32.4-55.1 83.6-55.1 135.5 0 7.8 1.3 15.6 1.9 18.1 3.2.6 8.4 1.3 13.6 1.3 45.4 0 102.5-30.4 135.5-71.3z"/></svg>';
 /* la dirección publicada: la app de las tiendas lee de acá los Evangelios del día (los genera la GitHub Action cada noche) */
@@ -60,6 +60,7 @@ function fichaSanto(mm){ const sn=SANTOS[mm]; if(!sn) return null; const x=SANTO
   return {mm,n:(SANTORAL[mm]&&SANTORAL[mm].n)||sn[0],p:x.p||[],b:x.b||sn[1],f:x.f||null,vida:x.vida||null,src:x.src||null}; }
 const misteriosHoy=(d)=>{const w=(d||new Date()).getDay();for(const k in MISTERIOS)if(MISTERIOS[k].d.includes(w))return k;return "gozosos"};
 const TODAS_ORA=()=>ORACIONES.concat(ORACIONES_MAS);
+const ORA_SUB={"Magníficat":"Cántico de María","Benedictus":"Cántico de Zacarías","Nunc dimittis":"Cántico de Simeón","Te Deum":"Himno de acción de gracias"};
 const rosLat=()=>!!(profile&&profile.rosLat);
 const oraTxt=(n,lat)=>{const o=TODAS_ORA().find(x=>x.n===n);if(!o) return "";return (lat&&o.lat&&o.lat.length?o.lat:o.es).join("\n")};
 const momento=(d)=>{const h=(d||new Date()).getHours();return h<4?"noche":h<11?"manana":h<14?"mediodia":h<19?"tarde":"noche"};
@@ -72,7 +73,7 @@ let days={}, profile=null, recordatorios={m:"07:30",n:"22:00",on:false}, intents
 let evHoy=null, evEstado="", lhCache={};
 const hoy=()=>iso();
 const dayOf=(s)=>days[s]||{};
-async function setDay(s,patch){ const d={...(days[s]||{}),...patch}; days[s]=d; await backend.setDoc("daily_days/"+s,d); render(); }
+async function setDay(s,patch){ const viejo=days[s]||{}; if(s===hoy()) actDeDia(viejo,patch); const d={...viejo,...patch}; days[s]=d; await backend.setDoc("daily_days/"+s,d); render(); }
 const marcar=(k,s)=>setDay(s||hoy(),{[k]:1,t:Date.now()});
 /* 1.8.1: toda marca tiene vuelta atrás. Saca solo la marca; lo escrito (oraciones, Lectio, examen, diario) queda. */
 async function desmarcar(k,f){ f=f||hoy(); const d=dayOf(f);
@@ -248,7 +249,7 @@ function renderHoy(){ cargarEvangelio(); const d=dayOf(hoy()), nom=(profile&&pro
      heroTexto(mo,d,ev)+'</div>'+nivelHTML("card")+
    (anioListo()?'<button class="card anioc" data-a="anio"><span class="n"><span class="eyebrow">Cristo Rey · termina el año litúrgico</span><b>Tu año con Dios · '+hoy().slice(0,4)+'</b><small>Mirá tu año en historias y compartilo</small></span>'+(esPlus()?ic("right"):'<span class="plus-mini">'+ic("lock")+' Scaeli+</span>')+'</button>':'')+
    '<button class="card lhnow" data-a="horaLH" data-p="'+lh+'"><span class="n"><span class="eyebrow">Ahora · Liturgia de las Horas</span><b>'+esc(LHn[1])+'</b><small>'+esc(LHn[2])+'</small></span><span class="ghost">Rezar</span></button>'+caminoHoyHTML()+
-   '<div class="covers">'+
+   actBanner()+'<div class="covers">'+
      cov("evangelio","evangelio","Evangelio",ev?esc(citaCorta(ev.evangelio.cita)):"Del día")+
      cov("rosario",misteriosHoy(),"Rosario",MISTERIOS[misteriosHoy()].n.replace("Misterios ",""))+
      cov("examen","examen","Examen del día","A la noche")+
@@ -380,6 +381,7 @@ function renderMas(){ const claro=document.documentElement.getAttribute("data-th
    '<button class="card plusmas" data-a="plus"><span class="plus-tag">Scaeli<b>+</b></span><span class="n"><b>'+(esPlus()?"Scaeli+ activo":"Scaeli+")+'</b><small>'+(esPlus()?"Tu progreso, tus virtudes y los caminos guiados":"Tu progreso, tus virtudes y caminos guiados · desde USD 1,67 por mes")+'</small></span>'+ic("right")+'</button>'+
    '<div class="card list"><div class="row"><div class="n"><b>Ayudar a Scaeli</b><small>Una donación para sostener el proyecto</small></div><button class="ghost g" data-a="donarVer">'+ic("heart")+' Donar</button></div></div>'+
    '<div class="card list"><div class="row"><div class="n"><b>Modo claro</b><small>Para leer de día</small></div><button class="ghost g" data-a="tema">'+(claro?"Oscuro":"Claro")+'</button></div>'+
+   '<div class="row"><div class="n"><b>Compartir mi actividad</b><small>Tu grupo ve qué rezaste, nunca lo que escribiste</small></div><button class="ghost g" data-a="actOff">'+(profile&&profile.actOff?"Activar":"Desactivar")+'</button></div>'+
    '<div class="row"><div class="n"><b>Exportar mis datos</b><small>Un archivo con todo lo tuyo</small></div><button class="ghost g" data-a="exportar">Exportar</button></div>'+
    '<div class="row"><div class="n"><b>Importar</b><small>Desde un archivo exportado</small></div><button class="ghost g" data-a="importar">Importar</button><input type="file" id="impFile" accept="application/json" hidden></div></div>'+
    '<div class="card list"><div class="row"><div class="n"><b>Scaeli Fit</b><small>Ordenar el cuerpo desde la templanza</small></div><a class="ghost g" href="https://ldiazvidela.github.io/scaeli-fit/" target="_blank" rel="noopener">Abrir</a></div>'+
@@ -520,7 +522,7 @@ const desafioDe=f=>DESAFIOS[((nSemana(f)%DESAFIOS.length)+DESAFIOS.length)%DESAF
 const puntosDia=f=>{ const d=dayOf(f); let c=0; Object.values(d.hb||{}).forEach(x=>{ c+=5*(x.m||0); }); return Math.max(0,xpDia(f)-c); };   // la misma experiencia de la app, menos las caídas
 function statsSemana(lun){ const o={r:0,e:0,d:0,x:0,o:0,p:0,mi:0}; for(let i=0;i<7;i++){ const f=addDays(lun,i); if(f>hoy()) break; const d=dayOf(f); if(d.r) o.r+=Math.max(1,d.rn||1); if(d.e) o.e++; if(d.x) o.x++; if(rezoAlgo(d)) o.d++; const or=d.or||{}; if(or.m) o.o++; if(or.n) o.o++; o.p+=puntosDia(f)+misPts(f); if(f>=MIS_INICIO&&misDia(f).n===3) o.mi++; } return o; }
 function miFicha(){ const P=PJ.normal(profile||{}), raw=profile||{}; const nom=(raw.nombre||(user&&user.displayName&&user.displayName.split(" ")[0])||(P.sx==="f"?"Peregrina":"Peregrino")).slice(0,24);
-  const s={}; [0,1,2,3,4,5].forEach(i=>{ const l=addDays(semanaDe(),-7*i); s[l]=statsSemana(l); }); return {n:nom,av:{sx:P.sx,prenda:P.prenda,peinado:P.peinado},s,mh:{f:hoy(),n:misDia(hoy()).n},cs:album.t||{}}; }
+  const s={}; [0,1,2,3,4,5].forEach(i=>{ const l=addDays(semanaDe(),-7*i); s[l]=statsSemana(l); }); return {n:nom,av:{sx:P.sx,prenda:P.prenda,peinado:P.peinado},s,mh:{f:hoy(),n:misDia(hoy()).n},cs:album.t||{},act:actMia(),am:actAmMia()}; }
 function grupoSync(){ if(!grupo.gid||!grupoBE||!grupo.meta) return; clearTimeout(gsyncT); gsyncT=setTimeout(async()=>{ const f=miFicha(), k=JSON.stringify(f); if(k===gUltimo) return; gUltimo=k; try{ await grupoBE.setMiembro(grupo.gid,f); }catch(e){} },800); }
 function grupoAbrir(gid){ grupoCerrar(); if(!gid||!grupoBE) return; grupo={gid,meta:null,L:null,unsub:null,err:""};
   grupo.unsub=grupoBE.watch(gid,(meta,L,err)=>{ if(err){ grupo.err="No se pudo leer el grupo."; render(); return; } if(meta===false){ grupo.meta=false; grupo.L=[]; render(); if(sheet&&sheet.view==="grupo") renderSheetQuieto(); return; }
@@ -573,7 +575,7 @@ function shGrupo(){ const local=backend&&backend.mode==="local";
    (creador?'<label class="gport" title="Cambiar la portada">'+ic("image")+'<input type="file" accept="image/*" id="gPortada"></label>':'')+'<span class="gt"><b>'+esc(G.n)+'</b><small>'+R.length+(R.length===1?" miembro":" miembros")+' · código '+G.id+'</small></span></div>'+
    (alientos.length?'<div class="card gali">'+alientos.map(a=>'<p>'+ic("heart")+' <b>'+esc(a.n)+'</b> te manda: «'+esc(a.t)+'»</p>').join("")+'</div>':'')+
    '<div class="card gdes"><div class="hd"><div class="eyebrow">Desafío de la semana</div><span class="chip">'+ic(E.D[3])+' '+E.D[2]+' c/u</span></div><b class="gt">'+esc(E.D[1])+' entre todos: '+E.tot+' de '+E.meta+'</b><div class="bar3"><i style="width:'+Math.min(100,Math.round(E.tot/E.meta*100))+'%"></i></div><p class="hint">'+(E.ok?'¡Meta cumplida! Todos se llevan la insignia del equipo.':'Si llegan antes del domingo, todos ganan la insignia del equipo. Lo tuyo: '+(((me.s||{})[lun]||{})[E.D[0]]||0)+'.')+'</p></div>'+
-   misionesHTML(R,u)+muroHTML(u,creador)+
+   misionesHTML(R,u)+actividadHTML()+muroHTML(u,creador)+
    '<div class="card"><div class="hd"><div class="eyebrow">Ranking de la semana</div><span class="hint" style="margin:0">Se reinicia el lunes</span></div><div class="podio">'+podio+'</div>'+(ganador?'<p class="hint" style="text-align:center">La semana pasada ganó <b>'+esc(ganador.n)+'</b> con '+ganador.pts+' puntos.</p>':'')+
      '<p class="hint" style="margin-top:6px">Los puntos son tu experiencia de la semana (lo que suma cada diaria, hábito u oración) más las misiones, menos las caídas y los días sin ninguna misión.</p></div>'+
    '<div class="card"><div class="hd"><div class="eyebrow">Intenciones</div>'+(recibidos?'<span class="hint" style="margin:0;color:var(--accent);display:inline-flex;align-items:center;gap:5px;white-space:nowrap">'+ic("heart")+' '+recibidos+' rezaron por vos</span>':'')+'</div>'+
@@ -592,6 +594,35 @@ function muroHTML(u,creador){ const M=muro.filter(m=>!muroOculto(m)), ver=sheet.
    (sheet.mrec?'<div class="chips mrec">'+RECORDATORIOS.map((r,i)=>'<button data-a="mRecOk" data-p="'+i+'">'+esc(r)+'</button>').join("")+'</div>':'')+
    '<form data-f="muro" class="add"><input type="text" name="m" placeholder="Escribile al grupo…" maxlength="140" autocomplete="off"><button class="iconbtn acc" type="submit" aria-label="Enviar">'+ic("send")+'</button></form>'+
    (L.length?'<div class="msgs">'+L.map(msg).join("")+'</div>'+(M.length>ver?'<button class="lnk" data-a="mMas" style="margin:8px auto 0;display:block">Ver más</button>':''):'<p class="hint" style="margin:6px 0 0">Todavía no escribió nadie. Un «buen día» o un recordatorio para rezar ya alcanza.</p>')+'</div>'; }
+
+/* ── 1.11.1 · actividad del grupo: qué rezó cada uno (nunca lo que escribió), en la ficha del grupo; «Amén» para acompañar ── */
+let actividad={L:[],am:{}};
+const ACT_TX={m:"rezó la oración de la mañana",e:"leyó el Evangelio del día",r:"rezó el Rosario",x:"hizo el examen del día",n:"rezó la oración de la noche",pal:"rezó con la Palabra del día",h:"rezó la Liturgia de las Horas",nov:"rezó un día de la novena",novfin:"terminó la novena",alb:"sumó al álbum a"};
+const actTexto=a=>ACT_TX[a.k]+(a.x?(a.k==="alb"?" ":": ")+a.x:"");
+const actGuardar=()=>backend&&backend.setDoc("daily_settings/actividad",{L:actividad.L,am:actividad.am}).then(()=>grupoSync());
+function actRegistrar(k,x){ if(!backend) return; const t=Date.now(); actividad.L=[{i:k+t.toString(36),k,x:String(x||"").slice(0,60),t}].concat((actividad.L||[]).filter(a=>a.t>t-2*864e5)).slice(0,15); actGuardar(); }
+function actQuitar(k){ const h0=parse(hoy()).getTime(), i=(actividad.L||[]).findIndex(a=>a.k===k&&a.t>=h0); if(i<0) return; actividad.L=actividad.L.filter((a,j)=>j!==i); actGuardar(); }
+function actDeDia(v,p){ ["m","e","x","n"].forEach(k=>{ if(p[k]===1&&!v[k]) actRegistrar(k); else if(p[k]===0&&v[k]) actQuitar(k); });
+  if(p.rn!==undefined){ const a=v.rn||(v.r?1:0); if(p.rn>a) actRegistrar("r"); else if(p.rn<a) actQuitar("r"); }
+  if(p.pal&&p.pal.r&&!(v.pal&&v.pal.r)) actRegistrar("pal");
+  if(p.h&&Object.keys(p.h).length>Object.keys(v.h||{}).length) actRegistrar("h"); }
+const actMia=()=>profile&&profile.actOff?[]:(actividad.L||[]).filter(a=>a.t>Date.now()-2*864e5).map(a=>[a.i,a.k,a.x,a.t]);
+/* lo que hicieron todos, lo más nuevo primero */
+function actGrupo(){ if(!enGrupo()) return []; const u=yo(), R=(grupo.L||[]).filter(x=>x.uid!==u).concat([{uid:u,n:"Vos",av:miFicha().av,act:actMia(),am:actividad.am}]), out=[];
+  R.forEach(x=>(x.act||[]).forEach(a=>{ if(!Array.isArray(a)||!ACT_TX[a[1]]) return; out.push({id:a[0],k:a[1],x:a[2],t:a[3],uid:x.uid,n:x.uid===u?"Vos":x.n,av:x.av}); }));
+  out.sort((a,b)=>b.t-a.t); const am=id=>R.filter(x=>x.am&&x.am[id]).length; return out.filter(a=>a.t>Date.now()-36*36e5).map(a=>({...a,amen:am(a.uid+"|"+a.id),mio:!!(actividad.am||{})[a.uid+"|"+a.id]})); }
+function actividadHTML(){ const A=actGrupo(), u=yo(), ver=sheet.aver||6, L=A.slice(0,ver);
+  return '<div class="card gact"><div class="hd"><div class="eyebrow">Hoy en el grupo</div>'+(profile&&profile.actOff?'<span class="hint" style="margin:0">No compartís lo tuyo</span>':'')+'</div>'+
+   (L.length?L.map(a=>'<div class="ac">'+avatarHTML(a.av,36)+'<div class="t"><b>'+esc(a.n)+'</b> '+esc(actTexto(a))+'<small>'+hace(a.t)+'</small></div>'+
+     (a.uid===u?(a.amen?'<span class="amen2 quieto">Amén · '+a.amen+'</span>':''):'<button class="amen2'+(a.mio?" on":"")+'" data-a="actAmen" data-p="'+esc(a.uid+"|"+a.id)+'" aria-pressed="'+a.mio+'">Amén'+(a.amen?' · '+a.amen:'')+'</button>')+'</div>').join("")+
+     (A.length>ver?'<button class="lnk" data-a="actMas" style="margin:8px auto 0;display:block">Ver más</button>':''):'<p class="hint" style="margin:4px 0 0">Cuando alguien rece el Rosario, lea el Evangelio o termine una novena, aparece acá para que todos se animen.</p>')+
+   '<p class="hint" style="margin:10px 0 0">Se ve qué rezó cada uno, nunca lo que escribió.</p></div>'; }
+/* en Hoy: «Romina y Mateo ya rezaron el Rosario hoy · Me sumo» */
+function actBanner(){ if(!enGrupo()) return ""; const h0=parse(hoy()).getTime(), d=dayOf(hoy()), u=yo(), A=actGrupo().filter(a=>a.uid!==u&&a.t>=h0);
+  for(const [k,falta,acc,pl,sg] of [["r",!d.r,"rosario","ya rezaron el Rosario hoy","ya rezó el Rosario hoy"],["e",!d.e,"evangelio","ya leyeron el Evangelio de hoy","ya leyó el Evangelio de hoy"],["pal",!(d.pal&&d.pal.r),"palabra","ya rezaron con la Palabra del día","ya rezó con la Palabra del día"]]){
+    if(!falta) continue; const N=[...new Set(A.filter(a=>a.k===k).map(a=>a.n))]; if(!N.length) continue; const quien=N.length===1?N[0]:N.length===2?N[0]+" y "+N[1]:N[0]+", "+N[1]+" y "+(N.length-2===1?"1 más":(N.length-2)+" más"), pv=A.find(a=>a.k===k);
+    return '<div class="card actban">'+avatarHTML(pv.av,40)+'<div class="t"><b>'+esc(quien)+'</b> '+(N.length===1?sg:pl)+'</div><button class="ghost mesumo" data-a="'+acc+'">Me sumo</button></div>'; }
+  return ""; }
 
 /* ═════════ 1.10 · Palabra del día, misiones del grupo, premios semanales y álbum de santos ═════════ */
 
@@ -725,6 +756,7 @@ function albNorm(v){ v=v||{}; if(v.v===2) return {c:{},t:{},ab:[],...v}; const o
   Object.keys(viejo).forEach(k=>{ if(!(viejo[k]>0)) return; const c=CARTAS.find(x=>fechaMD(x.f)===k); if(c){ o.c[c.id]=(o.c[c.id]||0)+viejo[k]; o.t[c.id]=o.t[c.id]||ahora; } o.mig=1; }); return o; }
 async function albGuardar(){ const a={...album}; delete a.mig; await backend.setDoc("daily_settings/album",a); grupoSync(); }
 const enGrupo=()=>!!(grupo.gid&&grupo.meta);
+const actAmMia=()=>Object.fromEntries(Object.entries(actividad.am||{}).filter(([k,t])=>t>Date.now()-3*864e5));
 /* el álbum del grupo: cada carta con quién la sumó primero */
 function albGrupo(){ const u=yo(), M={}; let L=(enGrupo()&&grupo.L)||[]; L=L.filter(x=>x.uid!==u).concat([{uid:u,n:"vos",cs:album.t||{}}]);
   L.forEach(x=>Object.entries(x.cs||{}).forEach(([id,t])=>{ if(!CARTA[id]) return; if(!M[id]||t<M[id].t) M[id]={t,uid:x.uid,n:x.uid===u?"vos":x.n}; })); return M; }
@@ -1038,34 +1070,41 @@ function rosIntro(act){ const d=dayOf(hoy()), hk=misteriosHoy(), sel=sheet.rset|
    '<div class="scroll fcuerpo rosin"><div class="fla">Santo Rosario</div><h2 class="fh">¿Qué misterios querés rezar?</h2><p class="fhint">Los de hoy, '+ROS_DIAS_N[new Date().getDay()]+', son los '+esc(MISTERIOS[hk].n.replace("Misterios ","").toLowerCase())+'. Podés rezar los que quieras, todas las veces que quieras.</p>'+
    '<div class="mgrid">'+Object.keys(MISTERIOS).map(k=>'<button class="mcard'+(k===sel?" on":"")+'" data-a="rosElegir" data-p="'+k+'" aria-pressed="'+(k===sel)+'"><img src="'+ilu(k)+'" alt="" loading="lazy"><span class="g"></span><span class="c"><b>'+esc(MISTERIOS[k].n.replace("Misterios ",""))+'</b><small>'+(k===hk?"Los de hoy":esc(diasMist(k)))+'</small></span>'+(k===sel?'<span class="ok">'+ic("check")+'</span>':'')+'</button>').join("")+'</div>'+
    '<ol class="mlist">'+MISTERIOS[sel].m.map(m=>'<li>'+esc(m[0])+'</li>').join("")+'</ol>'+
-   '<details class="rprep"><summary>Para empezar: la señal de la cruz y el acto de contrición</summary><p>'+esc(oraTxt("Señal de la cruz"))+'</p><p>'+esc(oraTxt("Acto de contrición"))+'</p></details>'+intHTML()+'</div>'+
+   '<details class="rprep"><summary>Para empezar: la señal de la cruz y el acto de contrición</summary><p>'+esc(oraTxt("Señal de la cruz"))+'</p><p>'+esc(oraTxt("Acto de contrición"))+'</p></details>'+intHTML()+
+   '<div class="rini"><div class="eyebrow">Al empezar</div><div class="seg"><button data-a="rosCorto" data-p="0" aria-pressed="'+!(profile&&profile.rosCorto)+'">Completo</button><button data-a="rosCorto" data-p="1" aria-pressed="'+!!(profile&&profile.rosCorto)+'">Solo el Credo</button></div><p class="hint">'+(profile&&profile.rosCorto?"El Credo y después los misterios.":"Credo, Padrenuestro, tres Avemarías (por la fe, la esperanza y la caridad) y Gloria.")+'</p></div></div>'+
    '<div class="fpie"><span></span><button class="primary" data-a="rosEmpezar" data-p="'+sel+'">Empezar</button></div>'; }
-function rosAnillo(n,hechos,actual,padre,centro,sub){ const R=104, c=130, pos=k=>{ const ang=(n===10?-60+k*30:[-30,90,210][k])*Math.PI/180; return [c+R*Math.cos(ang),c+R*Math.sin(ang)]; };
-  let s='<svg class="anillo r-'+rosDis()+'" viewBox="0 0 260 260" aria-hidden="true"><circle cx="130" cy="130" r="'+R+'" class="hilo"/>';
+function rosAnillo(n,hechos,actual,padre,centro,sub){ const R=104, c=130, tot=n+1, colg=n===10, H=colg?316:260, pos=k=>{ const ang=(-90+(k+1)*360/tot)*Math.PI/180; return [c+R*Math.cos(ang),c+R*Math.sin(ang)]; };
+  let s='<svg class="anillo r-'+rosDis()+'" viewBox="0 0 260 '+H+'" aria-hidden="true"><circle cx="130" cy="130" r="'+R+'" class="hilo"/>';
+  if(colg) s+='<path d="M130 240V262" class="hilo"/><path d="M130 266V310M117 279H143" class="cruz"/><circle cx="130" cy="236" r="7" class="cu med'+(hechos>=10?" ya":"")+'"/>';
   for(let k=0;k<n;k++){ const [x,y]=pos(k), st=k<hechos?"ya":k===actual?"on":""; s+=(st==="on"?'<circle cx="'+x.toFixed(1)+'" cy="'+y.toFixed(1)+'" r="17" class="halo"/>':'')+'<circle cx="'+x.toFixed(1)+'" cy="'+y.toFixed(1)+'" r="'+(st==="on"?10:8)+'" class="cu '+st+'"/>'; }
   s+='<rect x="119" y="'+(c-R-11)+'" width="22" height="22" rx="6" class="cu p '+padre+'"/>'+(padre==="on"?'<rect x="111" y="'+(c-R-19)+'" width="38" height="38" rx="12" class="halo"/>':'');
   return s+'</svg><div class="acentro"><b>'+centro+'</b><span>'+sub+'</span></div>'; }
 function shRosario(){ const act=rosario&&rosario.f===hoy()?rosario:null, r=act&&act.fase!=="fin"&&act.fase!=="intro"?act:null; if(!r) return rosIntro(act);
   const M=MISTERIOS[r.set], i=r.mis, mis=M.m[i], med=(ROS_MED[r.set]||[])[i], solo=!!(profile&&profile.rosSolo), fin=r.fase==="salve"||r.fase==="papa";
-  const etiqueta=fin?"Para terminar":ORD_M[i]+" misterio "+(ADJ[r.set]||"");
-  const top='<div class="ftop"><button class="iconbtn ghost g" data-a="cerrar" aria-label="Salir">'+ic("x")+'</button><div class="fprog">'+[0,1,2,3,4].map(k=>'<i class="'+(k<i||fin?"ya":k===i?"on":"")+'"></i>').join("")+'</div><span class="ft">'+(fin?"Para terminar":"Misterio "+(i+1)+" de 5")+'</span></div>';
+  const ini=r.fase==="credo"||r.fase==="ini", etiqueta=fin?"Para terminar":ini?"Para empezar":ORD_M[i]+" misterio "+(ADJ[r.set]||"");
+  const top='<div class="ftop"><button class="iconbtn ghost g" data-a="cerrar" aria-label="Salir">'+ic("x")+'</button><div class="fprog">'+[0,1,2,3,4].map(k=>'<i class="'+(k<i||fin?"ya":k===i&&!ini?"on":"")+'"></i>').join("")+'</div><span class="ft">'+(fin?"Para terminar":ini?"Para empezar":"Misterio "+(i+1)+" de 5")+'</span></div>';
   const pie=(der)=>'<div class="fpie"><button class="lnk" data-a="rosAtras">'+ic("left")+' Atrás</button>'+der+'</div>';
+  const irMis='<button class="lnk solo-t" data-a="rosIrMis">Ir a los misterios</button>';
+  if(r.fase==="credo"){ const lt=rosLat(); return top+'<div class="scroll fcuerpo ros2"><div class="fla">Para empezar</div><h2 class="fh">'+(lt?"Symbolum Apostolorum":"Credo de los Apóstoles")+'</h2><p class="rora'+(lt?" lat":"")+'">'+esc(oraTxt("Credo de los Apóstoles",lt))+'</p>'+
+     '<p class="fhint">'+(profile&&profile.rosCorto?"Después, los misterios.":"Después: Padrenuestro, tres Avemarías y Gloria.")+'</p><div class="solo-row">'+irMis+'<button class="lnk solo-t" data-a="rosLat">'+(lt?"En español":"En latín")+'</button></div></div>'+pie('<button class="primary" data-a="rosAv">Amén · seguir</button>'); }
   if(r.fase==="anuncio") return top+'<div class="scroll fcuerpo ros2"><div class="rmis"><img src="'+ilu(r.set)+'" alt=""><span class="g"></span><div class="tx"><div class="fla">'+esc(etiqueta)+'</div><h2 class="fh">'+esc(mis[0])+'</h2></div></div>'+
      (med?'<p class="rmed">«'+esc(med[0].replace(/^«|»$/g,""))+'»</p><p class="rcita">'+esc(med[1])+'</p><p class="rfruto"><span>Fruto</span>'+esc(med[2])+'</p>':'<p class="rcita">'+esc(mis[1])+'</p>')+'<p class="fhint">Contemplá la escena un momento, en silencio, antes de empezar.</p></div>'+
      pie('<button class="primary" data-a="rosAv">Comenzar la decena</button>');
   if(r.fase==="salve") return top+'<div class="scroll fcuerpo ros2"><div class="fla">Para terminar</div><h2 class="fh">'+(rosLat()?"Salve, Regina":"Dios te salve, Reina y Madre")+'</h2><p class="rora'+(rosLat()?" lat":"")+'">'+esc(oraTxt("Salve",rosLat()))+'</p></div>'+pie('<button class="primary" data-a="rosAv">Amén</button>');
   let ora, anillo;
-  if(r.fase==="papa"){ const c=r.c; ora=c===0?"Padrenuestro":c<=3?"Avemaría":"Gloria"; anillo=rosAnillo(3,c===0?0:Math.min(3,c-1+(c>3?1:0)),c>=1&&c<=3?c-1:-1,c===0?"on":"ya",c>=1&&c<=3?String(c):ora==="Padrenuestro"?ic("cross"):ic("star"),c>=1&&c<=3?"de 3 · Avemaría":ora); }
+  if(r.fase==="papa"||r.fase==="ini"){ const c=r.c; ora=c===0?"Padrenuestro":c<=3?"Avemaría":"Gloria"; anillo=rosAnillo(3,c===0?0:Math.min(3,c-1+(c>3?1:0)),c>=1&&c<=3?c-1:-1,c===0?"on":"ya",c>=1&&c<=3?String(c):ora==="Padrenuestro"?ic("cross"):ic("star"),c>=1&&c<=3?(r.fase==="ini"?"de 3 · por la "+["fe","esperanza","caridad"][c-1]:"de 3 · Avemaría"):ora); }
   else { ora=r.fase==="padre"?"Padrenuestro":r.fase==="ave"?"Avemaría":"Gloria";
     anillo=rosAnillo(10,r.fase==="ave"?r.c-1:r.fase==="gloria"?10:0,r.fase==="ave"?r.c-1:-1,r.fase==="padre"?"on":"ya",r.fase==="ave"?String(r.c):r.fase==="padre"?ic("cross"):ic("star"),r.fase==="ave"?"de 10 · Avemaría":ora); }
   const LBL={Padrenuestro:"Pater noster",Avemaría:"Ave Maria",Gloria:"Gloria Patri"}; if(rosLat()) anillo=anillo.replace(">"+ora+"<",">"+LBL[ora]+"<").replace("· Avemaría","· Ave Maria");
   const lt=rosLat(), texto=solo?'':'<p class="rora'+(lt?" lat":"")+'">'+esc(oraTxt(ora,lt))+'</p>'+(ora==="Gloria"&&r.fase==="gloria"?'<p class="rora jac'+(lt?" lat":"")+'">'+esc(lt?oraTxt("Oración de Fátima",1):ROS_FATIMA)+'</p>':'');
-  return top+'<div class="scroll fcuerpo ros2"><div class="rcab">'+(r.fase==="papa"?'Por el Papa y la Iglesia':esc(mis[0]))+'</div>'+
-    '<button class="rtap'+(solo?" solo":"")+'" data-a="rosAv" aria-label="Pasar la cuenta">'+anillo+'</button><p class="rhint">Tocá el rosario para pasar la cuenta</p>'+texto+
-    '<div class="solo-row"><button class="lnk solo-t" data-a="rosSolo">'+(solo?"Mostrar las oraciones":"Solo el contador")+'</button>'+(solo?'':'<button class="lnk solo-t" data-a="rosLat">'+(lt?"En español":"En latín")+'</button>')+'</div></div>'+
+  return top+'<div class="scroll fcuerpo ros2"><div class="rcab">'+(r.fase==="papa"?'Por el Papa y la Iglesia':r.fase==="ini"?'Por la fe, la esperanza y la caridad':esc(mis[0]))+'</div>'+
+    '<button class="rtap'+(solo?" solo":"")+(r.fase==="papa"||r.fase==="ini"?"":" colg")+'" data-a="rosAv" aria-label="Pasar la cuenta">'+anillo+'</button><p class="rhint">Tocá el rosario para pasar la cuenta</p>'+texto+
+    '<div class="solo-row"><button class="lnk solo-t" data-a="rosSolo">'+(solo?"Mostrar las oraciones":"Solo el contador")+'</button>'+(solo?'':'<button class="lnk solo-t" data-a="rosLat">'+(lt?"En español":"En latín")+'</button>')+(r.fase==="ini"?irMis:'')+'</div></div>'+
     pie('<button class="lnk" data-a="rosSalir">Seguir después</button>'); }
 async function rosAvanzar(){ let r={...(rosario||rosNuevo())}; if(r.f!==hoy()) r=rosNuevo(r.set);
-  if(r.fase==="intro") r.fase="anuncio";
+  if(r.fase==="intro") r.fase="credo";
+  else if(r.fase==="credo"){ if(profile&&profile.rosCorto){ r.fase="anuncio"; r.mis=0; } else { r.fase="ini"; r.c=0; } }
+  else if(r.fase==="ini"){ if(r.c<4) r.c++; else { r.fase="anuncio"; r.mis=0; r.c=0; } }
   else if(r.fase==="anuncio"){ r.fase="padre"; r.c=0; }
   else if(r.fase==="padre"){ r.fase="ave"; r.c=1; }
   else if(r.fase==="ave"){ if(r.c<10) r.c++; else r.fase="gloria"; }
@@ -1073,7 +1112,7 @@ async function rosAvanzar(){ let r={...(rosario||rosNuevo())}; if(r.f!==hoy()) r
   else if(r.fase==="salve"){ r.fase="papa"; r.c=0; }
   else if(r.fase==="papa"){ if(r.c<4) r.c++; else { r.fase="fin"; const dd=dayOf(hoy()), n=(dd.rn||(dd.r?1:0))+1; await setDay(hoy(),{r:1,rn:n,t:Date.now()}); toast(n>1?"Rezaste "+n+" Rosarios hoy":"Rezaste el Santo Rosario",()=>desmarcar("r")); } }
   await rosGuardar(r); if(r.fase==="fin") closeSheet(); }
-async function rosAtras(){ let r={...rosario}; if(r.fase==="papa"){ if(r.c>0) r.c--; else r.fase="salve"; } else if(r.fase==="salve"){ r.fase="gloria"; r.mis=4; } else if(r.fase==="ave"){ if(r.c>1) r.c--; else r.fase="padre"; } else if(r.fase==="gloria"){ r.fase="ave"; r.c=10; } else if(r.fase==="padre"){ r.fase="anuncio"; } else if(r.fase==="anuncio"&&r.mis>0){ r.mis--; r.fase="gloria"; } else if(r.fase==="anuncio"){ r.fase="intro"; sheet.rset=r.set; } await rosGuardar(r); }
+async function rosAtras(){ let r={...rosario}; if(r.fase==="papa"){ if(r.c>0) r.c--; else r.fase="salve"; } else if(r.fase==="salve"){ r.fase="gloria"; r.mis=4; } else if(r.fase==="ave"){ if(r.c>1) r.c--; else r.fase="padre"; } else if(r.fase==="gloria"){ r.fase="ave"; r.c=10; } else if(r.fase==="padre"){ r.fase="anuncio"; } else if(r.fase==="anuncio"&&r.mis>0){ r.mis--; r.fase="gloria"; } else if(r.fase==="anuncio"){ if(profile&&profile.rosCorto) r.fase="credo"; else { r.fase="ini"; r.c=4; } } else if(r.fase==="ini"){ if(r.c>0) r.c--; else r.fase="credo"; } else if(r.fase==="credo"){ r.fase="intro"; sheet.rset=r.set; } await rosGuardar(r); }
 
 /* la Liturgia de las Horas */
 function shHoras(){ const d=dayOf(hoy()), h=d.h||{}; const ahora=new Date().getHours(); const sug=ahora<9?"laudes":ahora<12?"tercia":ahora<15?"sexta":ahora<18?"nona":ahora<21?"visperas":"completas";
@@ -1087,7 +1126,7 @@ function shHoraLH(){ const h=sheet.p, nom=(LH_HORAS.find(x=>x[0]===h)||[])[1]||h
 /* las oraciones de siempre */
 function shOraciones(){ const L=TODAS_ORA(), lat=!!sheet.lat; return shTop("Oraciones","Las de siempre")+'<div class="scroll"><div class="sbanner"><img src="'+ilu("oraciones")+'" alt=""><span class="g"></span></div>'+
   '<div class="seg lat-seg"><button aria-pressed="'+!lat+'" data-a="oraLat" data-p="0">Español</button><button aria-pressed="'+lat+'" data-a="oraLat" data-p="1">Latín</button></div>'+
-  '<div class="list">'+L.map((o,i)=>'<button class="food" data-a="oracion" data-p="'+i+'"><div><b>'+esc(lat&&o.la?o.la:o.n)+'</b>'+(o.la&&sinTilde(o.la)!==sinTilde(o.n)?'<br><small>'+esc(lat?o.n:o.la)+'</small>':'')+'</div>'+ic("right")+'</button>').join("")+'</div></div><button class="primary ink" data-a="cerrar">Volver</button>'; }
+  '<div class="list">'+L.map((o,i)=>'<button class="food" data-a="oracion" data-p="'+i+'"><div><b>'+esc(lat&&o.la?o.la:o.n)+'</b>'+(o.la&&sinTilde(o.la)!==sinTilde(o.n)?'<br><small>'+esc(lat?o.n:o.la)+'</small>':'<br><small>'+esc(ORA_SUB[o.n]||(o.la?"Igual en latín":"Oración"))+'</small>')+'</div>'+ic("right")+'</button>').join("")+'</div></div><button class="primary ink" data-a="cerrar">Volver</button>'; }
 function shOracion(){ const o=TODAS_ORA()[+sheet.p], lat=!!sheet.lat&&!!(o.lat&&o.lat.length), tx=(lat?o.lat:o.es).join("\n"); const igual=o.la&&sinTilde(o.la)===sinTilde(o.n); return shTop(esc(lat&&o.la?o.la:o.n),o.la&&!igual?esc(lat?o.n:o.la):"")+'<div class="scroll">'+
   (o.lat&&o.lat.length?'<div class="seg lat-seg"><button aria-pressed="'+!lat+'" data-a="oraLat" data-p="0">Español</button><button aria-pressed="'+lat+'" data-a="oraLat" data-p="1">Latín</button></div>':'')+
   '<div class="pray"><p class="q'+(tx.length>500?' sm':'')+(lat?' lat':'')+'">'+esc(tx)+'</p></div></div><div class="grid2"><button class="ghost g" data-a="oraciones">'+ic("left")+' Todas</button><button class="primary" data-a="cerrar" style="height:40px;font-size:14px">Amén</button></div>'; }
@@ -1278,6 +1317,7 @@ function startSession(u,local){ user=u; unsubs.forEach(f=>{try{f()}catch(e){}});
   w(()=>backend.watchCol("daily_novenas",L=>{ novenas=L; if(sheet&&/novena/.test(sheet.view)) renderSheet(); }));
   w(()=>backend.watchDoc("daily_settings/propositos",v=>{ propositos=(v&&v.list)||[]; if(view==="dia") render(); }));
   grupoBE=local?gruposLocal("local"):gruposBackend(u.uid); grupoCerrar(); plusBE=local?null:plusBackend(u.uid); plusDoc=null; w(()=>plusEscuchar());
+  w(()=>backend.watchDoc("daily_settings/actividad",v=>{ actividad={L:(v&&v.L)||[],am:(v&&v.am)||{}}; }));
   w(()=>backend.watchDoc("daily_settings/premios",v=>{ premios={items:(v&&v.items)||[],vis:(v&&v.vis)||[]}; acentoAplicar(); if(view==="yo") render(); premiosRevisar(); }));
   w(()=>backend.watchDoc("daily_settings/album",v=>{ album=albNorm(v); if(album.mig) albGuardar(); if(view==="hoy"||view==="yo") render(); if(sheet&&sheet.view==="album") renderSheetQuieto(); }));
   w(()=>backend.watchDoc("daily_settings/grupo",v=>{ const gid=v&&v.gid||null; if(gid!==grupo.gid) grupoAbrir(gid); else if(!gid) render(); }));
@@ -1320,7 +1360,12 @@ const ACC={
   santoral(){ const q=sheet&&sheet.view==="santo"&&sheet.desde?sheet.desde:{q:"",m:new Date().getMonth()}; openSheet({view:"santoral",...q}); }, salMes(p){ sheet.m=+p; renderSheet(); },
   salVer(p){ openSheet({view:"santo",p,desde:{q:sheet.q,m:sheet.m}}); },
   rosario(){ openSheet({view:"rosario",full:1}); }, rosElegir(p){ if(MISTERIOS[p]){ sheet.rset=p; renderSheet(); } }, async rosSet(p){ ACC.rosElegir(p); },
-  async rosEmpezar(p){ const set=MISTERIOS[p]?p:(sheet.rset||misteriosHoy()); const r=rosNuevo(set); r.fase="anuncio"; await rosGuardar(r); },
+  async rosEmpezar(p){ const set=MISTERIOS[p]?p:(sheet.rset||misteriosHoy()); const r=rosNuevo(set); r.fase="credo"; await rosGuardar(r); },
+  async actAmen(p){ const am={...(actividad.am||{})}; if(am[p]) delete am[p]; else am[p]=Date.now(); actividad.am=am; await actGuardar(); renderSheetQuieto(); },
+  actMas(){ sheet.aver=(sheet.aver||6)+10; renderSheetQuieto(); },
+  async actOff(){ await backend.setDoc("daily_settings/profile",{...(profile||{}),actOff:!(profile&&profile.actOff)}); grupoSync(); render(); },
+  async rosIrMis(){ if(!rosario) return; await rosGuardar({...rosario,fase:"anuncio",mis:0,c:0}); },
+  async rosCorto(p){ await backend.setDoc("daily_settings/profile",{...(profile||{}),rosCorto:p==="1"}); renderSheet(); },
   rosAv(){ rosAvanzar(); }, rosAtras(){ rosAtras(); },
   async rosCero(){ sheet.rset=rosario&&rosario.set; await rosGuardar(rosNuevo(rosario&&rosario.set)); },
   async rosLat(){ await backend.setDoc("daily_settings/profile",{...(profile||{}),rosLat:!rosLat()}); renderSheet(); },
@@ -1329,7 +1374,7 @@ const ACC={
   oraciones(){ openSheet({view:"oraciones",lat:sheet&&sheet.lat?1:0}); }, oracion(p){ openSheet({view:"oracion",p,lat:sheet&&sheet.lat?1:0}); }, oraLat(p){ sheet.lat=+p; renderSheet(); },
   novenas(){ openSheet({view:"novenas"}); }, novena(p){ openSheet({view:"novena",p}); novChip(); }, novVer(p){ sheet.vd=+p; sheet.cerrarTodos=1; renderSheet(); novChip(); },
   async novOk(p){ const [id,dia]=p.split("|"); const mia=novenas.find(x=>x.id===id)||{}; const dias=Array.from(new Set([...(mia.dias||[]),+dia])).sort((a,b)=>a-b);
-    const N=NOVENAS.find(x=>x.id===id)||{d:9}; const doc={ini:mia.ini||hoy(),dias,ult:hoy(),t:Date.now()}; if(mia.libre){ doc.libre=dias.length<(N.d||9)?1:0; } await backend.setDoc("daily_novenas/"+id,doc); await marcar("nov"); closeSheet(); toast(dias.length>=(N.d||9)?(N.d===10?"Decenario completo":"Novena completa"):"Amén · día "+dia,()=>ACC.novDes(id+"|"+dia+"|1")); },
+    const N=NOVENAS.find(x=>x.id===id)||{d:9}; const doc={ini:mia.ini||hoy(),dias,ult:hoy(),t:Date.now()}; if(mia.libre){ doc.libre=dias.length<(N.d||9)?1:0; } await backend.setDoc("daily_novenas/"+id,doc); await marcar("nov"); actRegistrar(dias.length>=(N.d||9)?"novfin":"nov",N.n||""); closeSheet(); toast(dias.length>=(N.d||9)?(N.d===10?"Decenario completo":"Novena completa"):"Amén · día "+dia,()=>ACC.novDes(id+"|"+dia+"|1")); },
   async novDes(p){ const [id,dia,sin]=String(p).split("|"); if(!sin&&!(await confirmar("¿Desmarcar el día "+dia+"?","Queda como no rezado; lo podés volver a marcar.","Desmarcar"))) return; const mia=novenas.find(x=>x.id===id)||{}; const dias=(mia.dias||[]).filter(x=>x!==+dia); const N=NOVENAS.find(x=>x.id===id)||{d:9};
     const doc={...mia,dias,t:Date.now()}; delete doc.id; if(doc.ult===hoy()&&+dia===(mia.dias||[]).length) doc.ult=addDays(hoy(),-1); if(mia.libre!==undefined) doc.libre=dias.length<(N.d||9)?1:0; await backend.setDoc("daily_novenas/"+id,doc); if(!dias.length&&!mia.libre){ /* sin días no hace falta el doc */ } toast("Día "+dia+" desmarcado"); if(sheet&&sheet.view==="novena") renderSheetQuieto(); },
   novTodas(p){ sheet.todas=p==="1"; renderSheet(); },
@@ -1347,7 +1392,7 @@ const ACC={
   async camCita(p){ const m=String(p).match(/^((?:[123] )?\S+) (\d+),(\d+)/); if(!m) return; try{ await bibIndice(); }catch(e){ toast("No se pudo abrir la Biblia."); return; } const r=bibReferencia(m[1]+" "+m[2]+","+m[3]); if(!r) return; openSheet({view:"biblia",m:"libros"}); bibAbrir(r.b,r.c,r.v); },
   grupo(){ openSheet({view:"grupo"}); },
   async gEjemplo(){ if(!grupoBE||grupoBE.mode!=="local") return; const gid=await grupoBE.crear("Los de la parroquia",miFicha()); const lun=semanaDe(), ant=addDays(lun,-7), ej={};
-    [["Juan",{sx:"m",prenda:"remera:azul",peinado:"corto"},[64,120]],["Clari",{sx:"f",prenda:"buzo:bordo",peinado:"suelto"},[92,70]],["Mateo",{sx:"m",prenda:"camisa:blanco",peinado:"base"},[31,150]],["Sofi",{sx:"f",prenda:"pollera:negro",peinado:"corto"},[77,40]]].forEach((x,i)=>{ const u="ej"+i; ej[u]={n:x[0],av:x[1],int:["Por mi abuela, que está enferma","Por los exámenes","Por mi hermano","Por la misión de verano"][i],s:{[lun]:{r:i+1,e:3-(i%2),d:4,x:2,o:1,p:x[2][0]},[ant]:{r:4,e:5,d:6,x:3,o:2,p:x[2][1]}},rece:{local:{n:1,t:Date.now()}},al:i===1?{local:[1,Date.now()]}:{},cs:Object.fromEntries(CARTAS.filter((c,j)=>(j*7+i*3)%11===0).map((c,j)=>[c.id,Math.round(Date.now()/1000)-86400*(10-j%9)-i*3600])),t:Date.now()}; });
+    [["Juan",{sx:"m",prenda:"remera:azul",peinado:"corto"},[64,120]],["Clari",{sx:"f",prenda:"buzo:bordo",peinado:"suelto"},[92,70]],["Mateo",{sx:"m",prenda:"camisa:blanco",peinado:"base"},[31,150]],["Sofi",{sx:"f",prenda:"pollera:negro",peinado:"corto"},[77,40]]].forEach((x,i)=>{ const u="ej"+i; ej[u]={n:x[0],av:x[1],int:["Por mi abuela, que está enferma","Por los exámenes","Por mi hermano","Por la misión de verano"][i],s:{[lun]:{r:i+1,e:3-(i%2),d:4,x:2,o:1,p:x[2][0]},[ant]:{r:4,e:5,d:6,x:3,o:2,p:x[2][1]}},rece:{local:{n:1,t:Date.now()}},al:i===1?{local:[1,Date.now()]}:{},act:[["r"+i,"r","",Date.now()-(i*55+20)*60000],["e"+i,i%2?"e":"pal","",Date.now()-(i*80+90)*60000]].slice(0,i===3?1:2),am:{},cs:Object.fromEntries(CARTAS.filter((c,j)=>(j*7+i*3)%11===0).map((c,j)=>[c.id,Math.round(Date.now()/1000)-86400*(10-j%9)-i*3600])),t:Date.now()}; });
     grupoBE._sembrar(gid,ej); if(grupoBE._sembrarMuro){ const U=Object.keys(ej); grupoBE._sembrarMuro(gid,[{id:"e1",u:U[0],n:ej[U[0]].n,tx:"No se olviden de rezar el Evangelio hoy",tipo:"rec",t:Date.now()-3600e3,a:{[U[1]]:1}},{id:"e2",u:U[1],n:ej[U[1]].n,tx:"Recé la decena por todos, ¡vamos que llegamos al desafío!",t:Date.now()-7200e3,a:{[U[0]]:1,[U[2]||U[0]]:1}},{id:"e3",u:U[2]||U[0],n:ej[U[2]||U[0]].n,tx:"Buen día grupo, hoy ofrezco el día por los que están lejos.",t:Date.now()-86400e3}]); } await backend.setDoc("daily_settings/grupo",{gid}); openSheet({view:"grupo"}); }, grupoModo(p){ sheet.m=p; sheet.err=""; renderSheet(); setTimeout(()=>{ const i=document.querySelector("#sheet form input"); if(i) i.focus(); },40); },
   async gInvitar(){ const G=grupo.meta; if(!G) return; const url=SITIO+"?grupo="+G.id, txt="Sumate a mi grupo «"+G.n+"» en Scaeli Daily para rezar juntos. Código: "+G.id+" · "+url;
     try{ if(navigator.share){ await navigator.share({title:"Scaeli Daily",text:txt}); return; } }catch(e){ if(/abort/i.test(String(e&&e.name))) return; }
@@ -1427,7 +1472,7 @@ const ACC={
   figu(p){ openSheet({view:"figu",p}); },
   async sobreAbrir(){ const e=sobreEstado(); if(e.k!=="listo"){ toast(e.k==="hecho"?"Ya abriste el sobre de esta semana":e.k==="grupo"?"Para abrir sobres sumate a un grupo":"Te faltan días con Dios esta semana"); return; }
     const G=albGrupo(), sale=albSortear(G), nuevas=sale.filter((id,i)=>!G[id]&&sale.indexOf(id)===i), ahora=Math.round(Date.now()/1000);
-    album.c={...(album.c||{})}; album.t={...(album.t||{})}; sale.forEach(id=>{ album.c[id]=(album.c[id]||0)+1; if(!album.t[id]) album.t[id]=ahora; }); album.ab=[...(album.ab||[]),semanaDe()].slice(-60); await albGuardar(); openSheet({view:"sobre",full:1,sale,nuevas}); },
+    album.c={...(album.c||{})}; album.t={...(album.t||{})}; sale.forEach(id=>{ album.c[id]=(album.c[id]||0)+1; if(!album.t[id]) album.t[id]=ahora; }); album.ab=[...(album.ab||[]),semanaDe()].slice(-60); await albGuardar(); if(nuevas.length) actRegistrar("alb",nuevas.map(id=>CARTA[id].n).join(", ")); openSheet({view:"sobre",full:1,sale,nuevas}); },
   sobreRasgar(){ if(!sheet||sheet.view!=="sobre") return; sheet.abierto=1; renderSheet(); },
   diploma(){ if(Object.keys(albGrupo()).length<CARTAS.length) return; openSheet({view:"diploma",full:1}); },
   async premUsar(p){ const [t,id]=String(p).split(":"); if(!tengo(p)) return; await backend.setDoc("daily_settings/profile",{...(profile||{}),[t==="ros"?"ros":"acento"]:id}); toast(t==="ros"?"Vas a rezar con el "+premioNom(p).toLowerCase():"Listo: "+premioNom(p).toLowerCase()); },
