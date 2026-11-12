@@ -1116,3 +1116,31 @@ svg.anillo .cu.med{stroke-width:2.2}
 .actban .mesumo{flex:none;width:auto;padding:0 16px;font-size:14px;font-weight:600;background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
 html[data-theme="light"] .actban{background:linear-gradient(135deg,var(--accent-dim),var(--surface))}
 html[data-theme="light"] .actban .t{color:var(--ink)}
+
+/* ── 1.12: rango de perseverancia, ranking de grupos, entreno de Fit ── */
+.rangoc .rgtop{display:flex;align-items:center;gap:14px;margin-bottom:12px}
+.rangoc .rgtop .n{flex:1;min-width:0}.rangoc .rgtop .n b{display:block;font-size:22px;font-weight:600;margin-top:2px}.rangoc .rgtop .n small{color:var(--muted);font-size:12.5px}
+.rangoc .escudo{flex:none;filter:drop-shadow(0 4px 8px rgba(0,0,0,.4))}
+.rgdes{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.rgdes span{display:flex;flex-direction:column;align-items:center;gap:2px;padding:10px 4px;border-radius:12px;background:var(--inset);text-align:center}
+.rgdes b{font-size:18px;font-weight:600;font-variant-numeric:tabular-nums}.rgdes small{font-size:10.5px;color:var(--muted);line-height:1.2}
+.grow .rgk{display:grid;place-items:center;width:26px;background:none;border:0}
+.grow .rgk .escudo{display:block}
+.grow .pts .rgn{display:block;font-size:11px;color:var(--muted);white-space:nowrap}
+.granq .gpos{display:flex;align-items:center;gap:14px;margin:4px 0 12px}
+.granq .gpos>b{font-size:40px;font-weight:600;line-height:1;color:var(--accent);font-variant-numeric:tabular-nums}
+.granq .gpos span{display:flex;flex-direction:column;font-size:15px;font-weight:600}.granq .gpos small{font-size:12px;font-weight:400;color:var(--muted)}
+.rgl{display:flex;flex-direction:column}
+.rgf{display:flex;align-items:center;gap:12px;padding:9px 0;border-top:1px solid var(--line)}
+.rgf:first-child{border-top:0}
+.rgf .rk{width:22px;text-align:center;font-weight:700;color:var(--muted);font-variant-numeric:tabular-nums}
+.rgf .n{flex:1;min-width:0;display:flex;flex-direction:column}.rgf .n b{font-size:14.5px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.rgf .n small{font-size:11.5px;color:var(--muted)}
+.rgf .pts{font-weight:600;font-variant-numeric:tabular-nums}.rgf .pts small{font-size:11px;color:var(--muted);margin-left:2px;font-weight:400}
+.rgf.yo{margin:0 -10px;padding:9px 10px;border-radius:12px;background:var(--accent-dim);border-top-color:transparent}
+.rgf.yo .rk{color:var(--accent)}
+.rgf.yo+.rgf{border-top-color:transparent}
+.rgf.sep{justify-content:center;color:var(--muted);padding:2px 0}
+.entc{display:flex;align-items:center;gap:14px}
+.entc .eic{flex:none;width:40px;height:40px;border-radius:12px;display:grid;place-items:center;background:var(--accent-dim);color:var(--accent)}
+.entc .n{flex:1;min-width:0;display:flex;flex-direction:column;gap:2px}.entc .n b{font-size:15px;font-weight:600}.entc .n small{font-size:12.5px;color:var(--muted);line-height:1.35}
+.grow{grid-template-columns:26px auto 1fr auto}

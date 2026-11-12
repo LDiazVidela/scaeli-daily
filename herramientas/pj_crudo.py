@@ -29,6 +29,8 @@ for pn, k in ropa('yo', 'yo_corto', ['remera', 'buzo', 'camisa']): COMBOS['m'].a
 for pn, k in ropa('yo', 'yo_largo', ['remera', 'buzo', 'camisa']): COMBOS['m'].append((pn + '|largo', k))
 COMBOS['m'] += [('sotana|base', 'yo_sotana'), ('sotana|corto', 'yo_corto_sotana'), ('sotana|largo', 'yo_largo_sotana'),
                 ('clergyman|corto', 'yo_corto_clergyman')]
+# 1.12: el atleta de Scaeli Fit (PixelLab, frente tal cual) como ropa «Deportiva»; está en herramientas/pixellab_extra/
+COMBOS['m'] += [('deportiva|base', 'atleta')]
 # Ella: colita (los dibujos originales), suelto y carré
 COMBOS['f'] += [('base|base', 'yo_f'), ('base|suelto', 'yo_f_pelo_suelto'), ('base|corto', 'yo_f_pelo_corto')]
 for pn, k in ropa('yo_f', 'yo_f', ['remera', 'buzo', 'pollera']): COMBOS['f'].append((pn + '|base', k))
@@ -48,7 +50,8 @@ for sx in ('m', 'f'):
     hoja = np.zeros((128 * len(L), 128, 4), np.uint8)
     meta = {}
     for i, (combo, k) in enumerate(L):
-        a = np.array(cargar(k)['south'].convert('RGBA'))   # es un avatar: solo el frente
+        if k == 'atleta': a = np.array(Image.open(__file__.rsplit('/', 1)[0] + '/pixellab_extra/atleta_south.png').convert('RGBA'))
+        else: a = np.array(cargar(k)['south'].convert('RGBA'))   # es un avatar: solo el frente
         assert a.shape == (128, 128, 4), (k, a.shape)
         hoja[i * 128:(i + 1) * 128, 0:128] = a
         meta[combo] = {'fila': i, 'dibujo': k}

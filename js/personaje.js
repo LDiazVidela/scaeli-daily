@@ -3,11 +3,11 @@
 const VISTAS=["south"];   // desde la 1.6.1 la hoja trae solo el frente
 
 export const COLORES=[["gris","Gris","#A9ABB2"],["blanco","Blanco","#EEEDE8"],["negro","Negro","#2C2D33"],["azul","Azul","#2E3E66"],["bordo","Bordó","#6E1E2E"]];
-export const PRENDAS={m:[["base","Camisa clara"],["remera","Remera"],["buzo","Buzo"],["camisa","Camisa"],["sotana","Sotana"],["clergyman","Clergyman"]],
+export const PRENDAS={m:[["base","Camisa clara"],["remera","Remera"],["buzo","Buzo"],["camisa","Camisa"],["deportiva","Deportiva"],["sotana","Sotana"],["clergyman","Clergyman"]],
   f:[["base","Blusa y jean"],["remera","Remera"],["buzo","Buzo"],["pollera","Pollera"],["consagrada","Consagrada"],["caridad","Misionera de la Caridad"],["dominica","Dominica"],["carmelita","Carmelita"]]};
 export const CON_COLOR=["remera","buzo","camisa","pollera"];
 export const VELO=["consagrada","caridad","dominica","carmelita"];
-export const FIJO={clergyman:"corto"};   // la ropa que PixelLab dibujó con un solo peinado
+export const FIJO={clergyman:"corto",deportiva:"base"};   // la ropa que PixelLab dibujó con un solo peinado
 export const ALTURAS=[["baja","Baja"],["media","Media"],["alta","Alta"]];
 export const PEINADOS={m:[["base","Medio"],["corto","Corto"]],f:[["base","Colita"],["suelto","Suelto"],["corto","Carré"]]};
 
