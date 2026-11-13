@@ -81,3 +81,5 @@ Primera versión en las tiendas: la Biblia completa, Lectio y Examen en pantalla
 - Ícono 512×512 para Google Play: `../icons/icon-512.png` · el de 1024 para Apple lo pone Xcode desde el proyecto.
 
 Orden de las capturas: 1 Hoy · 2 Rosario · 3 La Biblia · 4 Lectio en pantalla completa · 5 Rezar · 6 Tu día · 7 Tu personaje · 8 Santo del día.
+
+Todo este material es del diseño 2.0 y se regenera solo (con `python3 -m http.server 8765` corriendo en la raíz del repo): `node herramientas/capturas_tienda.js` (las 16 capturas y `capturas/revision-scaeli-plus.png`) y `node herramientas/grafico_destacado.js` (el gráfico destacado).
