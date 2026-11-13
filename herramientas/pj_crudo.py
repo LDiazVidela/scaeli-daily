@@ -38,6 +38,9 @@ for pn, k in ropa('yo_f', 'yo_f_suelto', ['remera', 'buzo', 'pollera']): COMBOS[
 for pn, k in ropa('yo_f', 'yo_f_carre', ['remera', 'buzo', 'pollera']): COMBOS['f'].append((pn + '|corto', k))
 COMBOS['f'] += [('consagrada|base', 'yo_f_consagrada'), ('caridad|base', 'yo_f_monja_caridad'),
                 ('dominica|base', 'yo_f_monja_dominica'), ('carmelita|base', 'yo_f_monja_carmelita')]
+# 2.0.1: la versión mujer de la ropa «Deportiva» (PixelLab, «Edit image» sobre yo_f: misma cara y peinado) va al final de la hoja.
+# El atleta de él es el de Fit sin el logo de la remera (PixelLab, «Edit image»; el original queda en atleta_south_original_fit.png).
+COMBOS['f'] += [('deportiva|base', 'atleta_f')]
 
 # Desde la 1.8 (Lorenzo, 1/11: «agreguemos todos los estilos que se vean bien en formato frontal»): entra todo lo que de frente se ve
 # bien, aunque la cara tenga otro sombreado. Queda afuera solo la camisa azul de él (PixelLab le dibujó un «1» en el pelo).
@@ -50,7 +53,7 @@ for sx in ('m', 'f'):
     hoja = np.zeros((128 * len(L), 128, 4), np.uint8)
     meta = {}
     for i, (combo, k) in enumerate(L):
-        if k == 'atleta': a = np.array(Image.open(__file__.rsplit('/', 1)[0] + '/pixellab_extra/atleta_south.png').convert('RGBA'))
+        if k in ('atleta', 'atleta_f'): a = np.array(Image.open(__file__.rsplit('/', 1)[0] + '/pixellab_extra/' + k + '_south.png').convert('RGBA'))
         else: a = np.array(cargar(k)['south'].convert('RGBA'))   # es un avatar: solo el frente
         assert a.shape == (128, 128, 4), (k, a.shape)
         hoja[i * 128:(i + 1) * 128, 0:128] = a

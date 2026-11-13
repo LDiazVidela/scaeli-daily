@@ -49,5 +49,7 @@ const { chromium } = require('playwright');
   await p.evaluate(() => window.DAILY.ir('yo')); await p.waitForTimeout(400); t = await p.evaluate(() => document.body.innerText); ok(/Deportiva/.test(t), 'opción Deportiva');
   await A('pjSet', 'prenda|deportiva', 600); st = await LS(); ok(st['daily_settings/profile'].prenda === 'deportiva', 'se elige Deportiva');
   const px = await p.evaluate(() => { const c = document.querySelector('#pjsec canvas.pj, canvas.pj'); const x = c.getContext('2d').getImageData(0, 0, 128, 128).data; let n = 0; for (let i = 3; i < x.length; i += 4) if (x[i]) n++; return n; }); ok(px > 1500, 'se dibuja el atleta: ' + px);
-  await A('pjSet', 'sx|f', 600); t = await p.evaluate(() => document.body.innerText); ok(/Ropa deportiva: próximamente/.test(t) && !/\bDeportiva\b/.test(t.replace('Ropa deportiva', '')), 'para mujer: próximamente');
+  await A('pjSet', 'sx|f', 600); t = await p.evaluate(() => document.body.innerText); ok(/\bDeportiva\b/.test(t) && !/próximamente/.test(t), 'para mujer también hay Deportiva (2.0.1)');
+  await A('pjSet', 'prenda|deportiva', 600); st = await LS(); ok(st['daily_settings/profile'].prenda === 'deportiva' && st['daily_settings/profile'].sx === 'f', 'ella elige Deportiva');
+  const pxf = await p.evaluate(() => { const c = document.querySelector('#pjsec canvas.pj, canvas.pj'); const x = c.getContext('2d').getImageData(0, 0, 128, 128).data; let n = 0; for (let i = 3; i < x.length; i += 4) if (x[i]) n++; return n; }); ok(pxf > 1500 && pxf !== px, 'se dibuja la atleta: ' + pxf);
   console.log('T30', errs.concat(fails).join('\n') || 'OK'); await b.close(); })();
