@@ -4,7 +4,7 @@ const { chromium } = require('playwright');
   const ctx = await b.newContext({ viewport: { width: 390, height: 844 } }); const p = await ctx.newPage();
   p.on('pageerror', e => errs.push('PAGEERROR ' + e.message)); p.on('console', m => { if (m.type() === 'error' && !/Failed to load resource/.test(m.text())) errs.push('CONSOLE ' + m.text()); });
   await p.goto('http://localhost:8765/index.html'); await p.evaluate(() => localStorage.clear()); await p.reload(); await p.waitForTimeout(1000);
-  ok(await p.$('.login .logo img[src*="logo-daily-2"]') !== null, 'logo nuevo en la entrada');
+  ok(await p.$('.login .marca img[src*="icon-512"]') !== null, 'ícono nuevo en la entrada');
   await p.click('#invitado'); await p.waitForTimeout(1200);
   const A = async (a, q, ms = 450) => { await p.evaluate(([a, q]) => window.DAILY.ACC[a](q), [a, q]); await p.waitForTimeout(ms); };
   const SH = async () => p.evaluate(() => document.querySelector('#sheet').innerText);

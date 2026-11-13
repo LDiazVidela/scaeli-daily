@@ -1,0 +1,153 @@
+/* ── Scaeli Daily 2.0 · piel nueva ─────────────────────────────────────────────
+   Bordó oscuro y crema («rojo y blanco»), tipografía del sistema (la de Apple en iPhone),
+   barra inferior flotante de vidrio, tarjetas de radio 22, botón principal de 54 y de fila de 44.
+   Se carga DESPUÉS de app.css y solo pisa lo visual: no cambia estructura ni datos. */
+:root{
+  --bg:#170A0D; --surface:#241116; --inset:#301820; --track:#3B2129; --ink:#FBF3E4; --ink2:#DCCFC4; --muted:#A8958F; --rosa:#E6CFC8;
+  --line:rgba(255,255,255,.07); --line2:rgba(255,255,255,.13);
+  --accent:#FFF4D2; --accent-ink:#170A0D; --accent-dim:rgba(255,244,210,.09); --accent-line:rgba(255,244,210,.36);
+  --ok:#FFF4D2; --brand:#8A2638; --brand2:#A32B41; --rojo:#C8414F; --naranja:#E9A07A;
+  --vidrio:rgba(52,26,34,.8); --vidrio-on:rgba(255,255,255,.12); --seg-on:#6A2A38;
+  --font:-apple-system,BlinkMacSystemFont,"SF Pro Text","Inter","Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif; color-scheme:dark;
+}
+:root[data-theme="light"]{
+  --bg:#FAF4EA; --surface:#FFFFFF; --inset:#F3E9DC; --track:#E7DACB; --ink:#2A1216; --ink2:#4B3136; --muted:#7D6862; --rosa:#8A2638;
+  --line:rgba(70,20,28,.08); --line2:rgba(70,20,28,.16);
+  --accent:#8A2638; --accent-ink:#FFFFFF; --accent-dim:rgba(138,38,56,.08); --accent-line:rgba(138,38,56,.38);
+  --ok:#8A2638; --vidrio:rgba(255,255,255,.82); --vidrio-on:rgba(138,38,56,.1); --seg-on:#FFFFFF; color-scheme:light;
+}
+body{font-size:15px;line-height:1.4;letter-spacing:-.01em;-webkit-font-smoothing:antialiased;padding-bottom:calc(108px + var(--sab))}
+
+/* tipografía */
+.title{font-size:34px;line-height:41px;font-weight:700;letter-spacing:-.01em}
+.eyebrow{font-size:12px;font-weight:600;letter-spacing:.06em}
+.sheet h3{font-size:22px;line-height:28px;font-weight:700;letter-spacing:-.012em}
+h2,.h2{font-weight:700;letter-spacing:-.02em}
+.row .n b{font-size:16px}
+.row .n small{font-size:13px}
+
+/* tarjetas y filas */
+.card{border-radius:22px;border-color:var(--line)}
+.cov{border-radius:20px}
+.hero2{border-radius:26px}
+.hero2 .sh{background:linear-gradient(0deg,rgba(23,10,13,.96) 0%,rgba(23,10,13,.8) 36%,rgba(23,10,13,0) 72%)}
+.cov .g{background:linear-gradient(0deg,rgba(23,10,13,.94) 0%,rgba(23,10,13,.3) 55%,rgba(23,10,13,0))}
+.cov small{color:#E6DACE}
+.sbanner{border-radius:20px}
+
+/* botones: principal 54, de fila e ícono 44 */
+.primary{height:54px;border-radius:27px;font-size:17px;font-weight:600}
+.primary.ok{background:var(--inset);color:var(--ink);border:1px solid var(--line2)}
+.ghost{height:44px;padding:0 18px;border-radius:22px;border:1px solid var(--line2);background:var(--inset);color:var(--ink);font-size:15px;font-weight:600}
+.ghost.g{background:transparent;border-color:var(--line2);color:var(--ink)}
+.ghost.hecha{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
+.iconbtn{width:44px;height:44px}
+.chip{border-color:var(--line2);background:var(--inset);color:var(--ink);letter-spacing:.04em}
+.chip.off,.chip.muted{background:var(--surface)}
+input[type=text],input[type=number],input[type=search],input[type=url],textarea{border-radius:16px;border-color:var(--line2)}
+
+/* control segmentado, estilo iOS */
+.seg{border-radius:12px;padding:2px;background:var(--inset)}
+.seg button{height:36px;border-radius:10px;font-size:13px;font-weight:500;color:var(--ink2)}
+.seg button[aria-pressed="true"]{background:var(--seg-on);color:var(--ink);font-weight:600;box-shadow:0 1px 3px rgba(0,0,0,.3)}
+
+/* barra inferior flotante */
+.nav{padding:10px max(20px,env(safe-area-inset-left,0px)) calc(14px + var(--sab));background:linear-gradient(to top,var(--bg) 38%,transparent)}
+.nav .in{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));height:64px;padding:6px;border:0;border-radius:32px;background:var(--vidrio);
+  -webkit-backdrop-filter:blur(24px) saturate(160%);backdrop-filter:blur(24px) saturate(160%);box-shadow:inset 0 0 0 1px var(--line2),0 12px 32px rgba(0,0,0,.45)}
+.nav button{width:auto;height:52px;flex-direction:column;gap:3px;border-radius:26px;padding:0;font-size:10px;font-weight:500;color:var(--muted)}
+.nav button span{display:inline}
+.nav button svg.i{width:22px;height:22px}
+.nav button[aria-current="page"]{background:var(--vidrio-on);color:var(--ink);width:auto;padding:0;font-weight:600}
+:root[data-theme="light"] .nav .in{box-shadow:inset 0 0 0 1px var(--line2),0 10px 28px rgba(70,20,28,.16)}
+:root[data-theme="light"] .nav button[aria-current="page"]{color:var(--accent)}
+.toast{bottom:calc(96px + var(--sab))}
+
+/* paneles */
+.scrim{background:rgba(10,3,5,.62)}
+.sheet{border-radius:28px 28px 0 0}
+.sheet.full{background:radial-gradient(120% 60% at 50% 0%,rgba(163,43,65,.36) 0%,rgba(163,43,65,0) 62%),var(--bg)}
+:root[data-theme="light"] .sheet.full{background:radial-gradient(120% 60% at 50% 0%,rgba(163,43,65,.14) 0%,rgba(163,43,65,0) 62%),var(--bg)}
+
+/* entrada */
+.login{gap:0;justify-content:space-between;min-height:calc(100vh - 40px - var(--sat) - var(--sab));min-height:calc(100dvh - 40px - var(--sat) - var(--sab));position:relative}
+.login::before{content:"";position:fixed;inset:0;z-index:-1;background:radial-gradient(90% 46% at 50% 22%,rgba(163,43,65,.5) 0%,rgba(23,10,13,0) 70%)}
+:root[data-theme="light"] .login::before{background:radial-gradient(90% 46% at 50% 22%,rgba(163,43,65,.16) 0%,rgba(250,244,234,0) 70%)}
+.login .marca{display:flex;flex-direction:column;align-items:center;gap:22px;margin-top:14vh}
+.login .marca img{width:124px;height:124px;border-radius:22.5%;box-shadow:0 18px 50px rgba(0,0,0,.5)}
+.login .marca .wm{font-family:"Inter",var(--font);font-size:36px;line-height:1;letter-spacing:-.035em;font-weight:400;color:var(--ink)}
+.login .marca .wm b{font-weight:700}
+.login .pie{width:100%;display:flex;flex-direction:column;gap:12px;align-items:stretch;padding-bottom:8px}
+.login .pie h1{margin:0;font-size:28px;line-height:34px;font-weight:700;letter-spacing:-.01em}
+.login .pie .hint{margin:0 0 12px;font-size:15px;line-height:21px;color:var(--ink2);text-wrap:balance}
+.login .apple{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+:root[data-theme="light"] .login .apple{background:#1B0D10;color:#fff;border-color:#1B0D10}
+
+/* rango de perseverancia (2.0): insignia de PixelLab, tres puntitos de subnivel y escalera de ocho */
+img.escudo{image-rendering:pixelated;display:block;flex:none}
+.rgi{display:inline-flex;flex-direction:column;align-items:center;gap:3px;flex:none}
+.rgd{display:flex;gap:3px}
+.rgd i{width:5px;height:5px;border-radius:50%;background:var(--track)}
+.rgd i.on{background:var(--accent)}
+.rgi.ch .rgd i{width:4px;height:4px}
+.rangoc{background:linear-gradient(160deg,rgba(163,43,65,.34) 0%,var(--surface) 70%)}
+:root[data-theme="light"] .rangoc{background:linear-gradient(160deg,rgba(163,43,65,.1) 0%,var(--surface) 70%)}
+.rangoc .rgtop{gap:12px}
+.rangoc .rgtop .n b{font-size:22px;line-height:28px;font-weight:700}
+.rangoc .rgtop .pt{flex:none;text-align:right}
+.rangoc .rgtop .pt b{display:block;font-size:22px;line-height:28px;font-weight:700;color:var(--accent)}
+.rangoc .rgtop .pt small{font-size:12px;color:var(--muted)}
+.rgesc{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px 0;margin:4px 0 14px}
+.rgesc span{display:flex;flex-direction:column;align-items:center;gap:4px;font-size:11px;line-height:14px;color:var(--muted)}
+.rgesc span.falta img{opacity:.5}
+.rgesc span.yo{color:var(--ink);font-weight:600}
+.rgesc span.yo img{filter:drop-shadow(0 0 7px rgba(255,244,210,.55))}
+.rangoc .rgdes{grid-template-columns:repeat(2,minmax(0,1fr))}
+
+/* interruptor estilo iOS (Más) */
+.swt{flex:none;position:relative;width:51px;height:31px;padding:0;border:0;border-radius:16px;background:rgba(255,255,255,.18);transition:background .15s}
+.swt::before{content:"";position:absolute;inset:-7px -4px}
+.swt::after{content:"";position:absolute;top:2px;left:2px;width:27px;height:27px;border-radius:50%;background:#fff;box-shadow:0 2px 4px rgba(0,0,0,.3);transition:transform .15s}
+.swt[aria-checked="true"]{background:var(--rojo)}
+.swt[aria-checked="true"]::after{transform:translateX(20px)}
+:root[data-theme="light"] .swt{background:rgba(70,20,28,.18)}
+:root[data-theme="light"] .swt[aria-checked="true"]{background:var(--brand)}
+.recl{margin-top:6px}
+.grow .rgk{width:34px}
+
+/* Tu año con Dios: cada historia conserva su color y termina en el bordó de la app */
+.story{color:var(--ink,#FBF3E4)}
+.story::before{background:radial-gradient(90% 60% at 50% 0%,rgba(255,244,210,.16),transparent 60%)}
+.story.bg-portada,.story.bg-final{background:linear-gradient(180deg,#7A2233,#3A1620 60%,#170A0D)}
+.story.bg-dias{background:linear-gradient(180deg,#1B2A4A,#150F1E 60%,#170A0D)}
+.story.bg-racha{background:linear-gradient(180deg,#5A2A0E,#2A1408 60%,#170A0D)}
+.story.bg-rosario{background:linear-gradient(180deg,#2A1A4A,#1A0E24 60%,#170A0D)}
+.story.bg-evangelio{background:linear-gradient(180deg,#143A34,#13191A 60%,#170A0D)}
+.story.bg-examen{background:linear-gradient(180deg,#3A2A14,#1E140C 60%,#170A0D)}
+.story.bg-oracion{background:linear-gradient(180deg,#4A1E3A,#26101E 60%,#170A0D)}
+.story.bg-momento{background:linear-gradient(180deg,#2E3E66,#19182A 60%,#170A0D)}
+.story.bg-mes{background:linear-gradient(180deg,#1E4A2A,#132016 60%,#170A0D)}
+.story.bg-habitos,.story.bg-virtud{background:linear-gradient(180deg,#8A2638,#3A1018 60%,#170A0D)}
+.story.bg-novenas{background:linear-gradient(180deg,#4A3A0E,#241A0A 60%,#170A0D)}
+.story.bg-medallas{background:linear-gradient(180deg,#3A3A42,#1E181C 60%,#170A0D)}
+
+/* medidas de botones 2.0 en todos los rincones (pisan las fijas de app.css) */
+.ghost,.iconbtn,.mini{height:44px!important}
+.iconbtn,.mini{width:44px}
+.sheet .in>.grid2>button,.dlgc .grid2>button,.fpie .primary{height:54px!important;font-size:17px!important}
+.entrar{height:54px}
+.login .ghost{height:54px!important}
+.bibq input,.bibq .primary{height:54px!important}
+form.add2 .tadd{height:44px!important}
+.gbot button{height:54px!important}
+.story .sbody .eyebrow{color:#E6CFC8}
+.story .sbody h2{font-size:34px;line-height:41px;font-weight:700;letter-spacing:-.01em;max-width:14ch}
+.story .sbody .num{font-size:112px;font-weight:700;letter-spacing:-.03em;color:#FFF4D2;text-shadow:0 0 40px rgba(255,244,210,.3)}
+.story .sbody .big{font-size:76px;font-weight:700;letter-spacing:-.02em;color:#FFF4D2;background:none;border:0;box-shadow:none;padding:0}
+.story .sbody .sub{font-weight:400}
+.card.anioc{background:linear-gradient(135deg,rgba(163,43,65,.3),var(--surface) 70%)}
+.card.gali{background:linear-gradient(135deg,rgba(163,43,65,.26),var(--surface))}
+.card.grupoc.port .eyebrow,.card.grupoc .mnue{color:#FFF4D2!important}
+.ins.eq{background:linear-gradient(160deg,#8A2638,#5A1524);border-color:#A32B41;color:#FFF4D2}
+.big{background:radial-gradient(circle at 50% 42%,rgba(163,43,65,.3) 0%,var(--surface) 64%)}
+:root[data-theme="light"] .big{background:radial-gradient(circle at 50% 42%,rgba(163,43,65,.1) 0%,var(--surface) 64%)}

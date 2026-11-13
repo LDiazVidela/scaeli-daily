@@ -17,7 +17,7 @@ import { SANTORAL } from "../data/santoral.js";
 import { CARTAS } from "../data/cartas.js";
 import * as PJ from "./personaje.js";
 
-export const VERSION="1.12";
+export const VERSION="2.0";
 const LOGO_GOOGLE='<svg class="logo-g" viewBox="0 0 48 48" aria-hidden="true"><path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/><path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/><path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/><path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/></svg>';
 const LOGO_APPLE='<svg class="logo-a" viewBox="0 0 814 1000" aria-hidden="true"><path fill="currentColor" d="M788.1 340.9c-5.8 4.5-108.2 62.2-108.2 190.5 0 148.4 130.3 200.9 134.2 202.2-.6 3.2-20.7 71.9-68.7 141.9-42.8 61.6-87.5 123.1-155.5 123.1s-85.5-39.5-164-39.5c-76.5 0-103.7 40.8-165.9 40.8s-105.6-57-155.5-127C46.7 790.7 0 663 0 541.8c0-194.4 126.4-297.5 250.8-297.5 66.1 0 121.2 43.4 162.7 43.4 39.5 0 101.1-46 176.3-46 28.5 0 130.9 2.6 198.3 99.2zm-234-181.5c31.1-36.9 53.1-88.1 53.1-139.3 0-7.1-.6-14.3-1.9-20.1-50.6 1.9-110.8 33.7-147.1 75.8-28.5 32.4-55.1 83.6-55.1 135.5 0 7.8 1.3 15.6 1.9 18.1 3.2.6 8.4 1.3 13.6 1.3 45.4 0 102.5-30.4 135.5-71.3z"/></svg>';
 /* la dirección publicada: la app de las tiendas lee de acá los Evangelios del día (los genera la GitHub Action cada noche) */
@@ -62,6 +62,8 @@ const misteriosHoy=(d)=>{const w=(d||new Date()).getDay();for(const k in MISTERI
 const TODAS_ORA=()=>ORACIONES.concat(ORACIONES_MAS);
 const ORA_SUB={"Magníficat":"Cántico de María","Benedictus":"Cántico de Zacarías","Nunc dimittis":"Cántico de Simeón","Te Deum":"Himno de acción de gracias"};
 const rosLat=()=>!!(profile&&profile.rosLat);
+// latín por defecto (2.0): dentro de Oraciones manda lo que se eligió ahí; al entrar, la preferencia de Más
+const latDef=()=>((sheet&&/^oraci/.test(sheet.view||"")?sheet.lat:(profile||{}).lat)?1:0);
 const oraTxt=(n,lat)=>{const o=TODAS_ORA().find(x=>x.n===n);if(!o) return "";return (lat&&o.lat&&o.lat.length?o.lat:o.es).join("\n")};
 const momento=(d)=>{const h=(d||new Date()).getHours();return h<4?"noche":h<11?"manana":h<14?"mediodia":h<19?"tarde":"noche"};
 
@@ -375,15 +377,18 @@ function renderYo(){ const raw=profile||{}, P=PJ.normal(raw), nom=raw.nombre||(u
      '<button class="plusrow" data-a="anio"><span class="n"><b>Tu año con Dios</b><small>'+(esPlus()?"Tu año en historias, para ver y compartir":"Con Scaeli+")+'</small></span>'+(esPlus()?ic("right"):'<span class="plus-mini">'+ic("lock")+' Scaeli+</span>')+'</button></div>'+
    '<div class="card"><div class="eyebrow">Intenciones</div><p class="hint" style="margin:6px 0 10px">Por quién rezás estos días. Aparecen en el Rosario y en las Horas.</p><div class="chips">'+intents.map((t,i)=>'<button class="on" data-a="intDel" data-p="'+i+'">'+esc(t)+' ✕</button>').join("")+'</div><form data-f="int" style="margin-top:10px"><div class="grid2" style="grid-template-columns:1fr auto"><input type="text" name="t" placeholder="Por mi familia…" maxlength="40" required><button class="iconbtn acc" type="submit" aria-label="Agregar">'+ic("plus")+'</button></div></form></div>'; }
 
+const swt=(a,on,lab)=>'<button class="swt" role="switch" aria-checked="'+!!on+'" aria-label="'+esc(lab)+'" data-a="'+a+'"></button>';
 function renderMas(){ const claro=document.documentElement.getAttribute("data-theme")==="light";
   return cab("Más","Ajustes")+
    '<div class="card"><div class="eyebrow">Recordatorios</div><p class="hint" style="margin:6px 0 10px">'+(esNativo()?'Avisos del teléfono, aunque la app esté cerrada (también las tareas con hora).':'Avisos mientras la app está abierta o instalada'+("Notification" in window?'':' (este navegador no los permite)')+'.')+'</p>'+
    '<div class="grid2"><label class="f">Mañana<input type="time" data-rec="m" value="'+esc(recordatorios.m)+'"></label><label class="f">Noche<input type="time" data-rec="n" value="'+esc(recordatorios.n)+'"></label></div>'+
-   '<div style="margin-top:10px"><button class="ghost'+(recordatorios.on?'':' g')+'" data-a="recOn">'+ic("bell")+' '+(recordatorios.on?"Activados":"Activar")+'</button></div></div>'+
+   '<div class="list recl"><div class="row"><div class="n"><b>Avisos</b><small>'+(recordatorios.on?"Activados":"Desactivados")+'</small></div>'+swt("recOn",recordatorios.on,"Avisos")+'</div>'+
+   '<div class="row"><div class="n"><b>Ángelus</b><small>Un aviso más, a las 12:00</small></div>'+swt("recAng",recordatorios.ang,"Aviso del Ángelus")+'</div></div></div>'+
    '<button class="card plusmas" data-a="plus"><span class="plus-tag">Scaeli<b>+</b></span><span class="n"><b>'+(esPlus()?"Scaeli+ activo":"Scaeli+")+'</b><small>'+(esPlus()?"Tu progreso, tus virtudes y los caminos guiados":"Tu progreso, tus virtudes y caminos guiados · desde USD 1,67 por mes")+'</small></span>'+ic("right")+'</button>'+
    '<div class="card list"><div class="row"><div class="n"><b>Ayudar a Scaeli</b><small>Una donación para sostener el proyecto</small></div><button class="ghost g" data-a="donarVer">'+ic("heart")+' Donar</button></div></div>'+
-   '<div class="card list"><div class="row"><div class="n"><b>Modo claro</b><small>Para leer de día</small></div><button class="ghost g" data-a="tema">'+(claro?"Oscuro":"Claro")+'</button></div>'+
-   '<div class="row"><div class="n"><b>Compartir mi actividad</b><small>Tu grupo ve qué rezaste, nunca lo que escribiste</small></div><button class="ghost g" data-a="actOff">'+(profile&&profile.actOff?"Activar":"Desactivar")+'</button></div>'+
+   '<div class="card list"><div class="row"><div class="n"><b>Modo claro</b><small>Para leer de día</small></div>'+swt("tema",claro,"Modo claro")+'</div>'+
+   '<div class="row"><div class="n"><b>Oraciones en latín</b><small>Las que tienen versión en latín se abren así</small></div>'+swt("prefLat",profile&&profile.lat,"Oraciones en latín")+'</div>'+
+   '<div class="row"><div class="n"><b>Compartir mi actividad</b><small>Tu grupo ve qué rezaste, nunca lo que escribiste</small></div>'+swt("actOff",!(profile&&profile.actOff),"Compartir mi actividad")+'</div>'+
    '<div class="row"><div class="n"><b>Exportar mis datos</b><small>Un archivo con todo lo tuyo</small></div><button class="ghost g" data-a="exportar">Exportar</button></div>'+
    '<div class="row"><div class="n"><b>Importar</b><small>Desde un archivo exportado</small></div><button class="ghost g" data-a="importar">Importar</button><input type="file" id="impFile" accept="application/json" hidden></div></div>'+
    '<div class="card list"><div class="row"><div class="n"><b>Scaeli Fit</b><small>Ordenar el cuerpo desde la templanza</small></div><a class="ghost g" href="https://ldiazvidela.github.io/scaeli-fit/" target="_blank" rel="noopener">Abrir</a></div>'+
@@ -511,7 +516,7 @@ function shProgreso(){ if(!esPlus()) return shPlusPaywall("progreso");
 let grupo={gid:null,meta:null,L:null,unsub:null,err:""}, grupoBE=null, gsyncT=null, gUltimo="", muro=[], muroUnsub=null;
 const RECORDATORIOS=["No se olviden de rezar el Evangelio hoy","Una decena del Rosario por el grupo antes de dormir","Acuérdense del examen a la noche","Mañana es domingo: ¿vamos a Misa?","Recen por las intenciones del grupo","Hoy ofrezcan algo chiquito por los demás","Vamos por el desafío de la semana, falta poco","¿Alguien se confiesa esta semana? Rezo por ustedes"];
 const muroVisto=()=>+(lsGet("daily_muro_visto")||0);
-const gPortada=()=>grupo.meta&&grupo.meta.portada?grupo.meta.portada:ilu("mediodia");
+const gPortada=()=>grupo.meta&&grupo.meta.portada?grupo.meta.portada:ilu("grupo");
 const hace=t=>{ const m=Math.round((Date.now()-t)/60000); return m<1?"ahora":m<60?"hace "+m+" min":m<1440?"hace "+Math.round(m/60)+" h":m<2880?"ayer":"hace "+Math.round(m/1440)+" días"; };
 const GRUPO_TOPE=12;
 const DESAFIOS=[["r","Rosarios",3,"rosary"],["e","Evangelios",5,"book"],["d","Días con Dios",5,"flame"],["x","Exámenes del día",4,"check"],["o","Oraciones escritas",4,"pen"]];
@@ -552,7 +557,7 @@ function grupoCardHTML(){ if(backend&&backend.mode==="local"&&!grupo.gid) return
 const muroOculto=m=>{ const r=m.rep||{}; return !!r[yo()]||Object.keys(r).length>=2; };
 function shGrupo(){ const local=backend&&backend.mode==="local";
   if(!grupo.gid||grupo.meta===false){ const m=sheet.m||"";
-    return shTop("Grupo de perseverancia","Rezar es más fácil acompañado")+'<div class="scroll"><div class="sbanner"><img src="'+ilu("mediodia")+'" alt=""><span class="g"></span></div>'+
+    return shTop("Grupo de perseverancia","Rezar es más fácil acompañado")+'<div class="scroll"><div class="sbanner"><img src="'+ilu("grupo")+'" alt=""><span class="g"></span></div>'+
      (grupo.meta===false?'<p class="hint">Ese grupo ya no existe.</p>':'')+
      '<div class="list"><div class="benef">'+ic("check")+'<div><b>Un desafío por semana</b><small>Rosarios, Evangelios o días con Dios entre todos; si lo cumplen, todos ganan la insignia.</small></div></div>'+
      '<div class="benef">'+ic("check")+'<div><b>Intenciones</b><small>Cada uno deja por qué pide, y los demás tocan «Recé por vos».</small></div></div>'+
@@ -568,7 +573,7 @@ function shGrupo(){ const local=backend&&backend.mode==="local";
   const miRep=(me.rep||{}), reportado=x=>!!miRep[x.uid]||R.filter(y=>(y.rep||{})[x.uid]).length>=2;
   const recibidos=R.filter(x=>x.uid!==u&&x.rece&&x.rece[u]&&x.rece[u].t>Date.now()-7*864e5).length, alientos=R.filter(x=>x.uid!==u&&x.al&&x.al[u]&&x.al[u][1]>Date.now()-3*864e5).map(x=>({n:x.n,t:ALIENTOS[x.al[u][0]]||""}));
   const fila=x=>{ const esYo=x.uid===u, oculta=x.int&&reportado(x), rece=me.rece&&me.rece[x.uid]&&me.rece[x.uid].t>Date.now()-864e5;
-    const rg=rangoDe(esYo?rangoPts().pts:x.rg); return '<div class="grow'+(esYo?" yo":"")+'"><span class="rk rgk" title="'+rg.n+'">'+escudoSVG(rg,24)+'</span>'+avatarHTML(x.av,40)+'<span class="n"><b>'+esc(x.n)+(esYo?' (vos)':'')+'</b>'+(x.int&&!oculta?'<small class="int">«'+esc(x.int)+'»</small>':x.int&&oculta?'<small class="int muted">Intención ocultada</small>':'<small class="muted">Sin intención todavía</small>')+'</span><span class="pts"><small class="rgn">'+rg.n+'</small>'+(x.mh&&x.mh.f===hoy()?'<em class="mhc'+(x.mh.n>=3?' ok':'')+'">'+x.mh.n+'/3 hoy</em>':'')+'</span>'+
+    const rg=rangoDe(esYo?rangoPts().pts:x.rg); return '<div class="grow'+(esYo?" yo":"")+'"><span class="rk rgk" title="'+rg.n+'">'+insignia(rg,32)+'</span>'+avatarHTML(x.av,40)+'<span class="n"><b>'+esc(x.n)+(esYo?' (vos)':'')+'</b>'+(x.int&&!oculta?'<small class="int">«'+esc(x.int)+'»</small>':x.int&&oculta?'<small class="int muted">Intención ocultada</small>':'<small class="muted">Sin intención todavía</small>')+'</span><span class="pts"><small class="rgn">'+rg.n+'</small>'+(x.mh&&x.mh.f===hoy()?'<em class="mhc'+(x.mh.n>=3?' ok':'')+'">'+x.mh.n+'/3 hoy</em>':'')+'</span>'+
      (esYo?'':'<span class="acts">'+(x.int&&!oculta?'<button class="gb" data-a="gRece" data-p="'+x.uid+'" aria-pressed="'+!!rece+'">'+ic("rosary")+' '+(rece?"Rezaste ✓":"Recé")+'</button>':'')+'<button class="gb" data-a="gAliento" data-p="'+x.uid+'" aria-pressed="'+(sheet.al===x.uid)+'">'+ic("heart")+' Aliento</button>'+(x.int&&!oculta?'<button class="sm" data-a="gReportar" data-p="'+x.uid+'" aria-label="Reportar la intención" title="Reportar">'+ic("x")+'</button>':'')+(creador?'<button class="sm" data-a="gEchar" data-p="'+x.uid+'" aria-label="Sacar del grupo" title="Sacar del grupo">'+ic("trash")+'</button>':'')+'</span>')+
      (sheet.al===x.uid?'<div class="chips gal">'+ALIENTOS.map((a,i)=>'<button data-a="gAlientoOk" data-p="'+x.uid+'|'+i+'">'+esc(a)+'</button>').join("")+'</div>':'')+'</div>'; };
   const I=insignias(); if(muro.length) lsSet("daily_muro_visto",Date.now());
@@ -595,24 +600,23 @@ function muroHTML(u,creador){ const M=muro.filter(m=>!muroOculto(m)), ver=sheet.
    '<form data-f="muro" class="add"><input type="text" name="m" placeholder="Escribile al grupo…" maxlength="140" autocomplete="off"><button class="iconbtn acc" type="submit" aria-label="Enviar">'+ic("send")+'</button></form>'+
    (L.length?'<div class="msgs">'+L.map(msg).join("")+'</div>'+(M.length>ver?'<button class="lnk" data-a="mMas" style="margin:8px auto 0;display:block">Ver más</button>':''):'<p class="hint" style="margin:6px 0 0">Todavía no escribió nadie. Un «buen día» o un recordatorio para rezar ya alcanza.</p>')+'</div>'; }
 
-/* ── 1.12 · Rango de perseverancia (como los rangos de Fit): últimos 30 días.
-   puntos = días con Dios × 10 + racha más larga del mes × 5 + Rosarios × 3 (tope 30). Máximo 540. ── */
-const RANGOS=["Hierro","Bronce","Plata","Oro","Platino","Diamante"], RG_PISO=[0,20,40,60,80,100,130,160,190,225,260,295,335,375,415,455,490,520];
-const RG_COL={Hierro:["#C9CCD3","#8C8F96","#3E4148"],Bronce:["#F3C08F","#C77B3F","#5E2F10"],Plata:["#FFFFFF","#C3CBD6","#5F6B7C"],Oro:["#FFF1BE","#F2B544","#7A4A0E"],Platino:["#E4FFFB","#7FD8D0","#1F6670"],Diamante:["#F0F7FF","#8DB8FF","#3B4FC4"]};
+/* ── Rango de perseverancia (1.12; ocho rangos desde 2.0): últimos 30 días.
+   puntos = días con Dios × 10 + racha más larga del mes × 5 + Rosarios × 3 (tope 30) → hasta 540 (Diamante I pide 520).
+   Celestial y Divino (2.0) piden además sostener la racha más allá del mes: +5 por cada día de racha después del 30, tope 400. Máximo 940. ── */
+const RANGOS=["Hierro","Bronce","Plata","Oro","Platino","Diamante","Celestial","Divino"], RG_PISO=[0,20,40,60,80,100,130,160,190,225,260,295,335,375,415,455,490,520,590,660,730,800,870,940];
 function rangoPts(){ const h=hoy(); let dias=0, ros=0, rmax=0, r=0; for(let i=29;i>=0;i--){ const d=dayOf(addDays(h,-i)); if(rezoAlgo(d)){ dias++; r++; if(r>rmax) rmax=r; } else r=0; if(d.r) ros+=Math.max(1,d.rn||1); }
-  ros=Math.min(30,ros); return {dias,rmax,ros,pts:dias*10+rmax*5+ros*3}; }
+  ros=Math.min(30,ros); const rac=racha(), extra=Math.min(400,Math.max(0,rac-30)*5); return {dias,rmax,ros,rac,extra,pts:dias*10+rmax*5+ros*3+extra}; }
 function rangoDe(p){ p=+p||0; let i=0; while(i+1<RG_PISO.length&&p>=RG_PISO[i+1]) i++; const g=RANGOS[Math.floor(i/3)], s=["III","II","I"][i%3];
   return {i,n:g+" "+s,base:g,sub:s,piso:RG_PISO[i],sig:i+1<RG_PISO.length?RG_PISO[i+1]:null,sigN:i+1<RG_PISO.length?RANGOS[Math.floor((i+1)/3)]+" "+["III","II","I"][(i+1)%3]:""}; }
-function escudoSVG(rg,tam){ const c=RG_COL[rg.base], id="rg"+rg.base;
-  return '<svg class="escudo" viewBox="0 0 48 56" width="'+tam+'" height="'+Math.round(tam*56/48)+'" role="img" aria-label="'+rg.n+'"><defs><linearGradient id="'+id+'" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="'+c[0]+'"/><stop offset=".55" stop-color="'+c[1]+'"/><stop offset="1" stop-color="'+c[2]+'"/></linearGradient></defs>'+
-   '<path d="M24 2 44 9V27C44 40 35 49 24 54 13 49 4 40 4 27V9Z" fill="url(#'+id+')" stroke="'+c[2]+'" stroke-width="1.5"/><path d="M24 7 39 12.5V27C39 37.5 32 44.5 24 48.5 16 44.5 9 37.5 9 27V12.5Z" fill="none" stroke="'+c[0]+'" stroke-opacity=".7"/>'+
-   (rg.base==="Diamante"?'<path d="M24 14 31 22 24 31 17 22Z" fill="#fff" fill-opacity=".85"/>':'<path d="M24 15V30M18 20H30" stroke="'+c[2]+'" stroke-width="3" stroke-linecap="round" opacity=".75"/>')+
-   '<text x="24" y="42" text-anchor="middle" font-size="9.5" font-weight="800" fill="'+c[2]+'" font-family="Cinzel,serif">'+rg.sub+'</text></svg>'; }
-function rangoHTML(){ const P=rangoPts(), rg=rangoDe(P.pts), falta=rg.sig!=null?rg.sig-P.pts:0, pct=rg.sig!=null?Math.round((P.pts-rg.piso)/(rg.sig-rg.piso)*100):100;
-  return '<div class="card rangoc r-'+rg.base.toLowerCase()+'"><div class="rgtop">'+escudoSVG(rg,58)+'<div class="n"><div class="eyebrow">Tu rango de perseverancia</div><b>'+rg.n+'</b><small>'+P.pts+' puntos · últimos 30 días</small></div></div>'+
+// insignia del rango (dibujo de PixelLab, tal cual) con tres puntitos de subnivel: III = uno, II = dos, I = los tres
+function insignia(rg,tam){ return '<span class="rgi'+(tam<40?' ch':'')+'"><img class="escudo" src="assets/rangos/'+rg.base.toLowerCase()+'.png" width="'+tam+'" height="'+tam+'" alt="'+rg.n+'"><span class="rgd" aria-hidden="true">'+[0,1,2].map(k=>'<i'+(k<=rg.i%3?' class="on"':'')+'></i>').join("")+'</span></span>'; }
+function rangoHTML(){ const P=rangoPts(), rg=rangoDe(P.pts), falta=rg.sig!=null?rg.sig-P.pts:0, pct=rg.sig!=null?Math.round((P.pts-rg.piso)/(rg.sig-rg.piso)*100):100, gi=Math.floor(rg.i/3);
+  return '<div class="card rangoc r-'+rg.base.toLowerCase()+'"><div class="rgtop">'+insignia(rg,64)+'<div class="n"><div class="eyebrow">Tu rango de perseverancia</div><b>'+rg.n+'</b><small>Últimos 30 días</small></div><div class="pt"><b>'+P.pts+'</b><small>puntos</small></div></div>'+
+   '<div class="rgesc" role="img" aria-label="Escalera de rangos: '+RANGOS.join(", ")+'">'+RANGOS.map((n,k)=>'<span class="'+(k===gi?"yo":k>gi?"falta":"")+'"><img class="escudo" src="assets/rangos/'+n.toLowerCase()+'.png" width="32" height="32" alt="">'+n+'</span>').join("")+'</div>'+
    '<div class="bar3"><i style="width:'+Math.max(3,pct)+'%"></i></div><p class="hint" style="margin:8px 0 12px">'+(rg.sig!=null?'Te '+(falta===1?'falta 1 punto':'faltan '+falta+' puntos')+' para <b>'+rg.sigN+'</b>.':'Llegaste al rango más alto. Ahora, a sostenerlo.')+'</p>'+
-   '<div class="rgdes"><span><b>'+P.dias+'</b><small>días con Dios × 10</small></span><span><b>'+P.rmax+'</b><small>racha del mes × 5</small></span><span><b>'+P.ros+'</b><small>Rosarios × 3</small></span></div>'+
-   '<p class="hint" style="margin:10px 0 0">Hierro, Bronce, Plata, Oro, Platino y Diamante, cada uno con III, II y I. Mira los últimos 30 días: si aflojás, baja.</p></div>'; }
+   '<div class="rgdes"><span><b>'+P.dias+'</b><small>días con Dios × 10</small></span><span><b>'+P.rmax+'</b><small>racha del mes × 5</small></span><span><b>'+P.ros+'</b><small>Rosarios × 3</small></span><span><b>'+P.extra+'</b><small>por racha de más de 30 días</small></span></div>'+
+   '<p class="hint" style="margin:10px 0 0">Ocho rangos, de Hierro a Divino, cada uno con tres pasos (los puntitos). Mira los últimos 30 días: si aflojás, baja. Celestial y Divino piden además sostener la racha más allá del mes.</p></div>'; }
+
 
 /* ── 1.12 · Ranking de GRUPOS: cada grupo con el promedio semanal de puntos de sus miembros. Adentro del grupo no hay posiciones. ── */
 let rankG={sem:"",L:[]}, rankUnsub=null, rankUlt="";
@@ -696,7 +700,7 @@ function misionesHTML(R,u){ const M=misDia(hoy()), ya=(R||[]).filter(x=>x.mh&&x.
 
 /* ── Premios de la semana: rosarios y colores exclusivos ── */
 const ROSARIOS=[["clasico","Clásico","El de siempre"],["madera","Madera de olivo","Cuentas de madera, como las de Tierra Santa"],["nacar","Nácar","Cuentas de nácar, blancas y suaves"],["plata","Plata","Cuentas de plata"],["cristal","Cristal azul","Cuentas de cristal, azul mariano"],["rubi","Rubí","Cuentas rojas, por los mártires"],["oro","Oro","Cuentas de oro, el más difícil"]];
-const ACENTOS=[["ambar","Ámbar","#F2B544","#C8841A"],["oro","Oro viejo","#E3C26E","#A7841F"],["mariano","Azul mariano","#8DB4F2","#2F63B8"],["rubi","Rubí","#EE7D8C","#B5293F"],["plata","Plata","#CBD4E0","#5D6B7E"],["lila","Lila de Adviento","#BBA2EE","#6E4BB8"]];
+const ACENTOS=[["ambar","Crema","#FFF4D2","#8A2638"],["oro","Oro viejo","#E3C26E","#A7841F"],["mariano","Azul mariano","#8DB4F2","#2F63B8"],["rubi","Rubí","#EE7D8C","#B5293F"],["plata","Plata","#CBD4E0","#5D6B7E"],["lila","Lila de Adviento","#BBA2EE","#6E4BB8"]];
 const PREMIOS=["ros:madera","ac:oro","ros:nacar","ac:mariano","ros:plata","ac:rubi","ros:cristal","ac:plata","ros:rubi","ac:lila","ros:oro"];
 let premios={items:[],vis:[]};
 const premioDe=lun=>PREMIOS[((nSemana(lun)%PREMIOS.length)+PREMIOS.length)%PREMIOS.length];
@@ -881,17 +885,17 @@ function shAnio(){ if(!esPlus()) return shPlusPaywall("anio"); const D=sheet.D||
    '<p class="shint">'+(i+1)+' de '+S.length+' · tocá para pasar</p></div>'; }
 /* la imagen para compartir: 1080×1920, como una historia */
 async function anioImagen(D){ const cv=document.createElement("canvas"); cv.width=1080; cv.height=1920; const x=cv.getContext("2d");
-  const g=x.createLinearGradient(0,0,0,1920); g.addColorStop(0,"#400E1E"); g.addColorStop(.55,"#1A1420"); g.addColorStop(1,"#0C0D10"); x.fillStyle=g; x.fillRect(0,0,1080,1920);
-  const fk=fondoActual(); if(fk){ try{ const im=await new Promise((ok,no)=>{ const i=new Image(); i.onload=()=>ok(i); i.onerror=no; i.src=ilu(fk); }); x.imageSmoothingEnabled=false; const sc=Math.max(1080/im.width,760/im.height); x.drawImage(im,(1080-im.width*sc)/2,0,im.width*sc,im.height*sc); const g2=x.createLinearGradient(0,300,0,800); g2.addColorStop(0,"rgba(26,20,32,0)"); g2.addColorStop(1,"#1A1420"); x.fillStyle=g2; x.fillRect(0,300,1080,500); }catch(e){} }
-  const rg=x.createRadialGradient(540,520,10,540,520,560); rg.addColorStop(0,"rgba(242,181,68,.28)"); rg.addColorStop(1,"rgba(242,181,68,0)"); x.fillStyle=rg; x.fillRect(0,0,1080,1200);
+  const g=x.createLinearGradient(0,0,0,1920); g.addColorStop(0,"#5A1524"); g.addColorStop(.55,"#241116"); g.addColorStop(1,"#170A0D"); x.fillStyle=g; x.fillRect(0,0,1080,1920);
+  const fk=fondoActual(); if(fk){ try{ const im=await new Promise((ok,no)=>{ const i=new Image(); i.onload=()=>ok(i); i.onerror=no; i.src=ilu(fk); }); x.imageSmoothingEnabled=false; const sc=Math.max(1080/im.width,760/im.height); x.drawImage(im,(1080-im.width*sc)/2,0,im.width*sc,im.height*sc); const g2=x.createLinearGradient(0,300,0,800); g2.addColorStop(0,"rgba(36,17,22,0)"); g2.addColorStop(1,"#1A1420"); x.fillStyle=g2; x.fillRect(0,300,1080,500); }catch(e){} }
+  const rg=x.createRadialGradient(540,520,10,540,520,560); rg.addColorStop(0,"rgba(200,65,79,.42)"); rg.addColorStop(1,"rgba(200,65,79,0)"); x.fillStyle=rg; x.fillRect(0,0,1080,1200);
   const pj=document.createElement("canvas"); if(PJ.pintar(pj,profile,"south")){ x.imageSmoothingEnabled=false; x.drawImage(pj,0,0,128,128,540-224,250,448,448); x.imageSmoothingEnabled=true; }
   const nom=(profile&&profile.nombre)||(user&&user.displayName&&user.displayName.split(" ")[0])||"";
-  x.textAlign="center"; x.fillStyle="#F2B544"; x.font="600 34px 'Bricolage Grotesque',system-ui,sans-serif"; x.fillText("SCAELI DAILY · "+D.anio,540,160);
-  x.fillStyle="#F3F1EC"; x.font="300 96px 'Bricolage Grotesque',system-ui,sans-serif"; x.fillText(nom?"El año de "+nom:"Mi año con Dios",540,800);
+  x.textAlign="center"; x.fillStyle="#FFF4D2"; x.font="600 34px -apple-system,BlinkMacSystemFont,'SF Pro Text','Inter','Segoe UI',Roboto,sans-serif"; x.fillText("SCAELI DAILY · "+D.anio,540,160);
+  x.fillStyle="#FBF3E4"; x.font="700 92px -apple-system,BlinkMacSystemFont,'SF Pro Text','Inter','Segoe UI',Roboto,sans-serif"; x.fillText(nom?"El año de "+nom:"Mi año con Dios",540,800);
   const filas=[[D.dias,"días con Dios"],[D.rmax,"días seguidos, mi racha más larga"],[D.ros,"Rosarios"],[D.ev,"Evangelios"],[D.ex,"exámenes del día"],[D.or,"oraciones con mis palabras"],[D.hab,"hábitos sumados"]].filter(f=>f[0]>0).slice(0,6);
-  let y=920; filas.forEach(f=>{ x.textAlign="left"; x.fillStyle="#F2B544"; x.font="500 84px 'Bricolage Grotesque',system-ui,sans-serif"; x.fillText(String(f[0]),120,y); x.fillStyle="#F3F1EC"; x.font="300 44px 'Bricolage Grotesque',system-ui,sans-serif"; x.fillText(f[1],120+x.measureText("").width+Math.max(150,String(f[0]).length*52+40),y-8); y+=136; });
-  if(D.virtud){ x.textAlign="center"; x.fillStyle="#7E8087"; x.font="500 34px 'Bricolage Grotesque',system-ui,sans-serif"; x.fillText("LA VIRTUD QUE MÁS CRECIÓ",540,y+40); x.fillStyle="#F3F1EC"; x.font="300 72px 'Bricolage Grotesque',system-ui,sans-serif"; x.fillText(VNOM(D.virtud[0]),540,y+130); }
-  x.textAlign="center"; x.fillStyle="#7E8087"; x.font="400 34px 'Bricolage Grotesque',system-ui,sans-serif"; x.fillText("Tu fe, a otro nivel · ldiazvidela.github.io/scaeli-daily",540,1840);
+  let y=920; filas.forEach(f=>{ x.textAlign="left"; x.fillStyle="#FFF4D2"; x.font="700 84px -apple-system,BlinkMacSystemFont,'SF Pro Text','Inter','Segoe UI',Roboto,sans-serif"; x.fillText(String(f[0]),120,y); x.fillStyle="#FBF3E4"; x.font="400 44px -apple-system,BlinkMacSystemFont,'SF Pro Text','Inter','Segoe UI',Roboto,sans-serif"; x.fillText(f[1],120+x.measureText("").width+Math.max(150,String(f[0]).length*52+40),y-8); y+=136; });
+  if(D.virtud){ x.textAlign="center"; x.fillStyle="#A8958F"; x.font="500 34px -apple-system,BlinkMacSystemFont,'SF Pro Text','Inter','Segoe UI',Roboto,sans-serif"; x.fillText("LA VIRTUD QUE MÁS CRECIÓ",540,y+40); x.fillStyle="#FBF3E4"; x.font="700 72px -apple-system,BlinkMacSystemFont,'SF Pro Text','Inter','Segoe UI',Roboto,sans-serif"; x.fillText(VNOM(D.virtud[0]),540,y+130); }
+  x.textAlign="center"; x.fillStyle="#A8958F"; x.font="400 34px -apple-system,BlinkMacSystemFont,'SF Pro Text','Inter','Segoe UI',Roboto,sans-serif"; x.fillText("Tu fe, a otro nivel · ldiazvidela.github.io/scaeli-daily",540,1840);
   return new Promise(ok=>cv.toBlob(ok,"image/png")); }
 
 /* los caminos guiados (Scaeli+) */
@@ -902,7 +906,7 @@ function shCamino(){ const C=CAMINOS[sheet.p||"adviento"]; if(!esPlus()) return 
   const fila=(d,k)=>{ const ok=!!(dayOf(d[0]).cam||{})[sheet.p||"adviento"], esHoy=k===i, fut=d[0]>hoy();
     return (k===0||semana(k)!==semana(k-1)?'<div class="sect camsem">Semana '+(semana(k)+1)+' · '+esc(C.semanas[semana(k)][0])+'<small class="muted" style="display:block;text-transform:none;letter-spacing:0">'+esc(C.semanas[semana(k)][1])+'</small></div>':'')+
      '<div class="camd'+(esHoy?" hoy":"")+(fut?" fut":"")+'"><button class="ck'+(ok?" on":"")+'" data-a="camOk" data-p="'+d[0]+'"'+(fut?" disabled":"")+' aria-label="Hecho">'+(ok?ic("check"):"")+'</button><div class="n"><small>'+esc(cap(fLarga(d[0])))+' · '+esc(d[1])+'</small><button class="lnk cita" data-a="camCita" data-p="'+esc(d[2])+'">'+ic("book")+' '+esc(d[2])+'</button><p>'+esc(d[3])+'</p></div></div>'; };
-  return shTop(esc(C.n),esc(C.sub))+'<div class="scroll"><div class="sbanner"><img src="'+ilu("noche")+'" alt=""><span class="g"></span></div>'+
+  return shTop(esc(C.n),esc(C.sub))+'<div class="scroll"><div class="sbanner"><img src="'+ilu("camino")+'" alt=""><span class="g"></span></div>'+
    '<p class="texto chico">'+esc(C.intro)+'</p>'+'<div class="camprog">'+(antes?'<p class="hint">Empieza el '+esc(fLarga(C.ini))+'. Ya podés ver todo el camino.</p>':'<div class="bar"><i style="width:'+Math.round(hechos/C.dias.length*100)+'%"></i></div><p class="hint">'+hechos+' de '+C.dias.length+' días</p>')+'</div>'+
    C.dias.map(fila).join("")+'</div><button class="primary ink" data-a="cerrar">Volver</button>'; }
 
@@ -940,7 +944,7 @@ const libMin=L=>Math.max(1,Math.round(L.w/200/L.n));   // minutos por capítulo,
 function libParr(p){ if(p.startsWith("## ")) return '<h4 class="bibtit">'+esc(p.slice(3))+'</h4>'; if(p.startsWith("> ")) return '<p class="resumen">'+esc(p.slice(2))+'</p>'; const m=p.match(/^(\d+\.|\[\d+\])\s*/); return '<p'+(p.includes("\n")?' class="verso"':'')+'>'+(m?'<sup>'+esc(m[1].replace(/[\[\].]/g,""))+'</sup>'+esc(p.slice(m[0].length)):esc(p))+'</p>'; }
 function shLibros(){ const g=libGuardado(), u=libUltimo();
   const aut=[...new Set(LIBROS.map(x=>x.a.split(" · ")[0]))];
-  return shTop("Biblioteca","Clásicos católicos, libres de derechos")+'<div class="scroll"><div class="sbanner"><img src="'+ilu("oraciones")+'" alt=""><span class="g"></span></div>'+
+  return shTop("Biblioteca","Clásicos católicos, libres de derechos")+'<div class="scroll"><div class="sbanner"><img src="'+ilu("biblioteca")+'" alt=""><span class="g"></span></div>'+
    (u?'<button class="card lhnow" data-a="libIr" data-p="'+u.L.id+'|'+u.c+'"><span class="n"><span class="eyebrow">Seguir leyendo</span><b>'+esc(u.L.t)+'</b><small>'+esc(u.L.caps?u.L.caps[u.c].t:"capítulo "+(u.c+1))+'</small></span>'+ic("right")+'</button>':'')+
    aut.map(a=>'<div class="sect">'+esc(a)+'</div>'+LIBROS.filter(x=>x.a.split(" · ")[0]===a).map(x=>{ const m=g[x.id]; return '<button class="libro" data-a="libAbrir" data-p="'+x.id+'"><span class="tapa"><i></i><b>'+esc(x.t)+'</b></span><span class="n"><b>'+esc(x.t)+'</b><small>'+esc(x.sub)+'</small><small class="muted">'+x.n+' capítulos · '+libMin(x)+' min cada uno'+(m?' · vas por el '+(m.c+1):'')+'</small></span>'+ic("right")+'</button>'; }).join("")).join("")+
    '<p class="hint" style="margin-top:14px">Obras de dominio público: escritas en castellano por sus autores, y la Imitación de Cristo en la traducción clásica del P. Nieremberg (siglo XVII). El texto, tal cual lo publica el archivo de libros de mercaba.es; puede traer alguna errata de la edición digital.</p>'+
@@ -1002,7 +1006,7 @@ function shPlus(){ return shPlusPaywall(""); }
 function shDonar(){ const nat=esNativo(), D=sheet.dons;
   if(nat&&comprasDisponibles()&&!D&&!sheet.cargandoD){ sheet.cargandoD=1; donacionesProductos().then(x=>{ if(sheet){ sheet.dons=x||[]; renderSheet(); } }); }
   const montos=["USD 1,99","USD 4,99","USD 9,99"];
-  return shTop("Ayudar a Scaeli","Una donación, cuando quieras")+'<div class="scroll"><div class="sbanner"><img src="'+ilu("novenas")+'" alt=""><span class="g"></span></div>'+
+  return shTop("Ayudar a Scaeli","Una donación, cuando quieras")+'<div class="scroll"><div class="sbanner"><img src="'+ilu("donar")+'" alt=""><span class="g"></span></div>'+
    '<p class="texto chico">Scaeli es un proyecto personal de un educador católico de Buenos Aires para acercar a los jóvenes a Dios, sin publicidad y sin vender tus datos. Si te sirve y querés ayudar a sostenerlo, podés hacer una donación. No te da nada extra en la app: es un regalo.</p>'+
    '<div class="donmontos">'+montos.map((m,i)=>{ const p=D&&D.find(x=>x.identifier==="scaeli_donacion_"+(i+1)); return '<button class="donm" data-a="donar" data-p="'+(i+1)+'"'+(nat&&!p?' disabled':'')+'>'+ic("heart")+'<b>'+esc(p&&p.priceString||m)+'</b></button>'; }).join("")+'</div>'+
    (nat?(comprasDisponibles()?'':'<p class="hint">Las donaciones todavía no están activas en esta versión.</p>'):'<p class="hint">Las donaciones se hacen desde la app de Scaeli Daily para Android o iPhone.</p>')+
@@ -1339,10 +1343,10 @@ function shMisa(){ const ev=evHoy, f=hoy(), O=ordoDia(f), C=cicloDe(f);
 
 /* ── login ── */
 function renderLogin(){ $("#nav").hidden=true;
-  $("#app").innerHTML='<div class="login"><h1 class="logo"><img src="assets/logo-daily-2.webp" alt="Scaeli Daily" width="560" height="601"></h1><p class="hint" style="font-size:15px;margin-top:-10px">Rezar todos los días.</p>'+
-   '<p style="margin:0;font-size:19px;font-weight:300;line-height:1.4;max-width:30ch">El Evangelio, el Rosario, las Horas y el examen del día. Tu semana con Dios, guardada en tu cuenta.</p>'+
-   '<div style="display:flex;flex-direction:column;gap:10px;width:100%;max-width:340px">'+(plataforma()!=="android"?'<button class="entrar apple" id="loginApple" data-q="apple">'+LOGO_APPLE+'<span>Continuar con Apple</span></button>':'')+'<button class="entrar google" id="login" data-q="google">'+LOGO_GOOGLE+'<span>Continuar con Google</span></button><button class="ghost g" id="invitado" style="justify-content:center;height:52px;width:100%;margin-top:4px;font-size:15px">Probar sin cuenta</button></div>'+
-   '<p class="hint" id="status">'+esc(statusTxt||"La misma cuenta que Scaeli Fit y el juego. Nada es público.")+'</p><p class="hint"><a href="privacidad.html" target="_blank" rel="noopener">Política de privacidad</a></p></div>'; }
+  $("#app").innerHTML='<div class="login"><div class="marca"><img src="icons/icon-512.png" alt="" width="124" height="124"><div class="wm" role="img" aria-label="Scaeli Daily"><b>Scaeli</b> Daily</div></div>'+
+   '<div class="pie"><h1>Tu fe, a otro nivel</h1><p class="hint">El Evangelio, el Rosario, las Horas y el examen del día. Tu semana con Dios, guardada en tu cuenta.</p>'+
+   (plataforma()!=="android"?'<button class="entrar apple" id="loginApple" data-q="apple">'+LOGO_APPLE+'<span>Continuar con Apple</span></button>':'')+'<button class="entrar google" id="login" data-q="google">'+LOGO_GOOGLE+'<span>Continuar con Google</span></button><button class="ghost g" id="invitado" style="justify-content:center;height:54px;width:100%;font-size:17px">Probar sin cuenta</button>'+
+   '<p class="hint" id="status" style="margin:8px 0 0">'+esc(statusTxt||"La misma cuenta que Scaeli Fit y el juego. Nada es público.")+'</p><p class="hint" style="margin:0"><a href="privacidad.html" target="_blank" rel="noopener">Política de privacidad</a></p></div></div>'; }
 function startSession(u,local){ user=u; unsubs.forEach(f=>{try{f()}catch(e){}}); unsubs=[];
   backend=local?localBackend():userBackend(u.uid,e=>{ if(e&&e.code==="permission-denied") setStatus("La base de datos rechazó la operación: hay que publicar firestore.rules.",true); else setStatus("Sin conexión: los cambios se guardan y se sincronizan después."); });
   setStatus(local?"Guardado solo en este dispositivo":"Sincronizado · "+(u.displayName||u.email||"")); $("#nav").hidden=false;
@@ -1372,7 +1376,7 @@ let avisosT=[];
 function programarAvisos(){ avisosT.forEach(clearTimeout); avisosT=[];
   if(esNativo()){ programarAvisosNativos(recordatorios,propositos); return; }
   if(!recordatorios.on||!("Notification" in window)||Notification.permission!=="granted") return;
-  [["m",recordatorios.m,"Oración de la mañana","Señor, en tus manos pongo este día."],["n",recordatorios.n,"Oración de la noche","Dos minutos para dejar el día en manos de Dios."]].forEach(([k,hm,t,b])=>{ if(!hm) return; const [h,m]=hm.split(":").map(Number); const d=new Date(); d.setHours(h,m,0,0); if(d<=new Date()) d.setDate(d.getDate()+1);
+  [["m",recordatorios.m,"Oración de la mañana","Señor, en tus manos pongo este día."],["n",recordatorios.n,"Oración de la noche","Dos minutos para dejar el día en manos de Dios."]].concat(recordatorios.ang?[["a",recordatorios.a||"12:00","Ángelus","El ángel del Señor anunció a María."]]:[]).forEach(([k,hm,t,b])=>{ if(!hm) return; const [h,m]=hm.split(":").map(Number); const d=new Date(); d.setHours(h,m,0,0); if(d<=new Date()) d.setDate(d.getDate()+1);
     avisosT.push(setTimeout(()=>{ try{ new Notification(t,{body:b,icon:"icons/icon-192.png"}); }catch(e){} programarAvisos(); },d-new Date())); });
   propositos.filter(p=>!p.ok&&p.f===hoy()&&p.hr).forEach(p=>{ const [h,m]=p.hr.split(":").map(Number); const d=new Date(); d.setHours(h,m,0,0); if(d>new Date()) avisosT.push(setTimeout(()=>{ try{ new Notification(p.t,{body:"Tarea de hoy · "+p.hr,icon:"icons/icon-192.png"}); }catch(e){} },d-new Date())); }); }
 
@@ -1412,7 +1416,7 @@ const ACC={
   async rosLat(){ await backend.setDoc("daily_settings/profile",{...(profile||{}),rosLat:!rosLat()}); renderSheet(); },
   async rosSolo(){ await backend.setDoc("daily_settings/profile",{...(profile||{}),rosSolo:!(profile&&profile.rosSolo)}); renderSheet(); },
   horas(){ openSheet({view:"horas"}); }, horaLH(p){ openSheet({view:"hora_lh",p}); }, async lhOk(p){ const d=dayOf(hoy()); await setDay(hoy(),{h:{...(d.h||{}),[p]:1},t:Date.now()}); closeSheet(); amenToast("h:"+p); },
-  oraciones(){ openSheet({view:"oraciones",lat:sheet&&sheet.lat?1:0}); }, oracion(p){ openSheet({view:"oracion",p,lat:sheet&&sheet.lat?1:0}); }, oraLat(p){ sheet.lat=+p; renderSheet(); },
+  oraciones(){ openSheet({view:"oraciones",lat:latDef()}); }, oracion(p){ openSheet({view:"oracion",p,lat:latDef()}); }, oraLat(p){ sheet.lat=+p; renderSheet(); },
   novenas(){ openSheet({view:"novenas"}); }, novena(p){ openSheet({view:"novena",p}); novChip(); }, novVer(p){ sheet.vd=+p; sheet.cerrarTodos=1; renderSheet(); novChip(); },
   async novOk(p){ const [id,dia]=p.split("|"); const mia=novenas.find(x=>x.id===id)||{}; const dias=Array.from(new Set([...(mia.dias||[]),+dia])).sort((a,b)=>a-b);
     const N=NOVENAS.find(x=>x.id===id)||{d:9}; const doc={ini:mia.ini||hoy(),dias,ult:hoy(),t:Date.now()}; if(mia.libre){ doc.libre=dias.length<(N.d||9)?1:0; } await backend.setDoc("daily_novenas/"+id,doc); await marcar("nov"); actRegistrar(dias.length>=(N.d||9)?"novfin":"nov",N.n||""); closeSheet(); toast(dias.length>=(N.d||9)?(N.d===10?"Decenario completo":"Novena completa"):"Amén · día "+dia,()=>ACC.novDes(id+"|"+dia+"|1")); },
@@ -1505,6 +1509,8 @@ const ACC={
   async propDel(p){ propositos=propositos.filter(q=>q.id!==p); await backend.setDoc("daily_settings/propositos",{list:propositos}); },
   async notaOk(){ const t=$("textarea[data-nota]"); if(!t) return; await setDay(hoy(),{nota:t.value.trim(),t:Date.now()}); toast("Guardado"); },
   async intDel(p){ intents.splice(+p,1); await backend.setDoc("daily_settings/intents",{list:intents}); },
+  async recAng(){ recordatorios={...recordatorios,ang:!recordatorios.ang}; await backend.setDoc("daily_settings/recordatorios",recordatorios); programarAvisos(); render(); },
+  async prefLat(){ await backend.setDoc("daily_settings/profile",{...(profile||{}),lat:!(profile&&profile.lat)}); },
   async recOn(){ if(esNativo()){ if(!recordatorios.on&&!(await pedirPermisoAvisos())){ toast("Sin permiso para avisar: activalo en los ajustes del teléfono"); return; } }
     else if("Notification" in window&&Notification.permission!=="granted"){ const r=await Notification.requestPermission(); if(r!=="granted"){ toast("Sin permiso para avisar"); return; } } recordatorios={...recordatorios,on:!recordatorios.on}; await backend.setDoc("daily_settings/recordatorios",recordatorios); programarAvisos(); },
   palabra(){ openSheet({view:"palabra"}); },

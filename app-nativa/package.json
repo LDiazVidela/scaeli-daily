@@ -8,7 +8,7 @@
     "sync": "node copiar.mjs && npx cap sync",
     "android": "node copiar.mjs && npx cap sync android && npx cap open android",
     "ios": "node copiar.mjs && npx cap sync ios && npx cap open ios",
-    "iconos": "npx @capacitor/assets generate --iconBackgroundColor '#0D2146' --iconBackgroundColorDark '#0D2146' --splashBackgroundColor '#0C0D10' --splashBackgroundColorDark '#0C0D10'"
+    "iconos": "npx @capacitor/assets generate --iconBackgroundColor '#5A1524' --iconBackgroundColorDark '#5A1524' --splashBackgroundColor '#170A0D' --splashBackgroundColorDark '#170A0D'"
   },
   "dependencies": {
     "@capacitor-firebase/authentication": "^8.5.2",

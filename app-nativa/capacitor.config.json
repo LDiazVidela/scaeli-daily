@@ -2,13 +2,13 @@
   "appId": "io.github.ldiazvidela.scaelidaily",
   "appName": "Scaeli Daily",
   "webDir": "www",
-  "backgroundColor": "#0C0D10",
+  "backgroundColor": "#170A0D",
   "android": {
     "allowMixedContent": false
   },
   "ios": {
     "contentInset": "never",
-    "backgroundColor": "#0C0D10"
+    "backgroundColor": "#170A0D"
   },
   "plugins": {
     "FirebaseAuthentication": {

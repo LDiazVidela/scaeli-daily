@@ -6,21 +6,19 @@
 <title>Borrar cuenta · Scaeli Daily</title>
 <meta name="description" content="Cómo borrar tu cuenta de Scaeli y todos tus datos.">
 <link rel="icon" href="icons/icon-192.png">
-<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,300..700&display=swap" rel="stylesheet">
 <style>
-:root{--bg:#0C0D10;--card:#16181D;--tx:#ECEAE4;--su:#A8A6A0;--ac:#F5B83A;--li:#2A2C33;--rojo:#9b2c2c}
-@media (prefers-color-scheme: light){:root:not([data-theme="dark"]){--bg:#F6F4EF;--card:#FFFFFF;--tx:#1B1C20;--su:#5E5D59;--ac:#A86A00;--li:#E3E0D8}}
+:root{--bg:#170A0D;--card:#241116;--tx:#FBF3E4;--su:#A8958F;--ac:#FFF4D2;--li:rgba(255,255,255,.13);--rojo:#C8414F}
+@media (prefers-color-scheme: light){:root:not([data-theme="dark"]){--bg:#FAF4EA;--card:#FFFFFF;--tx:#2A1216;--su:#7D6862;--ac:#8A2638;--li:rgba(70,20,28,.16)}}
 *{box-sizing:border-box}
-body{margin:0;background:var(--bg);color:var(--tx);font:16px/1.6 "Bricolage Grotesque",system-ui,sans-serif}
+body{margin:0;background:var(--bg);color:var(--tx);font:16px/1.6 -apple-system,BlinkMacSystemFont,"SF Pro Text","Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif}
 main{max-width:640px;margin:0 auto;padding:32px 16px 64px}
 header{display:flex;gap:14px;align-items:center;margin-bottom:24px} header img{width:56px;height:56px;border-radius:14px}
 h1{font-size:30px;font-weight:500;letter-spacing:-.02em;margin:0;line-height:1.15}
 h2{font-size:19px;font-weight:600;margin:28px 0 8px}
 .su{color:var(--su);font-size:14px} a{color:var(--ac)}
-.card{background:var(--card);border:1px solid var(--li);border-radius:16px;padding:16px 18px;margin:16px 0}
+.card{background:var(--card);border:1px solid var(--li);border-radius:22px;padding:16px 18px;margin:16px 0}
 button{font:inherit;font-weight:600;border-radius:999px;padding:12px 18px;border:1px solid var(--li);background:transparent;color:var(--tx);cursor:pointer;min-height:44px}
-button.pri{background:var(--ac);color:#1b1205;border-color:var(--ac)} button.mal{background:var(--rojo);color:#fff;border-color:var(--rojo)}
+button.pri{background:var(--ac);color:var(--bg);border-color:var(--ac)} button.mal{background:var(--rojo);color:#fff;border-color:var(--rojo)}
 button:disabled{opacity:.5}
 .fila{display:flex;gap:10px;flex-wrap:wrap;margin-top:12px}
 #estado{min-height:1.6em}

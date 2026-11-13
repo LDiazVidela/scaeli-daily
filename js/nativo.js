@@ -6,7 +6,7 @@ export const plataforma = () => (C() && C().getPlatform ? C().getPlatform() : "w
 export const plugin = (n) => (esNativo() && C().Plugins ? C().Plugins[n] : null);
 
 /* ── avisos del teléfono (llegan aunque la app esté cerrada) ── */
-const ID_MANANA = 1, ID_NOCHE = 2, ID_TAREAS = 1000;
+const ID_MANANA = 1, ID_NOCHE = 2, ID_ANGELUS = 3, ID_TAREAS = 1000;
 let permiso = null;
 export async function pedirPermisoAvisos() {
   const LN = plugin("LocalNotifications"); if (!LN) return false;
@@ -26,6 +26,7 @@ export async function programarAvisosNativos(rec, tareas) {
     const diario = (id, hm, title, body) => { if (!hm) return; const [h, m] = hm.split(":").map(Number); L.push({ id, title, body, schedule: { on: { hour: h, minute: m }, allowWhileIdle: true }, smallIcon: "ic_stat_vela" }); };
     diario(ID_MANANA, rec.m, "Oración de la mañana", "Señor, en tus manos pongo este día.");
     diario(ID_NOCHE, rec.n, "Oración de la noche", "Dos minutos para dejar el día en manos de Dios.");
+    if (rec.ang) diario(ID_ANGELUS, rec.a || "12:00", "Ángelus", "El ángel del Señor anunció a María.");
     const ahora = Date.now();
     (tareas || []).filter((p) => !p.ok && (p.f || p.d) && p.hr).forEach((p) => {
       const at = new Date((p.f || p.d) + "T" + p.hr); if (at.getTime() > ahora) L.push({ id: hashId(p.id), title: p.t, body: "Tarea · " + p.hr, schedule: { at, allowWhileIdle: true }, smallIcon: "ic_stat_vela" });

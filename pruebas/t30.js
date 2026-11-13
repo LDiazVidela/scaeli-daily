@@ -32,15 +32,15 @@ const { chromium } = require('playwright');
   let st = await LS(); ok(Object.keys(st).filter(k => k.startsWith('workouts/')).length === 1 && st['workouts/' + iso].offered === false, 'Daily no escribe en workouts');
   // Rango
   await p.evaluate(([K]) => { const s = JSON.parse(localStorage.getItem(K)); const pad = n => String(n).padStart(2, '0'); const f = d => d.getFullYear() + '-' + pad(d.getMonth() + 1) + '-' + pad(d.getDate()); for (let i = 0; i < 30; i++) { const d = new Date(); d.setDate(d.getDate() - i); s['daily_days/' + f(d)] = { m: 1, r: 1, rn: 1, t: Date.now() }; } localStorage.setItem(K, JSON.stringify(s)); }, [K]);
-  await p.reload(); await p.waitForTimeout(1300); await p.evaluate(() => window.DAILY.ir('yo')); await p.waitForTimeout(500); t = await p.evaluate(() => document.querySelector('.rangoc').innerText);
-  ok(/Diamante I/.test(t) && /540 puntos/.test(t) && /rango más alto/.test(t), 'rango Diamante I con 540: ' + t.replace(/\n/g, ' | ').slice(0, 120));
+  await p.reload(); await p.waitForTimeout(1300); await p.evaluate(() => window.DAILY.ir('yo')); await p.waitForTimeout(500); t = await p.evaluate(() => document.querySelector('.rangoc').innerText.replace(/\s+/g, ' '));
+  ok(/Diamante I\b/.test(t) && /540 puntos/.test(t) && /faltan 50 puntos para Celestial III/.test(t), 'rango Diamante I con 540 (desde la 2.0 siguen Celestial y Divino): ' + t.replace(/\n/g, ' | ').slice(0, 120));
   await p.evaluate(([K]) => { const s = JSON.parse(localStorage.getItem(K)); Object.keys(s).filter(k => k.startsWith('daily_days/')).sort().slice(0, 20).forEach(k => delete s[k]); localStorage.setItem(K, JSON.stringify(s)); }, [K]);
-  await p.reload(); await p.waitForTimeout(1300); await p.evaluate(() => window.DAILY.ir('yo')); await p.waitForTimeout(500); t = await p.evaluate(() => document.querySelector('.rangoc').innerText);
+  await p.reload(); await p.waitForTimeout(1300); await p.evaluate(() => window.DAILY.ir('yo')); await p.waitForTimeout(500); t = await p.evaluate(() => document.querySelector('.rangoc').innerText.replace(/\s+/g, ' '));
   ok(/Plata II\b/.test(t) && /180 puntos/.test(t) && /faltan 10 puntos para\s+Plata I\b/.test(t), '10 días + racha 10 + 10 rosarios = 180, Plata II: ' + t.replace(/\n/g, ' | ').slice(0, 160));
-  ok(await p.$('.rangoc svg.escudo') !== null, 'escudo del rango');
+  ok(await p.$('.rangoc img.escudo') !== null, 'insignia del rango');
   // Ranking de grupos
   await A('grupo'); await A('gEjemplo', null, 1500); t = await SH(); ok(/Ranking de grupos/i.test(t) && /de 7 grupos/.test(t) && /Los de la parroquia \(tu grupo\)/.test(t), 'ranking de grupos con el mío: ' + t.slice(t.indexOf('Ranking de grupos'), t.indexOf('Ranking de grupos') + 400).replace(/\n/g, ' | '));
-  ok(!/Ranking de la semana/.test(t) && (await p.$$('.podio')).length === 0, 'sin ranking interno'); ok((await p.$$('.grow .rgk svg.escudo')).length === 5, 'escudo de rango en cada miembro');
+  ok(!/Ranking de la semana/.test(t) && (await p.$$('.podio')).length === 0, 'sin ranking interno'); ok((await p.$$('.grow .rgk img.escudo')).length === 5, 'insignia de rango en cada miembro');
   const rk = await p.evaluate(() => JSON.parse(localStorage.getItem('scaeli-daily-ranking') || '{}')); const mio = Object.entries(rk).find(([k]) => !k.startsWith('EJR'));
   ok(mio && mio[1].n === 'Los de la parroquia' && mio[1].m === 5 && typeof mio[1].pts === 'number' && mio[1].sem.length === 10 && Object.keys(mio[1]).sort().join() === 'm,n,pts,sem,t', 'mi grupo publica {n,sem,pts,m,t}: ' + JSON.stringify(mio && mio[1]));
   const pos = await p.evaluate(() => document.querySelector('.granq .gpos b').innerText); ok(/^\d\.º$/.test(pos), 'posición: ' + pos); await A('cerrar');
