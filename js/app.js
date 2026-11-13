@@ -17,7 +17,7 @@ import { SANTORAL } from "../data/santoral.js";
 import { CARTAS } from "../data/cartas.js";
 import * as PJ from "./personaje.js";
 
-export const VERSION="2.0.1";
+export const VERSION="2.0.2";
 const LOGO_GOOGLE='<svg class="logo-g" viewBox="0 0 48 48" aria-hidden="true"><path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/><path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/><path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/><path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/></svg>';
 const LOGO_APPLE='<svg class="logo-a" viewBox="0 0 814 1000" aria-hidden="true"><path fill="currentColor" d="M788.1 340.9c-5.8 4.5-108.2 62.2-108.2 190.5 0 148.4 130.3 200.9 134.2 202.2-.6 3.2-20.7 71.9-68.7 141.9-42.8 61.6-87.5 123.1-155.5 123.1s-85.5-39.5-164-39.5c-76.5 0-103.7 40.8-165.9 40.8s-105.6-57-155.5-127C46.7 790.7 0 663 0 541.8c0-194.4 126.4-297.5 250.8-297.5 66.1 0 121.2 43.4 162.7 43.4 39.5 0 101.1-46 176.3-46 28.5 0 130.9 2.6 198.3 99.2zm-234-181.5c31.1-36.9 53.1-88.1 53.1-139.3 0-7.1-.6-14.3-1.9-20.1-50.6 1.9-110.8 33.7-147.1 75.8-28.5 32.4-55.1 83.6-55.1 135.5 0 7.8 1.3 15.6 1.9 18.1 3.2.6 8.4 1.3 13.6 1.3 45.4 0 102.5-30.4 135.5-71.3z"/></svg>';
 /* la dirección publicada: la app de las tiendas lee de acá los Evangelios del día (los genera la GitHub Action cada noche) */
@@ -246,36 +246,42 @@ function renderHoy(){ cargarEvangelio(); const d=dayOf(hoy()), nom=(profile&&pro
   const L=tiempoLit(), mm=hoy().slice(5), santo=SANTOS[mm], mo=momento(), H=HORA[mo], ev=evHoy, k=momKey[mo];
   const lh=horaLHahora(), LHn=LH_HORAS.find(x=>x[0]===lh)||["","",""], lhOk=!!((d.h||{})[lh]);
   const mes=MISIONES_MES[new Date().getMonth()], nv=novenaEnCurso();
+  // 2.0.2: ninguna ilustración dos veces en la pantalla (el fondo de arriba puede ser la noche, un misterio, el Evangelio…)
+  const heroImg=fondoActual()||mo, usa=new Set([heroImg]), im=(...c)=>{ const k=c.find(x=>!usa.has(x))||c[0]; usa.add(k); return k; };
   return cab(cap(fLarga(hoy()))+' · '+esc(L.l),saludo()+(nom?',<br>'+esc(nom):''),rachaChip())+
-   '<div class="hero2"><img class="bg" src="'+ilu(fondoActual()||mo)+'" alt=""><span class="sh"></span><button class="pjbtn" data-a="pjIr" aria-label="Personalizar tu personaje">'+personajeHTML("vivo","south",150)+'</button>'+
+   '<div class="hero2"><img class="bg" src="'+ilu(heroImg)+'" alt=""><span class="sh"></span><button class="pjbtn" data-a="pjIr" aria-label="Personalizar tu personaje">'+personajeHTML("vivo","south",150)+'</button>'+
      heroTexto(mo,d,ev)+'</div>'+nivelHTML("card")+
    (anioListo()?'<button class="card anioc" data-a="anio"><span class="n"><span class="eyebrow">Cristo Rey · termina el año litúrgico</span><b>Tu año con Dios · '+hoy().slice(0,4)+'</b><small>Mirá tu año en historias y compartilo</small></span>'+(esPlus()?ic("right"):'<span class="plus-mini">'+ic("lock")+' Scaeli+</span>')+'</button>':'')+
    '<button class="card lhnow" data-a="horaLH" data-p="'+lh+'"><span class="n"><span class="eyebrow">Ahora · Liturgia de las Horas</span><b>'+esc(LHn[1])+'</b><small>'+esc(LHn[2])+'</small></span><span class="ghost">Rezar</span></button>'+caminoHoyHTML()+
    actBanner()+'<div class="covers">'+
-     cov("evangelio","evangelio","Evangelio",ev?esc(citaCorta(ev.evangelio.cita)):"Del día")+
-     cov("rosario",misteriosHoy(),"Rosario",dayOf(hoy()).r&&dayOf(hoy()).src==="fit"?"Rezado en Scaeli Fit":MISTERIOS[misteriosHoy()].n.replace("Misterios ",""))+
-     cov("examen","examen","Examen del día","A la noche")+
-     (nv?cov("novena","novenas","Novena",esc(nv.n.n)+" · día "+nv.D.dia,0,"",nv.n.id):cov("orar","noche","Tu oración de la noche","¿Cómo estuvo tu día con Dios?","","","noche"))+
-     (santo?cov("santo","santo",esc(santo[0].split(",")[0]),"Santo del día"+(fichaSanto(mm).p?" · "+esc(fichaSanto(mm).p[0]):""),0,"w"):'')+
+     cov("evangelio",im("evangelio","biblia"),"Evangelio",ev?esc(citaCorta(ev.evangelio.cita)):"Del día")+
+     cov("rosario",im(misteriosHoy(),"rosario"),"Rosario",dayOf(hoy()).r&&dayOf(hoy()).src==="fit"?"Rezado en Scaeli Fit":MISTERIOS[misteriosHoy()].n.replace("Misterios ",""))+
+     cov("examen",im("examen","confesion"),"Examen del día","A la noche")+
+     (nv?cov("novena",im("novenas","santo"),"Novena",esc(nv.n.n)+" · día "+nv.D.dia,0,"",nv.n.id):cov("orar",im("noche","oraciones"),"Tu oración de la noche","¿Cómo estuvo tu día con Dios?","","","noche"))+
+     (santo?cov("santo",im("santo","misa"),esc(santo[0].split(",")[0]),"Santo del día"+(fichaSanto(mm).p?" · "+esc(fichaSanto(mm).p[0]):""),0,"w"):'')+
    '</div>'+
    habitosHoyHTML()+grupoCardHTML()+(sobreEstado().k==="listo"?albumCard():'')+
    '<div class="card"><div class="eyebrow" style="margin-bottom:12px">Tu semana con Dios</div>'+semanaHTML()+'<p class="hint" style="margin-top:12px">'+esc(mes[0])+'. '+esc(mes[1])+'</p></div>'; }
 
 function renderRezar(){ const d=dayOf(hoy()); const nv=novenaEnCurso(); const lh=horaLHahora(), LHn=LH_HORAS.find(x=>x[0]===lh)||["",""];
+  // 2.0.2: cada portada una sola vez en la pantalla y sin huecos: las tarjetas chicas van de a dos; si una queda sola, va ancha.
+  const T=[
+   caminoActivo()?["camino","camino","Camino de "+esc(caminoActivo()[1].n),esc(caminoActivo()[1].sub)+(esPlus()?"":" · Scaeli+"),1,caminoActivo()[0]]:null,
+   ["rosario","rosario","Santo Rosario",dayOf(hoy()).r&&dayOf(hoy()).src==="fit"?"Rezado hoy en Scaeli Fit":MISTERIOS[misteriosHoy()].n+" · 20 min",1],
+   ["evangelio","evangelio","Evangelio del día","5 min"],
+   ["palabra","manana","Palabra del día",palHecha(d)?"Ya la rezaste hoy":"Un pasaje y lo que te dice · 5 min"],
+   ["horas","horas","Liturgia de las Horas","Ahora: "+esc(LHn[1])],
+   ["oraciones","oraciones","Oraciones","Las de siempre"],
+   ["novenas","novenas","Novenas",nv?esc(nv.n.n)+" · día "+nv.D.dia:"Nueve días con un santo"],
+   ["examen","examen","Examen del día","A la noche · 5 min"],
+   ["biblia","biblia","La Biblia",bibUltima()?"Seguir en "+esc(bibUltima()):"Buscá un libro, un capítulo o una palabra",1],
+   ["libros","biblioteca","Biblioteca",libUltimo()?"Seguir con "+esc(libUltimo().L.t):"Santa Teresa, San Juan de la Cruz, Kempis…"],
+   ["confesion","confesion","Confesión","Los pasos y el examen"],
+   ["misa","misa","La Misa de hoy","Guía del celebrante y lecturas"],
+   ["santoral","santo","Santoral","Todos los santos del año"]].filter(Boolean);
+  let suelta=-1; T.forEach((x,i)=>{ if(x[4]){ if(suelta>=0){ T[suelta][4]=1; } suelta=-1; } else suelta=suelta>=0?-1:i; }); if(suelta>=0) T[suelta][4]=1;
   return cab("Rezar","¿Cómo querés<br>rezar hoy?",rachaChip())+'<div class="covers">'+
-   (caminoActivo()?cov("camino","noche","Camino de "+esc(caminoActivo()[1].n),esc(caminoActivo()[1].sub)+(esPlus()?"":" · Scaeli+"),0,"w",caminoActivo()[0]):'')+
-   cov("rosario","rosario","Santo Rosario",dayOf(hoy()).r&&dayOf(hoy()).src==="fit"?"Rezado hoy en Scaeli Fit":MISTERIOS[misteriosHoy()].n+" · 20 min",0,"w")+
-   cov("evangelio","evangelio","Evangelio del día","5 min")+
-   cov("palabra","biblia","Palabra del día",palHecha(d)?"Ya la rezaste hoy":"Un pasaje y lo que te dice · 5 min")+
-   cov("horas","horas","Liturgia de las Horas","Ahora: "+esc(LHn[1]))+
-   cov("oraciones","oraciones","Oraciones","Las de siempre")+
-   cov("novenas","novenas","Novenas",nv?esc(nv.n.n)+" · día "+nv.D.dia:"Nueve días con un santo")+
-   cov("biblia","biblia","La Biblia",bibUltima()?"Seguir en "+esc(bibUltima()):"Buscá un libro, un capítulo o una palabra",0,"w")+
-   cov("libros","oraciones","Biblioteca",libUltimo()?"Seguir con "+esc(libUltimo().L.t):"Santa Teresa, San Juan de la Cruz, Kempis…")+
-   cov("examen","examen","Examen del día","A la noche · 5 min")+
-   cov("confesion","confesion","Confesión","Los pasos y el examen")+
-   cov("misa","misa","La Misa de hoy","Guía del celebrante y lecturas")+
-   cov("santoral","santo","Santoral","Todos los santos del año")+
+   T.map(x=>cov(x[0],x[1],x[2],x[3],0,x[4]?"w":"",x[5])).join("")+
    '</div><p class="hint" style="text-align:center;padding:8px 0">«Vengan a mí todos los que están afligidos y agobiados, y yo los aliviaré.» <span class="muted">Mt 11, 28</span></p>'; }
 
 /* ── Tu día: diarias (con racha), hábitos (+ y −) y tareas, al estilo Habitica; abajo el diario y el mes ── */
