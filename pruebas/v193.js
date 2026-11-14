@@ -1,0 +1,17 @@
+const { chromium } = require('playwright');
+(async () => { const b = await chromium.launch(); const errs=[];
+  const ctx=await b.newContext({ viewport:{width:393,height:852}, deviceScaleFactor:2, userAgent:'Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148' }); const p=await ctx.newPage();
+  await p.addInitScript(()=>{ Object.defineProperty(navigator,'standalone',{get:()=>true}); });
+  p.on('pageerror', e => errs.push('PAGEERROR '+e.message));
+  await p.goto('http://localhost:8765/index.html'); await p.evaluate(()=>localStorage.clear()); await p.reload(); await p.waitForTimeout(1000); await p.click('#invitado'); await p.waitForTimeout(1200);
+  const A = async (a, q, ms = 450) => { await p.evaluate(([a, q]) => window.DAILY.ACC[a](q), [a, q]); await p.waitForTimeout(ms); };
+  const S = async (n) => p.screenshot({ path: 'shots19/'+n+'.png' });
+  console.log(await p.evaluate(()=>[document.documentElement.className, getComputedStyle(document.body).paddingTop]));
+  await S('p_hoy');
+  await A('exConf',null,600); await S('p_conf0'); await A('hojaPaso',1); await S('p_conf1');
+  await p.click('.hq button'); await A('confModo','cap').catch(()=>{});
+  for(let i=0;i<7;i++) await A('hojaPaso',1,150); await S('p_hoja');
+  await A('cerrar',null,300);
+  await p.evaluate(()=>window.DAILY.ir('rezar')); await p.waitForTimeout(300); await A('rosario',null,500); await A('rosAv'); await A('rosAv'); await S('p_ros');
+  const r=await p.evaluate(()=>{ const t=document.querySelector('.ftop').getBoundingClientRect(), f=document.querySelector('.fpie').getBoundingClientRect(); return {top:t.top, pieBottom:f.bottom, h:innerHeight}; }); console.log(r);
+  console.log(errs.join('\n')||'OK'); await b.close(); })();

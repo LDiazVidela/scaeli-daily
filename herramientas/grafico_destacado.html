@@ -1,0 +1,29 @@
+<!doctype html><html lang="es"><meta charset="utf-8"><title>Gráfico destacado (Google Play, 1024×500)</title>
+<!-- Se abre con el servidor en :8765 → http://localhost:8765/herramientas/grafico_destacado.html y lo captura herramientas/grafico_destacado.js -->
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap">
+<style>
+html,body{margin:0}body{width:1024px;height:500px;overflow:hidden;position:relative;background:#170A0D;color:#FBF3E4;font-family:Inter,-apple-system,"Segoe UI",Roboto,sans-serif;-webkit-font-smoothing:antialiased}
+.luz{position:absolute;inset:0;background:radial-gradient(60% 90% at 76% 48%,rgba(179,48,74,.62) 0%,rgba(90,21,36,.34) 46%,rgba(23,10,13,0) 78%)}
+.txt{position:absolute;left:64px;top:118px;width:520px}
+.marca{display:flex;align-items:center;gap:18px}
+.ico{width:72px;height:72px;border-radius:22.5%;background:linear-gradient(160deg,#B3304A,#5A1524);display:grid;place-items:center;box-shadow:0 10px 30px rgba(0,0,0,.45)}
+.ico svg{width:36px;height:auto}
+.wm{font-size:60px;line-height:1;letter-spacing:-.035em;font-weight:400}.wm b{font-weight:700}
+h1{margin:34px 0 0;font-size:34px;line-height:41px;font-weight:700;letter-spacing:-.01em;color:#FFF4D2}
+p{margin:14px 0 0;font-size:19px;line-height:28px;color:#DCCFC4}
+.arco{position:absolute;right:95px;bottom:0;width:380px;height:440px;border-radius:190px 190px 0 0;background:linear-gradient(180deg,rgba(255,244,210,.2),rgba(255,244,210,.04));box-shadow:inset 0 0 0 1px rgba(255,244,210,.22)}
+canvas{position:absolute;bottom:-4px;width:384px;height:384px;image-rendering:pixelated}
+#m{right:176px}#f{right:10px}
+</style>
+<div class="luz"></div>
+<div class="txt"><div class="marca"><div class="ico"><svg viewBox="302 242 420 570"><path fill-rule="evenodd" fill="#fff" d="M302 812V452a210 210 0 0 1 420 0V812ZM302 812V738H382V664H462V590H562V664H642V738H722V812ZM494 392h36v54h54v36h-54v108h-36v-108h-54v-36h54Z"/></svg></div><div class="wm"><b>Scaeli</b> Daily</div></div>
+<h1>Tu fe, a otro nivel</h1><p>El Evangelio · el Rosario · las Horas<br>el examen del día · tu grupo · tu personaje</p></div>
+<div class="arco"></div><canvas id="m" width="128" height="128"></canvas><canvas id="f" width="128" height="128"></canvas>
+<script type="module">
+import * as PJ from "../js/personaje.js";
+await PJ.cargar("../assets/personaje/");
+PJ.pintar(document.getElementById("m"),{sx:"m",prenda:"buzo:bordo",peinado:"corto"},"south");
+PJ.pintar(document.getElementById("f"),{sx:"f",prenda:"base",peinado:"suelto"},"south");
+for(const c of document.querySelectorAll("canvas")){ c.style.width="384px"; c.style.height="384px"; }
+document.body.dataset.listo="1";
+</script></html>

@@ -1,0 +1,88 @@
+// Scaeli Daily · trae las citas de las lecturas de la Misa de los próximos días desde Evangelizo.org,
+// arma el texto con la Biblia Platense
+// y deja un archivo por día en evangelio/AAAA-MM-DD.json, para que la app las lea sin internet de terceros.
+// Lo corre GitHub Actions todos los días (ver .github/workflows/evangelio.yml).
+import { mkdir, writeFile, readdir, unlink, access } from "node:fs/promises";
+import { textoDe, tituloDe } from "./platense.mjs";
+const PLATENSE = "Biblia Platense (Mons. Juan Straubinger)";
+
+const BASE = process.env.EVANGELIZO_URL || "https://feed.evangelizo.org/v2/reader.php";
+const DIAS = Math.min(31, Number(process.env.DIAS || 30)); // Evangelizo publica hasta un mes hacia adelante; lo que todavía no está, se reintenta al otro día
+const GUARDAR_DIAS_VIEJOS = 7;
+const CARPETA = new URL("../evangelio/", import.meta.url);
+const pad = n => String(n).padStart(2, "0");
+const fechaISO = d => d.getFullYear() + "-" + pad(d.getMonth() + 1) + "-" + pad(d.getDate());
+const espera = ms => new Promise(r => setTimeout(r, ms));
+
+async function pedir(params) {
+  const url = BASE + "?" + new URLSearchParams(params);
+  for (let i = 0; i < 3; i++) {
+    try {
+      const r = await fetch(url, { headers: { "User-Agent": "Scala-app/1.0 (lecturas del dia; contacto en el repositorio)" } });
+      if (r.ok) return await r.text();
+    } catch (e) { /* reintenta */ }
+    await espera(1500 * (i + 1));
+  }
+  return "";
+}
+
+const ENT = { aacute: "á", eacute: "é", iacute: "í", oacute: "ó", uacute: "ú", Aacute: "Á", Eacute: "É", Iacute: "Í", Oacute: "Ó", Uacute: "Ú",
+  ntilde: "ñ", Ntilde: "Ñ", uuml: "ü", Uuml: "Ü", ccedil: "ç", agrave: "à", egrave: "è", ograve: "ò", ldquo: "“", rdquo: "”", lsquo: "‘", rsquo: "’",
+  hellip: "…", mdash: "—", ndash: "–", deg: "°", ordf: "ª", ordm: "º", middot: "·", copy: "©" };
+function limpiar(html) {
+  return String(html || "")
+    .replace(/\r/g, "")
+    .replace(/<br\s*\/?>/gi, "\n").replace(/<\/p>\s*<p[^>]*>/gi, "\n\n").replace(/<[^>]+>/g, "")
+    .replace(/&nbsp;/g, " ").replace(/&quot;/g, "\"").replace(/&#0?39;|&apos;/g, "'")
+    .replace(/&laquo;/g, "«").replace(/&raquo;/g, "»").replace(/&iexcl;/g, "¡").replace(/&iquest;/g, "¿")
+    .replace(/&#(\d+);/g, (m, n) => String.fromCodePoint(+n)).replace(/&#x([0-9a-f]+);/gi, (m, n) => String.fromCodePoint(parseInt(n, 16)))
+    .replace(/&([a-zA-Z]+);/g, (m, n) => ENT[n] !== undefined ? ENT[n] : m).replace(/&amp;/g, "&")
+    .replace(/[ \t]+/g, " ").split("\n").map(x => x.trim()).join("\n").replace(/\n{3,}/g, "\n\n").trim();
+}
+
+// De Evangelizo se toma solo la cita de cada lectura (y el nombre del día litúrgico).
+// El texto se arma con la Biblia Platense que ya trae la app (herramientas/platense.mjs): no se copia ninguna otra traducción.
+async function lectura(fecha, content, k) {
+  const date = fecha.replace(/-/g, "");
+  const cita = limpiar(await pedir({ date, type: "reading_st", lang: "SP", content }));
+  if (!cita || !/\d/.test(cita)) return null;
+  const r = await textoDe(cita);
+  if (!r) return { titulo: "", cita, texto: "", fuente: "" };
+  return { titulo: tituloDe(k, r), cita, texto: r.texto, fuente: PLATENSE };
+}
+
+async function dia(fecha) {
+  const date = fecha.replace(/-/g, "");
+  const out = { fecha, dia: limpiar(await pedir({ date, type: "liturgic_t", lang: "SP" })) };
+  for (const [k, c] of [["primera", "FR"], ["salmo", "PS"], ["segunda", "SR"], ["evangelio", "GSP"]]) {
+    const l = await lectura(fecha, c, k);
+    if (l) out[k] = l;
+    await espera(250);
+  }
+  out.fuente = "Citas: Evangelizo.org · Texto: " + PLATENSE;
+  out.creado = new Date().toISOString();
+  return out;
+}
+
+const existe = async p => { try { await access(p); return true; } catch { return false; } };
+
+await mkdir(CARPETA, { recursive: true });
+const hoy = new Date();
+let nuevos = 0, fallas = 0;
+for (let i = 0; i < DIAS; i++) {
+  const d = new Date(hoy.getFullYear(), hoy.getMonth(), hoy.getDate() + i);
+  const f = fechaISO(d), archivo = new URL(f + ".json", CARPETA);
+  if (i > 1 && await existe(archivo) && !process.env.FORZAR) continue; // hoy y mañana se refrescan siempre
+  const j = await dia(f);
+  if (!j.evangelio || !j.evangelio.texto) { fallas++; console.log("Sin Evangelio para", f); continue; }
+  await writeFile(archivo, JSON.stringify(j, null, 1) + "\n");
+  nuevos++; console.log("Listo", f, "·", j.evangelio.cita);
+}
+// borrar los días viejos
+const limite = fechaISO(new Date(hoy.getFullYear(), hoy.getMonth(), hoy.getDate() - GUARDAR_DIAS_VIEJOS));
+for (const n of await readdir(CARPETA)) if (/^\d{4}-\d{2}-\d{2}\.json$/.test(n) && n.slice(0, 10) < limite) await unlink(new URL(n, CARPETA));
+// un índice cortito para que la app sepa hasta qué día hay lecturas
+const dias = (await readdir(CARPETA)).filter(n => /^\d{4}-\d{2}-\d{2}\.json$/.test(n)).map(n => n.slice(0, 10)).sort();
+await writeFile(new URL("indice.json", CARPETA), JSON.stringify({ desde: dias[0] || null, hasta: dias[dias.length - 1] || null, dias, actualizado: new Date().toISOString() }) + "\n");
+console.log("Días nuevos o actualizados:", nuevos, "· sin datos:", fallas, "· hay lecturas hasta", dias[dias.length - 1] || "—");
+if (nuevos === 0 && fallas >= DIAS) process.exit(1);

@@ -1,0 +1,6 @@
+const fs=require('fs');const s=fs.readFileSync('/home/claude/scaeli/scala-paquete/salida/scala.html','utf8');
+function body(startIdx){ let j=startIdx; while(s[j]!=='{'&&s[j]!=='['&&s[j]!=='"'&&s[j]!=='`'&&s[j]!=='(') j++; const open=s[j]; const close={'{':'}','[':']','(':')'}[open]; if(!close){ const e=s.indexOf(open,j+1); return s.slice(startIdx,e+1); }
+  let d=0,k=j,str=null; for(;k<s.length;k++){ const c=s[k]; if(str){ if(c==='\\'){k++;continue;} if(c===str) str=null; continue; } if(c==='"'||c==="'"||c==='`'){ str=c; continue; } if(c==='/'&&s[k+1]==='*'){ k=s.indexOf('*/',k)+1; continue; } if(c==='{'||c==='['||c==='(') d++; else if(c==='}'||c===']'||c===')'){ d--; if(d===0){ k++; break; } } } return s.slice(startIdx,k); }
+function def(name){ let m=s.match(new RegExp('(?:^|\\n)(?:const|let|var) '+name+'\\s*=')); if(m){ const i=m.index+m[0].length; return 'const '+name+'='+body(i)+';'; } m=s.match(new RegExp('(?:^|\\n)function '+name+'\\s*\\(')); if(m){ const i=m.index+1; const args=body(s.indexOf('(',i)); let j=s.indexOf('(',i)+args.length; return 'function '+name+args+body(j); } return null; }
+module.exports={def,s,body};
+if(require.main===module){ for(const n of process.argv.slice(2)){ const d=def(n); console.log('/* ── '+n+' ('+(d?d.length:'no')+') ── */'); if(d) console.log(d.length>3000&&!process.env.FULL?d.slice(0,3000)+'…':d); } }

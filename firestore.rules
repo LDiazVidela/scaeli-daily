@@ -1,0 +1,78 @@
+rules_version = '2';
+// REGLAS COMPARTIDAS del proyecto Firebase "scaeli": las usan Scaeli Daily y Scaeli Fit.
+// Este archivo es la única fuente: cualquier cambio se hace acá y se publica entero.
+// Copia idéntica en los dos repos (scaeli-daily/firestore.rules y scaeli-fit/firestore.rules).
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Cada persona lee y escribe solo lo suyo. Nada es público.
+    // Daily guarda en users/{uid}/daily_*; Fit en users/{uid}/{days,workouts,body,combos,recipes,foods,tracks,settings}.
+    // El Plus compartido vive en users/{uid}/settings/plus (lo leen y escriben las dos apps).
+    match /users/{uid}/{document=**} {
+      allow read, write: if request.auth != null && request.auth.uid == uid;
+    }
+
+    // Grupos de perseverancia (Daily 1.8) y grupos de entrenamiento (Fit): quien tiene el código del grupo
+    // (y una cuenta) puede leerlo y sumarse. El grupo lo crea y lo cambia su creador; cada miembro escribe
+    // SOLO su propio documento; el creador puede sacar a alguien.
+    match /grupos/{gid} {
+      allow read: if request.auth != null;
+      allow create: if request.auth != null && request.resource.data.creador == request.auth.uid
+                    && request.resource.data.n is string && request.resource.data.n.size() <= 40;
+      allow update, delete: if request.auth != null && resource.data.creador == request.auth.uid;
+      match /miembros/{uid} {
+        allow read: if request.auth != null;
+        allow create, update: if request.auth != null && request.auth.uid == uid
+                              && (!("n" in request.resource.data) || request.resource.data.n.size() <= 24)
+                              && (!("int" in request.resource.data) || request.resource.data.int.size() <= 80);
+        allow delete: if request.auth != null && (request.auth.uid == uid
+                      || get(/databases/$(database)/documents/grupos/$(gid)).data.creador == request.auth.uid);
+      }
+      // Muro del grupo (Daily 1.9): mensajes cortos entre los miembros. Cada uno crea los suyos (u = su uid,
+      // texto de hasta 140 letras); todos pueden sumar un «amén» (a.{uid}) o reportar (rep.{uid}) tocando SOLO su
+      // propia clave; borra el autor o el creador del grupo. Fit puede ignorar esta colección.
+      match /mensajes/{mid} {
+        allow read: if request.auth != null
+                    && exists(/databases/$(database)/documents/grupos/$(gid)/miembros/$(request.auth.uid));
+        allow create: if request.auth != null
+                      && exists(/databases/$(database)/documents/grupos/$(gid)/miembros/$(request.auth.uid))
+                      && request.resource.data.u == request.auth.uid
+                      && request.resource.data.tx is string && request.resource.data.tx.size() <= 140
+                      && request.resource.data.n is string && request.resource.data.n.size() <= 24;
+        allow update: if request.auth != null
+                      && exists(/databases/$(database)/documents/grupos/$(gid)/miembros/$(request.auth.uid))
+                      && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['a', 'rep'])
+                      && (!('a' in request.resource.data) || !('a' in resource.data)
+                          || request.resource.data.a.diff(resource.data.a).affectedKeys().hasOnly([request.auth.uid]))
+                      && (!('rep' in request.resource.data) || !('rep' in resource.data)
+                          || request.resource.data.rep.diff(resource.data.rep).affectedKeys().hasOnly([request.auth.uid]));
+        allow delete: if request.auth != null && (resource.data.u == request.auth.uid
+                      || get(/databases/$(database)/documents/grupos/$(gid)).data.creador == request.auth.uid);
+      }
+    }
+
+    // Ranking de grupos (Daily 1.12): ranking/{gid} = {n, sem, pts, m, t}. Lo lee cualquiera con sesión (solo nombre del
+    // grupo, semana, promedio de puntos y cantidad de miembros: nada de personas). Lo escribe cualquier miembro de ese grupo.
+    match /ranking/{gid} {
+      allow read: if request.auth != null;
+      allow create, update: if request.auth != null
+                            && exists(/databases/$(database)/documents/grupos/$(gid)/miembros/$(request.auth.uid))
+                            && request.resource.data.keys().hasOnly(['n', 'sem', 'pts', 'm', 't'])
+                            && request.resource.data.n is string && request.resource.data.n.size() <= 40
+                            && request.resource.data.sem is string && request.resource.data.sem.size() == 10
+                            && request.resource.data.pts is number && request.resource.data.pts >= 0 && request.resource.data.pts <= 100000
+                            && request.resource.data.m is number && request.resource.data.m >= 1 && request.resource.data.m <= 200;
+      allow delete: if false;
+    }
+
+    // Códigos de Scaeli+ (compartidos por las dos apps): cualquier usuario con sesión puede leerlos y sumar un uso.
+    // Se crean desde la consola. Documento: codes/SCAELI-XXXX
+    //   { label: "para quién", days: 0 (0 = para siempre), max: 1 (0 = sin límite), uses: 0, until: "2027-12-31" (opcional) }
+    match /codes/{code} {
+      allow read: if request.auth != null;
+      allow update: if request.auth != null
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['uses'])
+        && request.resource.data.uses == resource.data.uses + 1;
+      allow create, delete: if false;
+    }
+  }
+}
