@@ -18,7 +18,7 @@ import { SANTORAL } from "../data/santoral.js";
 import { CARTAS } from "../data/cartas.js";
 import * as PJ from "./personaje.js";
 
-export const VERSION="2.1.1";
+export const VERSION="2.1.2";
 const LOGO_GOOGLE='<svg class="logo-g" viewBox="0 0 48 48" aria-hidden="true"><path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/><path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/><path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/><path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/></svg>';
 const LOGO_APPLE='<svg class="logo-a" viewBox="0 0 814 1000" aria-hidden="true"><path fill="currentColor" d="M788.1 340.9c-5.8 4.5-108.2 62.2-108.2 190.5 0 148.4 130.3 200.9 134.2 202.2-.6 3.2-20.7 71.9-68.7 141.9-42.8 61.6-87.5 123.1-155.5 123.1s-85.5-39.5-164-39.5c-76.5 0-103.7 40.8-165.9 40.8s-105.6-57-155.5-127C46.7 790.7 0 663 0 541.8c0-194.4 126.4-297.5 250.8-297.5 66.1 0 121.2 43.4 162.7 43.4 39.5 0 101.1-46 176.3-46 28.5 0 130.9 2.6 198.3 99.2zm-234-181.5c31.1-36.9 53.1-88.1 53.1-139.3 0-7.1-.6-14.3-1.9-20.1-50.6 1.9-110.8 33.7-147.1 75.8-28.5 32.4-55.1 83.6-55.1 135.5 0 7.8 1.3 15.6 1.9 18.1 3.2.6 8.4 1.3 13.6 1.3 45.4 0 102.5-30.4 135.5-71.3z"/></svg>';
 /* la dirección publicada: la app de las tiendas lee de acá los Evangelios del día (los genera la GitHub Action cada noche) */
@@ -411,7 +411,7 @@ const CREDITOS=[
  ["Novenas, examen y caminos","Texto propio de Scaeli, con lecturas de la Biblia Platense. El Te Deum, el Ven, Espíritu Creador y la oración del Regina caeli son traducciones propias del latín. Más novenas, en Catholic.net (se abre en tu navegador)."],
  ["Oraciones de siempre","Las oraciones tradicionales de la Iglesia (Padrenuestro, Avemaría, Credo, Salve, Yo confieso, Pésame y otras), de uso común, y sus textos latinos."],
  ["Biblioteca","Para leer en la app: los Ejercicios espirituales de San Ignacio (texto autógrafo) y la Imitación de Cristo (trad. P. Juan Eusebio Nieremberg, siglo XVII), de dominio público. Las obras de Santa Teresa de Jesús y San Juan de la Cruz se abren en archive.org, en ediciones de 1915 y 1912."],
- ["Ilustraciones y personajes","Pixel art hecho para Scaeli con PixelLab, con todos los derechos para Scaeli."],
+ ["Ilustraciones y personajes","Pixel art hecho para Scaeli con PixelLab, con todos los derechos para Scaeli. Los marcos de las cartas, el dorso, el sobre y la portada del álbum se hicieron con Gemini (Google) para Scaeli."],
  ["Tipografías","Inter (The Inter Project Authors), Cinzel (The Cinzel Project Authors) y Cormorant Garamond (The Cormorant Project Authors), con licencia SIL Open Font License 1.1. Van guardadas en la app."],
  ["Programas","Firebase (Google) para las cuentas y el guardado, con licencia Apache 2.0. En los teléfonos, Capacitor (licencia MIT) y RevenueCat para las compras."],
  ["Scaeli Daily","© Scaeli. Todos los derechos reservados sobre el diseño, el código y los textos propios."]];
@@ -766,7 +766,9 @@ function cartaDefs(){ if(document.getElementById("cdefs")) return; const d=docum
     '<pattern id="ctr-'+t+'" width="9" height="9" patternUnits="userSpaceOnUse"><path d="M4.5 1.2a2 2 0 0 1 0 3.3 2 2 0 0 1 0 3.3M1.2 4.5a2 2 0 0 1 3.3 0 2 2 0 0 1 3.3 0" fill="none" stroke="'+m[4]+'" stroke-opacity=".45" stroke-width=".7"/><circle cx="4.5" cy="4.5" r=".7" fill="'+m[4]+'" fill-opacity=".5"/></pattern>'; }).join("")+"</defs>";
   document.body.prepend(d); }
 const _marco={};
-function cartaMarco(t,num){ if(!_marco[t]){ const r=CR[t], m=r.met, me="url(#cme-"+t+")", mv="url(#cmv-"+t+")", ge="url(#cge-"+t+")";
+/* 2.1.2: el marco es un dibujo en pixel art (uno por rareza, assets/cartas) y el número va en el medallón */
+function cartaMarco(t,num){ return '<img class="marco" src="assets/cartas/marco-'+t+'.png" alt="" draggable="false"><span class="cnum">'+num+'</span>'; }
+function cartaMarcoSvg(t,num){ if(!_marco[t]){ const r=CR[t], m=r.met, me="url(#cme-"+t+")", mv="url(#cmv-"+t+")", ge="url(#cge-"+t+")";
   const esq='<g transform="translate(3 3) scale(.62)"><path d="M8 52C8 24 22 10 52 8 40 14 30 20 26 30 22 26 16 26 14 32 12 38 18 42 22 38 20 44 14 48 8 52Z" fill="'+me+'" stroke="'+m[4]+'" stroke-width="1"/><path d="M18 18C24 12 32 10 40 10" fill="none" stroke="'+m[4]+'" stroke-width=".8" opacity=".8"/><circle cx="17" cy="17" r="3.4" fill="'+ge+'" stroke="'+m[4]+'" stroke-width=".8"/></g>';
   let pips=""; for(let j=0;j<r.p;j++){ const x=-(r.p-1)*4.5+j*9; pips+='<polygon points="'+x+',-3.6 '+(x+3)+',0 '+x+',3.6 '+(x-3)+',0" fill="'+ge+'" stroke="'+m[4]+'" stroke-width=".6"/>'; }
   let hojas=""; [-1,1].forEach(sx=>{ for(let j=0;j<4;j++){ const cx=(sx*(28-j*5)).toFixed(1), cy=(-1-j*3.2).toFixed(1); hojas+='<ellipse cx="'+cx+'" cy="'+cy+'" rx="3.4" ry="1.6" transform="rotate('+(sx*(-50+j*12))+' '+cx+' '+cy+')" fill="'+mv+'" stroke="'+m[4]+'" stroke-width=".4"/>'; } });
@@ -792,16 +794,17 @@ const cvars=t=>{ const r=CR[t], m=r.met, s=r.sky; return "--m0:"+m[0]+";--m1:"+m
 const cimg=c=>"assets/santos/"+c.id+".png";
 /* la carta entera, a su medida de diseño (252×386); .cw la escala con --k */
 function cartaHTML(c){ const t=c.r, w=c.w*4, h=c.h*4, src=cimg(c);
-  return '<div class="carta r-'+t+'" style="'+cvars(t)+'"><div class="panel"><div class="damasco"></div>'+
+  return '<div class="carta r-'+t+'" style="'+cvars(t)+'"><div class="panel"><div class="pin"><div class="damasco"></div>'+
    '<div class="arte"><div class="ventana"><div class="cielo"></div>'+cartaRosa(t)+'<div class="haz"></div><div class="rayos"></div>'+CCATE+CNUBES+'<div class="aura"></div><div class="polvo">'+'<i></i>'.repeat(12)+'</div><div class="piso"></div>'+
     '<img class="refl" src="'+src+'" alt="" style="width:'+w+'px;height:'+h+'px;bottom:'+(22-h)+'px"><img class="cpj" src="'+src+'" alt="" style="width:'+w+'px;height:'+h+'px"><div class="vig"></div></div>'+
     '<svg class="arco" viewBox="-6 -6 224 234" aria-hidden="true"><path d="'+CARCO+'" fill="none" stroke="url(#cmv-'+t+')" stroke-width="5"/><path d="'+CARCO+'" fill="none" stroke="'+CR[t].met[4]+'"/><path d="M4 4H208V218H4Z" fill="none" stroke="'+CR[t].met[0]+'" stroke-opacity=".35" stroke-width=".8"/></svg></div>'+
    '<div class="placa'+(c.n.length>21?" largo":"")+'"><span class="o">✠</span><b>'+esc(c.n)+'</b><span class="o">✠</span></div>'+
    '<div class="fiesta"><span class="l"></span>'+esc(c.f)+'<span class="l"></span></div><div class="ctag">'+esc(c.tag)+'</div>'+
-   '<div class="cfrase"><span class="cq">«</span>'+esc(c.fr)+'<span class="cq">»</span></div></div>'+cartaMarco(t,c.i)+
+   '<div class="cfrase"><span class="cq">«</span>'+esc(c.fr)+'<span class="cq">»</span></div></div></div>'+cartaMarco(t,c.i)+
    '<div class="brillo"></div>'+(t==="gloria"?'<div class="holo"></div><div class="chispas"><i></i><i></i><i></i><i></i><i></i></div>':'')+'</div>'; }
 /* el dorso: el mismo marco dorado con el arco, la cruz y la escalera de Scaeli */
-function dorsoHTML(){ return '<div class="carta dorso" style="'+cvars("oro")+'"><div class="panel dp"><svg class="emb" viewBox="0 0 120 150" aria-hidden="true"><circle cx="60" cy="62" r="56" fill="url(#cdl)"/><defs><radialGradient id="cdl"><stop offset="0" stop-color="#FFF6D6"/><stop offset=".5" stop-color="#F2B544" stop-opacity=".45"/><stop offset="1" stop-color="#F2B544" stop-opacity="0"/></radialGradient></defs>'+
+function dorsoHTML(){ return '<div class="carta dorso" style="'+cvars("oro")+'"><img class="dimg" src="assets/cartas/dorso.webp" alt="" draggable="false"><div class="brillo"></div></div>'; }
+function dorsoHTMLSvg(){ return '<div class="carta dorso" style="'+cvars("oro")+'"><div class="panel dp"><svg class="emb" viewBox="0 0 120 150" aria-hidden="true"><circle cx="60" cy="62" r="56" fill="url(#cdl)"/><defs><radialGradient id="cdl"><stop offset="0" stop-color="#FFF6D6"/><stop offset=".5" stop-color="#F2B544" stop-opacity=".45"/><stop offset="1" stop-color="#F2B544" stop-opacity="0"/></radialGradient></defs>'+
   '<path d="M18 132V62C18 32 38 14 60 10 82 14 102 32 102 62V132" fill="none" stroke="url(#cmv-oro)" stroke-width="5"/><path d="M28 132V64C28 40 42 25 60 21 78 25 92 40 92 64V132" fill="none" stroke="url(#cmv-oro)" stroke-width="1.5" opacity=".7"/><path d="M60 40v34M48 52h24" stroke="url(#cmv-oro)" stroke-width="5" stroke-linecap="round"/><g fill="url(#cmv-oro)"><rect x="34" y="104" width="52" height="6" rx="1"/><rect x="28" y="114" width="64" height="6" rx="1"/><rect x="22" y="124" width="76" height="7" rx="1"/></g></svg>'+
   '<div class="dt">SCAELI</div><div class="ds">Álbum de santos</div></div>'+cartaMarco("oro","✠")+'<div class="brillo"></div></div>'; }
 /* contenedor escalado: .cw.fit ocupa el ancho de su celda (cartasAjustar calcula la escala) */
@@ -823,7 +826,8 @@ function albGrupo(){ const u=yo(), M={}; let L=(enGrupo()&&grupo.L)||[]; L=L.fil
 function sobreEstado(){ const lun=semanaDe(); if((album.ab||[]).includes(lun)) return {k:"hecho"}; if(!enGrupo()) return {k:"grupo"}; const d=statsSemana(lun).d; return d<SOBRE_DIAS?{k:"dias",d}:{k:"listo",d}; }
 function albSortear(G){ const out=[]; for(let i=0;i<3;i++){ const x=Math.random(), r=x<.06?"gloria":x<.22?"martir":x<.48?"plata":"oro"; let pool=CARTAS.filter(c=>c.r===r&&!out.includes(c.id)); const falta=pool.filter(c=>!G[c.id]); if(falta.length&&Math.random()<.4) pool=falta; out.push(pool[Math.floor(Math.random()*pool.length)].id); } return out; }
 const fCorta=t=>{ const d=new Date(t*1000); return d.getDate()+" "+MESES[d.getMonth()].slice(0,3); };
-function sobreHTML(cls){ return '<div class="sobre3'+(cls?" "+cls:"")+'"><div class="sb-borde t"></div><div class="sb-cuerpo"><div class="sb-brillo"></div><div class="sb-arco"><img src="assets/santos/teresita.png" alt=""><img src="assets/santos/miguel.png" alt=""><img src="assets/santos/francisco.png" alt=""></div><div class="sb-tit">Sobre de santos</div><div class="sb-sub">3 cartas · 1 por semana</div><div class="sb-sello">✠</div></div><div class="sb-borde b"></div></div>'; }
+function sobreHTML(cls){ return '<div class="sobre3 v2'+(cls?" "+cls:"")+'"><img class="sb-img" src="assets/cartas/sobre.png" alt="" draggable="false"><div class="sb-brillo"></div></div>'; }
+function sobreHTMLSvg(cls){ return '<div class="sobre3'+(cls?" "+cls:"")+'"><div class="sb-borde t"></div><div class="sb-cuerpo"><div class="sb-brillo"></div><div class="sb-arco"><img src="assets/santos/teresita.png" alt=""><img src="assets/santos/miguel.png" alt=""><img src="assets/santos/francisco.png" alt=""></div><div class="sb-tit">Sobre de santos</div><div class="sb-sub">3 cartas · 1 por semana</div><div class="sb-sello">✠</div></div><div class="sb-borde b"></div></div>'; }
 function sobreBox(){ const e=sobreEstado(), falta=SOBRE_DIAS-(e.d||0);
   const tx=e.k==="listo"?["Tu sobre de la semana está listo","Rezaste "+e.d+" días con Dios esta semana. Abrilo y sumá tus cartas al álbum del grupo."]:
    e.k==="hecho"?["Ya abriste el sobre de esta semana","El próximo sale el lunes, con 5 días con Dios."]:
@@ -833,7 +837,7 @@ function sobreBox(){ const e=sobreEstado(), falta=SOBRE_DIAS-(e.d||0);
    (e.k==="dias"?'<div class="pips5">'+Array.from({length:SOBRE_DIAS},(_,i)=>'<i'+(i<e.d?' class="on"':'')+'></i>').join("")+'</div>':'')+'</div>'+
    (e.k==="listo"?'<button class="primary" data-a="sobreAbrir">Abrir el sobre</button>':e.k==="grupo"?'<button class="ghost g" data-a="grupo">'+ic("user")+' Ir a mi grupo</button>':'')+'</div>'; }
 function shAlbum(){ const G=albGrupo(), n=Object.keys(G).length, F=sheet.fr||"", L=CARTAS.filter(c=>!F||c.r===F), lleno=n>=CARTAS.length;
-  return shTop("Álbum de santos",enGrupo()?"Álbum del grupo «"+esc(grupo.meta.n)+"»":"Se llena entre todos los del grupo")+'<div class="scroll">'+
+  return shTop("Álbum de santos",enGrupo()?"Álbum del grupo «"+esc(grupo.meta.n)+"»":"Se llena entre todos los del grupo")+'<div class="scroll"><div class="albport"><img src="assets/cartas/album.webp" alt=""></div>'+
    '<div class="card albtop"><div class="albh"><div><div class="eyebrow">'+(enGrupo()?"Entre todos":"Tus cartas")+'</div><b class="big2">'+n+'<small> / '+CARTAS.length+'</small></b></div><div class="albr">'+CR_ORDEN.map(t=>{ const tot=CARTAS.filter(c=>c.r===t).length, h=CARTAS.filter(c=>c.r===t&&G[c.id]).length; return '<span class="rz r-'+t+'" style="'+cvars(t)+'"><i></i>'+h+'/'+tot+'</span>'; }).join("")+'</div></div>'+
    '<div class="bar3"><i style="width:'+Math.round(n/CARTAS.length*100)+'%"></i></div>'+
    (lleno?'<button class="primary" data-a="diploma">'+ic("star")+' ¡Álbum completo! Ver el diploma</button>':'<p class="hint" style="margin:10px 0 0">Las cartas repetidas no suman. Quien complete el álbum con su grupo recibe de regalo el álbum impreso.</p>')+'</div>'+

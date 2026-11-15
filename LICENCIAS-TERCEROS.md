@@ -11,6 +11,7 @@
 | Oraciones tradicionales y sus textos latinos | Tradición de la Iglesia | Dominio público. |
 | Novenas, examen de conciencia, caminos, Te Deum, Ven Espíritu Creador, Regina caeli | Texto y traducciones propias de Scaeli | © Scaeli. |
 | Ilustraciones, personajes y cartas (`assets/`) | Hechas para Scaeli con PixelLab | Derechos de Scaeli según los términos de PixelLab. |
+| Marcos de las cartas, dorso, sobre y portada del álbum (`assets/cartas/`) | Hechos para Scaeli con Gemini (Google) | Google no reclama la propiedad del contenido generado (Términos de los servicios de IA generativa de Google). |
 | Inter (`assets/fuentes/inter.woff2`) | The Inter Project Authors | SIL Open Font License 1.1 (`assets/fuentes/licencias/OFL-Inter.txt`). |
 | Cinzel (`assets/fuentes/cinzel.woff2`) | The Cinzel Project Authors | SIL Open Font License 1.1 (`assets/fuentes/licencias/OFL-Cinzel.txt`). |
 | Cormorant Garamond (`assets/fuentes/cormorant-i.woff2`) | The Cormorant Project Authors | SIL Open Font License 1.1 (`assets/fuentes/licencias/OFL-Cormorant.txt`). |
