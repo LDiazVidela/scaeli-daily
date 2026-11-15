@@ -57,17 +57,18 @@ def poner_cabeza(B, Hd, D, M, caja, cut, extra):
     return out
 
 def pelo_abajo(Hd, D, cut):
-    """lo que el pelo nuevo agrega bajo el corte: píxeles distintos del deportivo y de color de pelo (no piel)."""
+    """lo que el pelo nuevo agrega bajo el corte (largo, ondas, trenza): lo que cambió respecto del deportivo,
+    pegado al pelo de arriba, más su contorno oscuro (que sobre la remera negra del deportivo no se distingue)."""
     dif = np.abs(Hd[:, :, :3].astype(int) - D[:, :, :3].astype(int)).sum(2) > 60
-    r, g, b = [Hd[:, :, i].astype(int) for i in range(3)]
-    pelo = (Hd[:, :, 3] > 0) & (r >= g) & (g >= b - 8) & ((r + g + b) < 420) & ~((r > 140) & (r - b > 60))
-    m = dif & pelo; m[:cut] = False
-    # solo lo que toca el pelo de arriba (no manchas sueltas de la ropa)
-    lab, n = ndimage.label(m); keep = np.zeros_like(m)
+    dif &= (Hd[:, :, 3] > 0); dif[:cut] = False
+    oscuro = (Hd[:, :, 3] > 0) & (Hd[:, :, :3].astype(int).sum(2) < 170)
+    cand = dif | (oscuro & ndimage.binary_dilation(dif)); cand[:cut] = False   # el contorno une los tramos (trenza)
+    lab, n = ndimage.label(cand); keep = np.zeros_like(cand)
     for i in range(1, n + 1):
         z = lab == i
-        if z.sum() >= 3 and np.argwhere(z)[:, 0].min() <= cut + 1: keep |= z
-    return keep
+        if z.sum() >= 3 and np.argwhere(z)[:, 0].min() <= cut + 2: keep |= z
+    borde = ndimage.binary_dilation(keep) & oscuro & ~keep; borde[:cut] = False
+    return keep | borde
 
 def main():
     pj = json.load(open(R + 'pj.json'))

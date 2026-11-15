@@ -50,7 +50,7 @@ const { chromium } = require('playwright');
   await A('anioCompartir',null,1500); ok((await p.evaluate(()=>window.__dl))==='mi-anio-con-dios-2026.png','imagen generada y descargada');
   await A('anioIr',1,300); ok(!(await p.evaluate(()=>window.DAILY.get().sheet)),'pasar de la última cierra');
   // sin Scaeli+: paywall
-  await p.evaluate(()=>localStorage.setItem('daily_plus_como_gratis','1')); await A('anio',null,500); t=await T(); ok(/Scaeli\+/.test(t)&&/Tu año en historias/.test(t),'sin plus, paywall con el texto nuevo'); ok(/En su tiempo se suman la Cuaresma/.test(t),'texto nuevo de Caminos'); await A('cerrar'); await p.evaluate(()=>localStorage.removeItem('daily_plus_como_gratis'));
+  await p.evaluate(()=>localStorage.setItem('daily_plus_como_gratis','1')); await A('anio',null,500); t=await T(); ok(/Scaeli\+/.test(t)&&/Tu año en historias/.test(t),'sin plus, paywall con el texto nuevo'); ok(/Adviento, Navidad, Cuaresma y Pascua/.test(t),'texto de Caminos (los cuatro tiempos que trae)'); await A('cerrar'); await p.evaluate(()=>localStorage.removeItem('daily_plus_como_gratis'));
   // 5) grupo (local): ejemplo
   await p.evaluate(()=>window.DAILY.ir('hoy')); await p.waitForTimeout(400); t=await T(); ok(/Rezá con tus amigos/.test(t),'tarjeta del grupo en Hoy');
   await A('grupo'); t=await T(); ok(/Grupo de perseverancia/.test(t)&&/grupo de ejemplo/.test(t),'pantalla sin grupo (local) ofrece ejemplo');
