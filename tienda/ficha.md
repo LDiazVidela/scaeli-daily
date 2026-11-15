@@ -25,7 +25,7 @@ rosario,evangelio,oración,católica,santos,santoral,liturgia,horas,novena,bibli
 Rezá todos los días con el Evangelio, el Rosario cuenta por cuenta, la Liturgia de las Horas y el santo del día. Con tu personaje en pixel art.
 
 ## Descripción larga (4000)
-Scaeli Daily te acompaña a rezar todos los días, con una app sobria, linda y pensada para jóvenes.
+Scaeli Daily te acompaña a rezar todos los días, con una app sobria y linda.
 
 HOY
 • A la mañana y a la noche, tu propia oración; al mediodía, el Ángelus; a la tarde, el Evangelio.
@@ -47,7 +47,7 @@ REZAR
 TU DÍA
 • Diarias y hábitos, cada uno con su vela: la racha de días seguidos, que se apaga si un día no lo hacés. Tareas con hora de aviso.
 • Nivel y experiencia: cada diaria, hábito u oración suma; las caídas y las diarias sin hacer bajan el ánimo, y la Confesión lo restaura. Logros de una sola vez: primer Rosario, 7 días seguidos, 100 hábitos…
-• Biblioteca de hábitos y virtudes: más de 60 propuestas por virtud y por área (oración, familia, amigos, estudio, cuerpo, pantallas) para agregar con un toque.
+• Biblioteca de hábitos y virtudes: más de 60 propuestas para agregar con un toque.
 • Diario privado, intenciones y calendario del mes (podés conectar Google Calendar).
 • Recordatorios para rezar a la mañana y a la noche.
 
@@ -55,7 +55,8 @@ GRUPO DE PERSEVERANCIA
 • Invitá a tus amigos con un enlace o un código: un desafío por semana entre todos (Rosarios, Evangelios, días con Dios), un muro para animarse, la actividad del día (qué rezó cada uno, nunca lo que escribió), intenciones por las que rezan los demás, aliento y un ranking de grupos. Se puede reportar y bloquear.
 
 TU PERSONAJE
-• Un personaje en pixel art que vos elegís: varón o mujer, tres peinados, ropa en cinco colores y ropa de consagrados.
+• Un personaje en pixel art que vos elegís: varón o mujer, seis peinados, ropa en cinco colores y ropa de consagrados.
+• Álbum de santos: 79 cartas que se llenan entre todos los del grupo, con un sobre por semana.
 
 SCAELI+ (OPCIONAL)
 La oración es gratis siempre. Con Scaeli+ sumás:
