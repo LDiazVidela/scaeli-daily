@@ -30,12 +30,12 @@ const { chromium } = require('playwright');
   await A('cerrar');
   // 3) libros
   await p.evaluate(()=>window.DAILY.ir('rezar')); await p.waitForTimeout(400); t=await T(); ok(/Biblioteca/.test(t)&&/Santa Teresa/.test(t),'portada Biblioteca en Rezar');
-  await A('libros',null,600); t=await T(); ok(/Las moradas del castillo interior/.test(t)&&/Imitación de Cristo/.test(t)&&/Ejercicios espirituales/.test(t),'12 libros listados'); ok((await p.evaluate(()=>document.querySelectorAll('.libro').length))===12,'12 tarjetas');
-  await A('libAbrir','moradas',1500); t=await T(); ok(/Moradas primeras/i.test(t)&&/Capítulo 1/.test(t),'capítulos de Las moradas con secciones');
-  await A('libIr','moradas|1',800); t=await T(); ok(/castillo todo de un diamante/.test(t),'texto del capítulo 1 de Las moradas'); ok(await p.evaluate(()=>!!document.querySelector('.biblia.lib p.resumen')),'resumen en itálica');
-  await A('libIr','poesias|8',1200); t=await T(); ok(/Nada te turbe,\nnada te espante/.test(t),'verso con saltos de línea');
+  await A('libros',null,600); t=await T(); ok(/Imitación de Cristo/.test(t)&&/Ejercicios espirituales/.test(t)&&!/Las moradas del castillo/.test(t),'solo los libros de dominio público'); ok(await p.evaluate(()=>document.querySelectorAll('a.libro.fuera[href^="https://archive.org/details/"]').length===6),'Santa Teresa y San Juan de la Cruz como enlaces a archive.org');
+  await A('libAbrir','imitacion',1500); t=await T(); ok(/Libro primero/i.test(t)&&/Capítulo 1/.test(t),'capítulos de la Imitación con secciones');
+  await A('libIr','imitacion|1',800); t=await T(); ok(/Del bajo aprecio de sí mismo/i.test(t),'texto del capítulo 2 de la Imitación');
   await A('libIr','imitacion|0',1200); t=await T(); ok(/Quien me sigue no anda en tinieblas/.test(t),'Kempis cap. 1');
-  const g=await p.evaluate(()=>JSON.parse(localStorage.getItem('daily_libros'))); ok(g&&g.ult==='imitacion'&&g.moradas&&g.moradas.c===1,'marcador guardado: '+JSON.stringify(g));
+  const g=await p.evaluate(()=>JSON.parse(localStorage.getItem('daily_libros'))); ok(g&&g.ult==='imitacion','marcador guardado: '+JSON.stringify(g));
+  await A('libIr','ejercicios|1',1000);
   await A('cerrar'); await A('libros',null,500); t=await T(); ok(/Seguir leyendo/i.test(t)&&/vas por el 2/.test(t),'seguir leyendo + vas por el 2: '+(t.match(/vas por el \d+/)||[''])[0]);
   await A('bibliAddLeer',null,500); await A('cerrar');
   // 4) Tu año con Dios

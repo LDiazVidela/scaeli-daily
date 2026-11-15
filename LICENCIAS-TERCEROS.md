@@ -6,7 +6,8 @@
 | Citas de las lecturas del día (solo qué lectura toca) | Evangelizo.org | Se toma solo la cita; el texto es el de la Biblia Platense. |
 | Liturgia de las Horas | liturgiadelashoras.github.io | No se copia: se abre el sitio en el navegador. |
 | Calendario litúrgico de la Argentina (`data/ordo/`) | GCatholic.org | Datos de fechas y celebraciones. |
-| Biblioteca (`libros/`) | Obras de Santa Teresa de Jesús, San Juan de la Cruz, San Ignacio y la Imitación de Cristo (trad. P. Nieremberg), según los PDF de mercaba.es | Obras de dominio público. |
+| Biblioteca (`libros/`) | Ejercicios espirituales de San Ignacio (transcripción literal del autógrafo) e Imitación de Cristo (trad. P. Juan Eusebio Nieremberg, s. XVII) | Obras de dominio público, sin notas de ediciones modernas. |
+| Santa Teresa de Jesús y San Juan de la Cruz | Ediciones de 1915 (Burgos) y 1912 (Toledo) en archive.org | No se copian: se abren como enlace. (Los textos de la Editorial Monte Carmelo que tenía la app se sacaron en la 2.1.) |
 | Oraciones tradicionales y sus textos latinos | Tradición de la Iglesia | Dominio público. |
 | Novenas, examen de conciencia, caminos, Te Deum, Ven Espíritu Creador, Regina caeli | Texto y traducciones propias de Scaeli | © Scaeli. |
 | Ilustraciones, personajes y cartas (`assets/`) | Hechas para Scaeli con PixelLab | Derechos de Scaeli según los términos de PixelLab. |

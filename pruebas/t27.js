@@ -13,7 +13,7 @@ const { chromium } = require('playwright');
   await p.click('.hero2 .pjbtn'); await p.waitForTimeout(700); ok(await p.evaluate(() => document.querySelector('#pjsec') && Math.abs(document.querySelector('#pjsec').getBoundingClientRect().top) < 140), 'tocar el avatar lleva a la personalización');
   // Palabra del día
   await A('palabra', null, 1500); let t = await SH(); ok(/Palabra del día/i.test(t) && /¿Qué me dice hoy\?/i.test(t) && /¿Cómo lo vivo hoy\?/i.test(t), 'panel de la Palabra del día'); const cita = await p.evaluate(() => document.querySelector('.pal .st').innerText);
-  ok(/^\S+ \d+(-\d+)?,\d+(-\d+)?$/.test(cita), 'cita: ' + cita); ok((await p.$$('.paltx sup')).length >= 2, 'texto con versículos');
+  ok(/^([123] )?\S+ \d+(-\d+)?,\d+(-\d+)?$/.test(cita), 'cita: ' + cita); ok((await p.$$('.paltx sup')).length >= 2, 'texto con versículos');
   await p.fill('#palQ', 'Que no estoy solo'); await p.fill('#palV', 'Llamar a mi abuela'); await A('palOk', null, 600);
   let st = await LS(); const hoyK = Object.keys(st).filter(k => k.startsWith('daily_days/')).sort().pop(); const dd = st[hoyK]; ok(dd && dd.pal && dd.pal.q === 'Que no estoy solo' && dd.pal.r === cita, 'reflexión guardada en el día');
   await A('misOraciones'); t = await SH(); ok(/Palabra del día/.test(t) && /Llamar a mi abuela/.test(t), 'aparece en Mis oraciones'); await A('cerrar');

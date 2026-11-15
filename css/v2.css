@@ -154,3 +154,4 @@ form.add2 .tadd{height:44px!important}
 .big{background:radial-gradient(circle at 50% 42%,rgba(163,43,65,.3) 0%,var(--surface) 64%)}
 :root[data-theme="light"] .big{background:radial-gradient(circle at 50% 42%,rgba(163,43,65,.1) 0%,var(--surface) 64%)}
 .novmas{display:flex;justify-content:center;align-items:center;gap:8px;height:48px;margin-top:18px;text-decoration:none}
+a.libro{text-decoration:none}

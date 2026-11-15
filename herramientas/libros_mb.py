@@ -109,6 +109,12 @@ def parsear(L, cfg):
     for c in caps: c['t'] = cfg.get('renombrar', {}).get(c['t'], c['t'])
     return [c for c in caps if c['p']]
 
+# 2.1 · DERECHOS: los PDF de Santa Teresa y San Juan de la Cruz de mercaba.es son la edición de la Editorial Monte Carmelo
+# («© La presente edición ... prohíbe expresamente la reproducción»), con notas de sus editores. NO se usan más.
+# Solo quedan los Ejercicios (transcripción literal del autógrafo) y la Imitación (trad. Nieremberg, s. XVII).
+SOLO = ('ejercicios', 'imitacion')
+LIBROS = [x for x in LIBROS if x['id'] in SOLO]
+FUERA = open(OUT + '/data/libros.js').read().split('export const LIBROS_FUERA=')[1]   # los enlaces a archive.org se conservan
 lista = []
 os.makedirs(OUT + '/libros', exist_ok=True)
 for cfg in LIBROS:
@@ -118,9 +124,10 @@ for cfg in LIBROS:
     caps = parsear(L, cfg)
     palabras = sum(len(p.split()) for c in caps for p in c['p'])
     json.dump({'caps': caps}, open(f"{OUT}/libros/{cfg['id']}.json", 'w'), ensure_ascii=False, separators=(',', ':'))
-    lista.append({'id': cfg['id'], 't': cfg['t'], 'a': cfg['autor'], 'y': cfg['anio'], 'sub': cfg['sub'], 'n': len(caps), 'w': palabras, 'url': MB + ('germania/' if 'brunforte' in cfg['pdf'] else 'renacimiento/') + cfg['pdf'] + '.pdf'})
+    lista.append({'id': cfg['id'], 't': cfg['t'], 'a': cfg['autor'], 'y': cfg['anio'], 'sub': cfg['sub'], 'n': len(caps), 'w': palabras})
     print(cfg['id'].ljust(14), len(caps), 'capítulos', palabras, 'palabras ·', ' | '.join(c['t'][:22] for c in caps[:4]))
 with open(OUT + '/data/libros.js', 'w') as f:
-    f.write('// La biblioteca de Daily: clásicos católicos de dominio público (herramientas/libros_mb.py). Lo generó el script: no editar a mano.\n')
-    f.write('// id = libros/<id>.json; t título; a autor; y año; sub de qué trata; n capítulos; w palabras; url la fuente (mercaba.es).\n')
+    f.write('// La biblioteca de Daily (2.1): solo textos de dominio público y sin notas ni aparato de ediciones modernas (herramientas/libros_mb.py).\n')
+    f.write('// id = libros/<id>.json; t título; a autor; y año; sub de qué trata; n capítulos; w palabras.\n')
     f.write('export const LIBROS=' + json.dumps(lista, ensure_ascii=False, separators=(',', ':')).replace('},{', '},\n{') + ';\n')
+    f.write('export const LIBROS_FUERA=' + FUERA)

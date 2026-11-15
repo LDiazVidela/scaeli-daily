@@ -11,14 +11,14 @@ import { ORACIONES_MAS } from "../data/oraciones_mas.js";
 import { NOVENAS, NOV_MAS } from "../data/novenas.js";
 import { CAPITALES, CAPITALES_N, VIDA, CONF_CIERRE } from "../data/examen.js";
 import { BIBLIOTECA, AREAS, PUBLICOS } from "../data/habitos.js";
-import { LIBROS } from "../data/libros.js";
+import { LIBROS, LIBROS_FUERA } from "../data/libros.js";
 import { MISA_ORDINARIO, PREF_SANTOS, PREF_PROPIO } from "../data/misa.js";
 import { SANTOS_MAS, tipoSanto, oracionSanto } from "../data/santos.js";
 import { SANTORAL } from "../data/santoral.js";
 import { CARTAS } from "../data/cartas.js";
 import * as PJ from "./personaje.js";
 
-export const VERSION="2.1";
+export const VERSION="2.1.1";
 const LOGO_GOOGLE='<svg class="logo-g" viewBox="0 0 48 48" aria-hidden="true"><path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/><path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/><path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/><path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/></svg>';
 const LOGO_APPLE='<svg class="logo-a" viewBox="0 0 814 1000" aria-hidden="true"><path fill="currentColor" d="M788.1 340.9c-5.8 4.5-108.2 62.2-108.2 190.5 0 148.4 130.3 200.9 134.2 202.2-.6 3.2-20.7 71.9-68.7 141.9-42.8 61.6-87.5 123.1-155.5 123.1s-85.5-39.5-164-39.5c-76.5 0-103.7 40.8-165.9 40.8s-105.6-57-155.5-127C46.7 790.7 0 663 0 541.8c0-194.4 126.4-297.5 250.8-297.5 66.1 0 121.2 43.4 162.7 43.4 39.5 0 101.1-46 176.3-46 28.5 0 130.9 2.6 198.3 99.2zm-234-181.5c31.1-36.9 53.1-88.1 53.1-139.3 0-7.1-.6-14.3-1.9-20.1-50.6 1.9-110.8 33.7-147.1 75.8-28.5 32.4-55.1 83.6-55.1 135.5 0 7.8 1.3 15.6 1.9 18.1 3.2.6 8.4 1.3 13.6 1.3 45.4 0 102.5-30.4 135.5-71.3z"/></svg>';
 /* la dirección publicada: la app de las tiendas lee de acá los Evangelios del día (los genera la GitHub Action cada noche) */
@@ -410,7 +410,7 @@ const CREDITOS=[
  ["Liturgia de las Horas","No está copiada en la app: cada Hora se abre en liturgiadelashoras.github.io, en tu navegador."],
  ["Novenas, examen y caminos","Texto propio de Scaeli, con lecturas de la Biblia Platense. El Te Deum, el Ven, Espíritu Creador y la oración del Regina caeli son traducciones propias del latín. Más novenas, en Catholic.net (se abre en tu navegador)."],
  ["Oraciones de siempre","Las oraciones tradicionales de la Iglesia (Padrenuestro, Avemaría, Credo, Salve, Yo confieso, Pésame y otras), de uso común, y sus textos latinos."],
- ["Biblioteca","Obras clásicas de santos y autores espirituales en ediciones de dominio público."],
+ ["Biblioteca","Para leer en la app: los Ejercicios espirituales de San Ignacio (texto autógrafo) y la Imitación de Cristo (trad. P. Juan Eusebio Nieremberg, siglo XVII), de dominio público. Las obras de Santa Teresa de Jesús y San Juan de la Cruz se abren en archive.org, en ediciones de 1915 y 1912."],
  ["Ilustraciones y personajes","Pixel art hecho para Scaeli con PixelLab, con todos los derechos para Scaeli."],
  ["Tipografías","Inter (The Inter Project Authors), Cinzel (The Cinzel Project Authors) y Cormorant Garamond (The Cormorant Project Authors), con licencia SIL Open Font License 1.1. Van guardadas en la app."],
  ["Programas","Firebase (Google) para las cuentas y el guardado, con licencia Apache 2.0. En los teléfonos, Capacitor (licencia MIT) y RevenueCat para las compras."],
@@ -967,7 +967,9 @@ function shLibros(){ const g=libGuardado(), u=libUltimo();
   return shTop("Biblioteca","Clásicos católicos, libres de derechos")+'<div class="scroll"><div class="sbanner"><img src="'+ilu("biblioteca")+'" alt=""><span class="g"></span></div>'+
    (u?'<button class="card lhnow" data-a="libIr" data-p="'+u.L.id+'|'+u.c+'"><span class="n"><span class="eyebrow">Seguir leyendo</span><b>'+esc(u.L.t)+'</b><small>'+esc(u.L.caps?u.L.caps[u.c].t:"capítulo "+(u.c+1))+'</small></span>'+ic("right")+'</button>':'')+
    aut.map(a=>'<div class="sect">'+esc(a)+'</div>'+LIBROS.filter(x=>x.a.split(" · ")[0]===a).map(x=>{ const m=g[x.id]; return '<button class="libro" data-a="libAbrir" data-p="'+x.id+'"><span class="tapa"><i></i><b>'+esc(x.t)+'</b></span><span class="n"><b>'+esc(x.t)+'</b><small>'+esc(x.sub)+'</small><small class="muted">'+x.n+' capítulos · '+libMin(x)+' min cada uno'+(m?' · vas por el '+(m.c+1):'')+'</small></span>'+ic("right")+'</button>'; }).join("")).join("")+
-   '<p class="hint" style="margin-top:14px">Obras de dominio público: escritas en castellano por sus autores, y la Imitación de Cristo en la traducción clásica del P. Nieremberg (siglo XVII). El texto, tal cual lo publica el archivo de libros de mercaba.es; puede traer alguna errata de la edición digital.</p>'+
+   '<div class="sect">Santa Teresa y San Juan de la Cruz</div><p class="hint">Sus obras, en las ediciones antiguas de dominio público, escaneadas en archive.org. Se abren en tu navegador.</p>'+
+   LIBROS_FUERA.map(x=>'<a class="libro fuera" href="'+esc(x[3])+'" target="_blank" rel="noopener"><span class="tapa"><i></i><b>'+esc(x[1])+'</b></span><span class="n"><b>'+esc(x[1])+'</b><small>'+esc(x[0])+'</small><small class="muted">'+esc(x[2])+' · archive.org</small></span>'+ic("right")+'</a>').join("")+
+   '<p class="hint" style="margin-top:14px">Obras de dominio público: los Ejercicios en el texto autógrafo de San Ignacio y la Imitación de Cristo en la traducción clásica del P. Nieremberg (siglo XVII). Puede haber alguna errata de la edición digital.</p>'+
    '</div><button class="primary ink" data-a="cerrar">Volver</button>'; }
 function shLibro(){ const L=LIBROS.find(x=>x.id===sheet.p); if(!L) return shTop("Libro")+'<p class="hint">No está.</p>'; const T=LIB[L.id];
   if(!T){ libTexto(L.id).then(()=>renderSheet()).catch(()=>{ sheet.err="No se pudo abrir este libro. Revisá la conexión."; renderSheet(); }); return shTop(esc(L.t),esc(L.a))+'<p class="hint">'+(sheet.err?esc(sheet.err):"Abriendo…")+'</p>'; }

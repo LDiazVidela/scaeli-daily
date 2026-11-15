@@ -42,7 +42,7 @@ REZAR
 • 30 novenas propias, día por día, con la Palabra de Dios de cada jornada (la Virgen de Luján, San Cayetano, San José, el Cura Brochero, Santa Rita, la Divina Misericordia y muchas más), y la Confesión explicada paso a paso.
 • La Misa de hoy con la guía del celebrante: color, grado, Gloria y Credo, prefacio, lecturas y el Ordinario paso a paso.
 • Santoral: los santos de cada día del año, con su vida, una frase y una oración para pedirles.
-• Biblioteca: clásicos católicos libres de derechos para leer capítulo a capítulo, con marcador: Santa Teresa de Jesús (Vida, Camino de perfección, Las moradas, Exclamaciones, Poesías), San Juan de la Cruz (Subida, Noche oscura, Cántico, Llama, Dichos de luz y amor), los Ejercicios de San Ignacio y la Imitación de Cristo.
+• Biblioteca: los Ejercicios de San Ignacio y la Imitación de Cristo para leer capítulo a capítulo, con marcador, y las obras de Santa Teresa de Jesús y San Juan de la Cruz en sus ediciones antiguas.
 
 TU DÍA
 • Diarias y hábitos, cada uno con su vela: la racha de días seguidos, que se apaga si un día no lo hacés. Tareas con hora de aviso.
