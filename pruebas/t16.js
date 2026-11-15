@@ -4,6 +4,6 @@ const { chromium } = require('playwright');
   const A = async (a, q, ms = 400) => { await p.evaluate(([a, q]) => window.DAILY.ACC[a](q), [a, q]); await p.waitForTimeout(ms); };
   await p.click('#nav button[data-view="yo"]'); await p.waitForTimeout(800);
   await A('pjSet','prenda|clergyman',800); await p.screenshot({path:'r_pj1.png',fullPage:false});
-  const t=await p.textContent('#app'); if(/Peinado/.test(t)) errs.push('FALLA peinado visible con clergyman');
+  const t=await p.textContent('#app'); if(!/Peinado/.test(t)||!/Medio/.test(t)||!/Corto/.test(t)) errs.push('FALLA el clergyman tiene que ofrecer pelo medio y corto (2.1.3)');
   await A('pjSet','sx|f',800); await A('pjSet','prenda|buzo:bordo',600); await A('pjSet','peinado|corto',800); await p.screenshot({path:'r_pj2.png'});
   console.log('T16',errs.join('\n')||'OK'); await b.close(); })();

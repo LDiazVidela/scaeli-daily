@@ -1,4 +1,4 @@
-// t34 · Daily 2.1.2: los personajes con la cara del deportivo y la deportiva (la misma cara en los 88 dibujos)
+// t34 · Daily 2.1.2 (y 2.1.3: lugares vacíos con silueta): los personajes con la cara del deportivo y la deportiva (la misma cara en los 88 dibujos)
 // y las cartas, el dorso, el sobre y la portada del álbum en pixel art (assets/cartas)
 const { chromium } = require('playwright');
 (async () => { const b = await chromium.launch(); const errs = [], fails = []; const ok = (c, m) => { if (!c) fails.push(m); };
@@ -31,8 +31,9 @@ const { chromium } = require('playwright');
   await p.reload(); await p.waitForTimeout(1300);
   await A('album', null, 1200);
   ok(await p.evaluate(() => { const i = document.querySelector('.albport img'); return i && i.complete && i.naturalWidth > 0; }), 'portada del álbum');
-  ok(await p.evaluate(() => { const L = [...document.querySelectorAll('.albgrid .carta img.marco')]; return L.length === 4 && L.every(i => i.complete && i.naturalWidth > 0); }), 'marcos de las cartas');
-  ok(await p.evaluate(() => [...document.querySelectorAll('.albgrid .carta')].map(c => c.className.match(/r-(\w+)/)[1] + ':' + c.querySelector('img.marco').getAttribute('src').match(/marco-(\w+)/)[1]).every(s => s.split(':')[0] === s.split(':')[1])), 'cada rareza con su marco');
+  ok(await p.evaluate(() => { const L = [...document.querySelectorAll('.albgrid .cw:not(.hueco) .carta img.marco')]; return L.length === 4 && L.every(i => i.complete && i.naturalWidth > 0); }), 'marcos de las cartas');
+  ok(await p.evaluate(() => [...document.querySelectorAll('.albgrid .cw:not(.hueco) .carta')].map(c => c.className.match(/r-(\w+)/)[1] + ':' + c.querySelector('img.marco').getAttribute('src').match(/marco-(\w+)/)[1]).every(s => s.split(':')[0] === s.split(':')[1])), 'cada rareza con su marco');
+  ok(await p.evaluate(() => { const H = [...document.querySelectorAll('.albgrid .cw.hueco .carta.hueco2')]; return H.length === 75 && H.every(h => h.querySelector('img.marco') && h.querySelector('.hsil img') && /\S/.test(h.querySelector('.placa b').innerText)); }), 'los lugares vacíos: marco apagado, silueta y nombre');
   ok(await p.evaluate(() => /^\d+$/.test(document.querySelector('.albgrid .carta .cnum').innerText.trim())), 'número en el medallón');
   ok(await p.evaluate(() => { const i = document.querySelector('.sobrec .sb-img'); return i && i.complete && i.naturalWidth > 0; }), 'sobre dibujado');
   await A('figu', 'pedro', 900);

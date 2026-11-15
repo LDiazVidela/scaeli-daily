@@ -1,5 +1,6 @@
 // El personaje de Daily: solo los dibujos de PixelLab, tal cual (herramientas/pj_crudo.py). Es un avatar: se ve solo de frente.
-// Cada combinación de ropa, color y peinado es un dibujo entero de PixelLab; acá no se pega, no se tiñe ni se agrega nada.
+// Cada combinación de ropa, color y peinado es un dibujo entero (PixelLab; desde 2.1.2 con la misma cara, caras.py, y desde 2.1.3
+// con los peinados nuevos de Gemini, peinados.py): acá no se pega, no se tiñe ni se agrega nada.
 const VISTAS=["south"];   // desde la 1.6.1 la hoja trae solo el frente
 
 export const COLORES=[["gris","Gris","#A9ABB2"],["blanco","Blanco","#EEEDE8"],["negro","Negro","#2C2D33"],["azul","Azul","#2E3E66"],["bordo","Bordó","#6E1E2E"]];
@@ -7,9 +8,11 @@ export const PRENDAS={m:[["base","Camisa clara"],["remera","Remera"],["buzo","Bu
   f:[["base","Blusa y jean"],["remera","Remera"],["buzo","Buzo"],["pollera","Pollera"],["deportiva","Deportiva"],["consagrada","Consagrada"],["caridad","Misionera de la Caridad"],["dominica","Dominica"],["carmelita","Carmelita"]]};
 export const CON_COLOR=["remera","buzo","camisa","pollera"];
 export const VELO=["consagrada","caridad","dominica","carmelita"];
-export const FIJO={clergyman:"corto",deportiva:"base"};   // la ropa que PixelLab dibujó con un solo peinado
+export const FIJO={};   // 2.1.3: el clergyman y la deportiva ya tienen varios peinados (los que no existen no se ofrecen)
 export const ALTURAS=[["baja","Baja"],["media","Media"],["alta","Alta"]];
-export const PEINADOS={m:[["base","Medio"],["corto","Corto"]],f:[["base","Colita"],["suelto","Suelto"],["corto","Carré"]]};
+/* 2.1.3: peinados nuevos, los del creador de personajes del juego (herramientas/peinados.py) */
+export const PEINADOS={m:[["base","Medio"],["corto","Corto"],["ondulado","Ondulado"],["rulos","Rulos"],["lacio","Lacio"],["rapado","Rapado"]],
+  f:[["base","Colita"],["suelto","Suelto"],["corto","Carré"],["ondas","Ondas"],["trenza","Trenza"],["flequillo","Flequillo"]]};
 
 let META=null; const HOJA={}; let listo=null;
 function cargarImg(src){ return new Promise((ok,mal)=>{ const im=new Image(); im.onload=()=>ok(im); im.onerror=mal; im.src=src; }); }

@@ -18,7 +18,7 @@ import { SANTORAL } from "../data/santoral.js";
 import { CARTAS } from "../data/cartas.js";
 import * as PJ from "./personaje.js";
 
-export const VERSION="2.1.2";
+export const VERSION="2.1.3";
 const LOGO_GOOGLE='<svg class="logo-g" viewBox="0 0 48 48" aria-hidden="true"><path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/><path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/><path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/><path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/></svg>';
 const LOGO_APPLE='<svg class="logo-a" viewBox="0 0 814 1000" aria-hidden="true"><path fill="currentColor" d="M788.1 340.9c-5.8 4.5-108.2 62.2-108.2 190.5 0 148.4 130.3 200.9 134.2 202.2-.6 3.2-20.7 71.9-68.7 141.9-42.8 61.6-87.5 123.1-155.5 123.1s-85.5-39.5-164-39.5c-76.5 0-103.7 40.8-165.9 40.8s-105.6-57-155.5-127C46.7 790.7 0 663 0 541.8c0-194.4 126.4-297.5 250.8-297.5 66.1 0 121.2 43.4 162.7 43.4 39.5 0 101.1-46 176.3-46 28.5 0 130.9 2.6 198.3 99.2zm-234-181.5c31.1-36.9 53.1-88.1 53.1-139.3 0-7.1-.6-14.3-1.9-20.1-50.6 1.9-110.8 33.7-147.1 75.8-28.5 32.4-55.1 83.6-55.1 135.5 0 7.8 1.3 15.6 1.9 18.1 3.2.6 8.4 1.3 13.6 1.3 45.4 0 102.5-30.4 135.5-71.3z"/></svg>';
 /* la dirección publicada: la app de las tiendas lee de acá los Evangelios del día (los genera la GitHub Action cada noche) */
@@ -411,7 +411,7 @@ const CREDITOS=[
  ["Novenas, examen y caminos","Texto propio de Scaeli, con lecturas de la Biblia Platense. El Te Deum, el Ven, Espíritu Creador y la oración del Regina caeli son traducciones propias del latín. Más novenas, en Catholic.net (se abre en tu navegador)."],
  ["Oraciones de siempre","Las oraciones tradicionales de la Iglesia (Padrenuestro, Avemaría, Credo, Salve, Yo confieso, Pésame y otras), de uso común, y sus textos latinos."],
  ["Biblioteca","Para leer en la app: los Ejercicios espirituales de San Ignacio (texto autógrafo) y la Imitación de Cristo (trad. P. Juan Eusebio Nieremberg, siglo XVII), de dominio público. Las obras de Santa Teresa de Jesús y San Juan de la Cruz se abren en archive.org, en ediciones de 1915 y 1912."],
- ["Ilustraciones y personajes","Pixel art hecho para Scaeli con PixelLab, con todos los derechos para Scaeli. Los marcos de las cartas, el dorso, el sobre y la portada del álbum se hicieron con Gemini (Google) para Scaeli."],
+ ["Ilustraciones y personajes","Pixel art hecho para Scaeli con PixelLab, con todos los derechos para Scaeli. Los marcos de las cartas, el dorso, el sobre, la portada del álbum y los peinados nuevos del personaje se hicieron con Gemini (Google) para Scaeli."],
  ["Tipografías","Inter (The Inter Project Authors), Cinzel (The Cinzel Project Authors) y Cormorant Garamond (The Cormorant Project Authors), con licencia SIL Open Font License 1.1. Van guardadas en la app."],
  ["Programas","Firebase (Google) para las cuentas y el guardado, con licencia Apache 2.0. En los teléfonos, Capacitor (licencia MIT) y RevenueCat para las compras."],
  ["Scaeli Daily","© Scaeli. Todos los derechos reservados sobre el diseño, el código y los textos propios."]];
@@ -802,6 +802,10 @@ function cartaHTML(c){ const t=c.r, w=c.w*4, h=c.h*4, src=cimg(c);
    '<div class="fiesta"><span class="l"></span>'+esc(c.f)+'<span class="l"></span></div><div class="ctag">'+esc(c.tag)+'</div>'+
    '<div class="cfrase"><span class="cq">«</span>'+esc(c.fr)+'<span class="cq">»</span></div></div></div>'+cartaMarco(t,c.i)+
    '<div class="brillo"></div>'+(t==="gloria"?'<div class="holo"></div><div class="chispas"><i></i><i></i><i></i><i></i><i></i></div>':'')+'</div>'; }
+/* 2.1.3 · el lugar vacío del álbum: el marco de su rareza apagado, la silueta del santo, su número y su nombre */
+function huecoHTML(c){ const t=c.r, w=c.w*4, h=c.h*4;
+  return '<div class="carta hueco2 r-'+t+'" style="'+cvars(t)+'"><div class="panel"><div class="pin"><div class="hsil"><img src="'+cimg(c)+'" alt="" loading="lazy" style="width:'+w+'px;height:'+h+'px"></div>'+
+   '<div class="placa'+(c.n.length>21?" largo":"")+'"><span class="o">✠</span><b>'+esc(c.n)+'</b><span class="o">✠</span></div><div class="fiesta"><span class="l"></span>'+esc(c.f)+'<span class="l"></span></div><div class="ctag">'+CR[t].nm+'</div></div></div>'+cartaMarco(t,c.i)+'</div>'; }
 /* el dorso: el mismo marco dorado con el arco, la cruz y la escalera de Scaeli */
 function dorsoHTML(){ return '<div class="carta dorso" style="'+cvars("oro")+'"><img class="dimg" src="assets/cartas/dorso.webp" alt="" draggable="false"><div class="brillo"></div></div>'; }
 function dorsoHTMLSvg(){ return '<div class="carta dorso" style="'+cvars("oro")+'"><div class="panel dp"><svg class="emb" viewBox="0 0 120 150" aria-hidden="true"><circle cx="60" cy="62" r="56" fill="url(#cdl)"/><defs><radialGradient id="cdl"><stop offset="0" stop-color="#FFF6D6"/><stop offset=".5" stop-color="#F2B544" stop-opacity=".45"/><stop offset="1" stop-color="#F2B544" stop-opacity="0"/></radialGradient></defs>'+
@@ -844,7 +848,7 @@ function shAlbum(){ const G=albGrupo(), n=Object.keys(G).length, F=sheet.fr||"",
    (lleno?'':sobreBox())+
    '<div class="chips albf">'+[["","Todas"]].concat(CR_ORDEN.map(t=>[t,CR[t].nm])).map(x=>'<button data-a="albFiltro" data-p="'+x[0]+'" aria-pressed="'+(F===x[0])+'">'+x[1]+'</button>').join("")+'</div>'+
    '<div class="albgrid">'+L.map(c=>G[c.id]?'<button class="albcel" data-a="figu" data-p="'+c.id+'" aria-label="'+esc(c.n)+'">'+cw(cartaHTML(c))+'<small class="quien">'+(G[c.id].n==="vos"?"La sumaste vos":esc(G[c.id].n))+'</small></button>':
-    '<span class="albcel"><span class="cw fit hueco r-'+c.r+'" style="'+cvars(c.r)+'"><span class="hn">N.º '+c.i+'</span><span class="hq">?</span><span class="hnom">'+esc(c.n)+'</span><span class="hr">'+CR[c.r].nm+'</span></span><small class="quien muted">Falta</small></span>').join("")+'</div></div>'+
+    '<span class="albcel">'+cw(huecoHTML(c),0,"hueco")+'<small class="quien muted">Falta</small></span>').join("")+'</div></div>'+
    '<button class="primary ink" data-a="cerrar">Volver</button>'; }
 function shSobre(){ const L=(sheet.sale||[]).map(id=>CARTA[id]).filter(Boolean), nv=sheet.nuevas||[];
   const top='<div class="ftop"><button class="iconbtn ghost g" data-a="album" aria-label="Volver al álbum">'+ic("x")+'</button><span style="flex:1"></span><span class="ft">Sobre de santos</span></div>';

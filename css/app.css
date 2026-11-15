@@ -1156,3 +1156,20 @@ html[data-theme="light"] .actban .t{color:var(--ink)}
 .sobre3.v2 .sb-brillo{-webkit-mask:url(../assets/cartas/sobre.png) center/contain no-repeat;mask:url(../assets/cartas/sobre.png) center/contain no-repeat;opacity:.8}
 .albport{margin:0 0 12px;border-radius:22px;overflow:hidden;aspect-ratio:1032/576;box-shadow:0 0 0 1px var(--line,rgba(255,255,255,.12))}
 .albport img{display:block;width:100%;height:100%;object-fit:cover}
+
+/* ── 2.1.3 · el lugar vacío del álbum: marco de su rareza apagado, la silueta del santo, número y nombre ── */
+.cw.hueco{display:block;padding:0;border:0;border-radius:0;background:none;gap:0}
+html[data-theme="light"] .cw.hueco{background:none}
+.carta.hueco2{filter:none}
+.carta.hueco2 img.marco{filter:grayscale(.7) brightness(.62) contrast(1.05)}
+.carta.hueco2 .cnum{color:color-mix(in srgb,var(--m1) 70%,#888);background:#0E0B12}
+.carta.hueco2 .panel{background:radial-gradient(ellipse 85% 60% at 50% 34%,color-mix(in srgb,var(--s1) 30%,#1A1622),#0B0A10 80%)}
+.carta.hueco2 .hsil{position:absolute;left:7px;top:14px;width:212px;height:222px;display:flex;align-items:flex-end;justify-content:center;padding-bottom:20px;border-radius:6px;box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--m2) 22%,transparent);background:repeating-linear-gradient(135deg,rgba(255,255,255,.025) 0 6px,transparent 6px 12px)}
+.carta.hueco2 .hsil img{max-width:none;image-rendering:pixelated;filter:brightness(0) drop-shadow(0 0 1px color-mix(in srgb,var(--m1) 70%,transparent)) drop-shadow(0 0 6px color-mix(in srgb,var(--m2) 45%,transparent));opacity:.92}
+.carta.hueco2 .hsil::after{content:"";position:absolute;inset:0;border-radius:6px;background:radial-gradient(ellipse 60% 40% at 50% 92%,color-mix(in srgb,var(--m2) 14%,transparent),transparent 70%)}
+.carta.hueco2 .hfalta{position:absolute;left:0;right:0;top:26px;text-align:center;font-family:Cinzel,serif;font-weight:800;font-size:13px;letter-spacing:.42em;padding-left:.42em;text-transform:uppercase;color:color-mix(in srgb,var(--m2) 55%,transparent)}
+.carta.hueco2 .placa{background:#0B0910;box-shadow:0 0 0 1px color-mix(in srgb,var(--m2) 35%,transparent)}
+.carta.hueco2 .placa b{background:none;-webkit-text-fill-color:#B9B3C2;color:#B9B3C2}
+.carta.hueco2 .placa .o{color:#5E5866}
+.carta.hueco2 .fiesta{color:#7E7887}.carta.hueco2 .fiesta .l{background:linear-gradient(90deg,transparent,#5E5866)}
+.carta.hueco2 .ctag{color:color-mix(in srgb,var(--m2) 70%,#888);font-family:Cinzel,serif;font-style:normal;font-weight:700;font-size:11px;letter-spacing:.3em;text-transform:uppercase;top:284px}
