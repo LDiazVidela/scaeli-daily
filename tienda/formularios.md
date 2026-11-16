@@ -5,7 +5,7 @@
 ## Google Play · Seguridad de los datos
 - ¿La app recopila o comparte datos? **Sí, recopila. No comparte.** (RevenueCat actúa como proveedor de servicios: según Google, eso no cuenta como «compartir».)
 - ¿Los datos se cifran en tránsito? **Sí.**
-- ¿Se puede pedir que se borren? **Sí** (en la app y en https://ldiazvidela.github.io/scaeli-daily/borrar-cuenta.html).
+- ¿Se puede pedir que se borren? **Sí** (en la app y en https://daily.scaeli.com.ar/borrar-cuenta.html).
 
 | Tipo de dato | Se recopila | Obligatorio | Para qué |
 |---|---|---|---|
@@ -45,7 +45,7 @@ Nada de: ubicación, contactos, fotos (salvo la portada del grupo), audio, salud
 ## Compras dentro de la app (Scaeli+ y donaciones)
 - **App Store Connect → Suscripciones:** grupo «Scaeli+», dos suscripciones auto-renovables: `scaeli_plus_mensual` (1 mes, USD 2,99) y `scaeli_plus_anual` (1 año, USD 19,99). Nombre visible: «Scaeli+ mensual» / «Scaeli+ anual». Descripción: «Tu progreso, tus virtudes y caminos guiados». Captura para la revisión: la pantalla de Scaeli+ (`tienda/` → captura de Más → Scaeli+).
 - **App Store Connect → Compras dentro de la app:** tres **consumibles**: `scaeli_donacion_1` (USD 1,99, «Donación»), `scaeli_donacion_2` (USD 4,99, «Donación»), `scaeli_donacion_3` (USD 9,99, «Donación»).
-- **App Store → Información de la app:** cargar la URL de los términos (https://ldiazvidela.github.io/scaeli-daily/terminos.html) en «Contrato de licencia» o en la descripción, y la de privacidad. Apple pide los dos enlaces cuando hay suscripciones.
+- **App Store → Información de la app:** cargar la URL de los términos (https://daily.scaeli.com.ar/terminos.html) en «Contrato de licencia» o en la descripción, y la de privacidad. Apple pide los dos enlaces cuando hay suscripciones.
 - **Play Console → Monetizar → Productos → Suscripciones:** `scaeli_plus` con dos planes base: `mensual` (renovación mensual, USD 2,99) y `anual` (renovación anual, USD 19,99). **Productos integrados (únicos):** los mismos tres `scaeli_donacion_1/2/3`, marcados como consumibles en RevenueCat.
 - **Precios locales:** dejá que cada tienda convierta a pesos y demás monedas (o ajustalos a mano en Argentina).
 - **Edad:** las compras quedan sujetas a los controles parentales de cada tienda; no hace falta cambiar la clasificación.
