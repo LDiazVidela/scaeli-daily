@@ -1857,7 +1857,7 @@ try{ if(localStorage.getItem("daily_theme")==="light") document.documentElement.
    2) Al abrir la versión nueva: una vez, la hoja «Novedades» con lo que cambió desde la última que viste (NOVEDADES, la más nueva primero).
    En cada versión nueva hay que sumar su entrada acá (t38 lo comprueba). */
 const NOVEDADES=[
-  ["2.3.1",["Tu personaje puede ser niño, joven, adulto o mayor (en Yo), con toda su ropa y sus colores.","La abuela tiene dos peinados: con anteojos o con rodete."]],
+  ["2.3.1",["Tu personaje puede ser niño, joven, adulto o mayor (en Yo), con toda su ropa y sus colores.","Ropa de chico para el niño y la niña: guardapolvo, jardinero, remera rayada y vestido.","La abuela tiene dos peinados: con anteojos o con rodete."]],
   ["2.3",["Elegí el tono de piel de tu personaje (en Yo).","Lo que ya rezaste hoy aparece con un tilde, y el inicio te propone lo que te falta.","El lápiz para editar tu personaje está en la esquina.","Liturgia de las Horas: qué es y para qué sirve cada Hora.","Este aviso: cada vez que actualicemos la app, vas a ver acá las novedades."]],
   ["2.2.7",["Scaeli Daily está en su dirección propia: daily.scaeli.com.ar."]],
   ["2.2.6",["En Hoy podés anotar una caída de un hábito con el «−».","Lo que rezás en la app marca solo el hábito del mismo nombre.","Ya se puede conectar Google Calendar."]]];

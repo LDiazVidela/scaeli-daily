@@ -43,6 +43,8 @@ const { chromium } = require('playwright'); const fs = require('fs');
     const cv = document.createElement('canvas'), cv2 = document.createElement('canvas'); PJ.pintar(cv, { sx: 'f', edad: 'mayor', peinado: 'rodete', prenda: 'buzo:azul' }); PJ.pintar(cv2, { sx: 'f', edad: 'mayor', prenda: 'buzo:azul' });
     return { pe: o.peinados.map(x => x[0]), joven: oj.peinados.map(x => x[0]), distinto: cv.toDataURL() !== cv2.toDataURL(), pr: PJ.opciones(PJ.normal({ sx: 'm', edad: 'adulto' })).prendas.map(x => x[0]) }; });
   ok(pm.pe.join() === 'base,rodete' && !pm.joven.includes('rodete') && pm.distinto, 'la mayor tiene anteojos o rodete (y la joven no tiene rodete): ' + JSON.stringify(pm));
+  const pn = await p.evaluate(async () => { const PJ = await import('./js/personaje.js'); await PJ.cargar(); return [PJ.opciones(PJ.normal({ sx: 'm', edad: 'nino' })).prendas.map(x => x[0]), PJ.opciones(PJ.normal({ sx: 'f', edad: 'nino' })).prendas.map(x => x[0]), PJ.opciones(PJ.normal({ sx: 'm' })).prendas.map(x => x[0])]; });
+  ok(['guardapolvo', 'rayada', 'jardinero'].every(x => pn[0].includes(x)) && ['guardapolvo', 'vestido', 'jardinero'].every(x => pn[1].includes(x)) && !pn[2].includes('guardapolvo'), 'los chicos tienen ropa de chico (y el joven no): ' + JSON.stringify(pn));
   ok(['remera', 'buzo', 'camisa', 'deportiva'].every(x => pm.pr.includes(x)) && !pm.pr.includes('sotana'), 'el adulto tiene toda la ropa laica del joven: ' + pm.pr);
   }
   if (listas.includes('nino')) { await p.click('.seg.edad button[data-p="edad|nino"]'); await p.waitForTimeout(600);

@@ -4,8 +4,8 @@
 const VISTAS=["south"];   // desde la 1.6.1 la hoja trae solo el frente
 
 export const COLORES=[["gris","Gris","#A9ABB2"],["blanco","Blanco","#EEEDE8"],["negro","Negro","#2C2D33"],["azul","Azul","#2E3E66"],["bordo","Bordó","#6E1E2E"]];
-export const PRENDAS={m:[["base","Camisa clara"],["remera","Remera"],["buzo","Buzo"],["camisa","Camisa"],["deportiva","Deportiva"],["sotana","Sotana"],["clergyman","Clergyman"]],
-  f:[["base","Blusa y jean"],["remera","Remera"],["buzo","Buzo"],["pollera","Pollera"],["deportiva","Deportiva"],["consagrada","Consagrada"],["caridad","Misionera de la Caridad"],["dominica","Dominica"],["carmelita","Carmelita"]]};
+export const PRENDAS={m:[["base","Camisa clara"],["remera","Remera"],["buzo","Buzo"],["camisa","Camisa"],["deportiva","Deportiva"],["guardapolvo","Guardapolvo"],["rayada","Remera rayada"],["jardinero","Jardinero"],["sotana","Sotana"],["clergyman","Clergyman"]],
+  f:[["base","Blusa y jean"],["remera","Remera"],["buzo","Buzo"],["pollera","Pollera"],["deportiva","Deportiva"],["guardapolvo","Guardapolvo"],["vestido","Vestido"],["jardinero","Jardinero"],["consagrada","Consagrada"],["caridad","Misionera de la Caridad"],["dominica","Dominica"],["carmelita","Carmelita"]]};
 export const CON_COLOR=["remera","buzo","camisa","pollera"];
 export const VELO=["consagrada","caridad","dominica","carmelita"];
 export const FIJO={};   // 2.1.3: el clergyman y la deportiva ya tienen varios peinados (los que no existen no se ofrecen)

@@ -21,9 +21,13 @@ COLORES = E.COLORES
 LAICAS = {'m': ['base', 'remera', 'buzo', 'camisa', 'deportiva'], 'f': ['base', 'remera', 'buzo', 'pollera', 'deportiva']}
 CABEZAS = {('m', 'adulto'): {'base': 'adulto_m_base_1'}, ('m', 'mayor'): {'base': 'mayor_m_base_1'},
            ('f', 'adulto'): {'base': 'adulta_f_base_2'}, ('f', 'mayor'): {'base': 'mayor_f_base_2', 'rodete': 'mayor_f_base_3'}}
-NINOS = {'m': {'base|base': 'nino_m_base_3', 'buzo:gris|base': 'nino_m_buzo2', 'remera:gris|base': 'nino_m_remera', 'deportiva|base': 'nino_m_deportiva'},
+NINOS = {'m': {'base|base': 'nino_m_base_3', 'buzo:gris|base': 'nino_m_buzo2', 'remera:gris|base': 'nino_m_remera', 'deportiva|base': 'nino_m_deportiva',
+               'guardapolvo|base': 'nino_m_guardapolvo', 'rayada|base': 'nino_m_rayada', 'jardinero|base': 'nino_m_jardinero'},
          'f': {'base|base': 'nina_f_base_2', 'buzo:gris|base': 'nina_f_buzo', 'remera:gris|base': 'nina_f_remera',
-               'pollera:gris|base': 'nina_f_pollera', 'deportiva|base': 'nina_f_deportiva'}}
+               'pollera:gris|base': 'nina_f_pollera', 'deportiva|base': 'nina_f_deportiva',
+               'guardapolvo|base': 'nina_f_guardapolvo', 'vestido|base': 'nina_f_vestido', 'jardinero|base': 'nina_f_jardinero'}}
+# ropa de chico (2.3.1, «los niños pueden tener ropa justamente de niño»): guardapolvo blanco, jardinero de jean,
+# remera rayada con bermuda (él) y vestido (ella); sin colores, como salieron de PixelLab
 
 def img(p): return np.array(Image.open(p).convert('RGBA')).astype(int)
 def frame(sx, k): return np.array(E.frame(E.hoja(sx), sx, k)).astype(int)
