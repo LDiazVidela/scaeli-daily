@@ -60,7 +60,7 @@ export function normal(p){ p=p||{}; const sx=p.sx==="f"?"f":"m";
       [pr,pe]=m; [t,c]=pr.split(":"); c=c||null; } }
   return { sx, tipo:t, color:c, prenda:c?t+":"+c:t, peinado:pe, velo:VELO.includes(t), fijo:!!FIJO[t], alt:ok(ALTURAS,p.alt,"media"), tono:ok(TONOS,p.tono,"base"), edad, hoja:h }; }
 /* tiñe la piel del cuadro ya pintado (antes de cambiar la altura, para que la máscara coincida) */
-function tenir(x, P, fila){ if(P.tono==="base"||!PIEL[P.hoja]) return; const T=hex(TONOS.find(t=>t[0]===P.tono)[2]), R0=REF[P.sx];
+function tenir(x, P, fila){ if(P.tono==="base"||!PIEL[P.hoja]) return; const T=hex(TONOS.find(t=>t[0]===P.tono)[2]), R0=(META[P.hoja]&&META[P.hoja].ref)||REF[P.sx];   // 2.3.1: los niños tienen su propio tono de cara (pj.json, ref)
   const mc=document.createElement("canvas"); mc.width=128; mc.height=128; const mx=mc.getContext("2d"); mx.drawImage(PIEL[P.hoja],0,fila*128,128,128,0,0,128,128);
   const m=mx.getImageData(0,0,128,128).data, im=x.getImageData(0,0,128,128), d=im.data;
   for(let i=0;i<d.length;i+=4){ if(m[i]<128||!d[i+3]) continue; for(let c=0;c<3;c++) d[i+c]=Math.max(0,Math.min(255,Math.round(T[c]*d[i+c]/R0[c]))); }

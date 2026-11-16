@@ -12,13 +12,17 @@ R = os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', 'assets', 'pe
 def piel(H):
     r, g, b, a = [H[..., k].astype(int) for k in range(4)]
     return (a > 0) & (r > 140) & (r > g) & (g > b) & (r - b > 60)
+PALETAS = {}; REFS = {}
 def mascara_hoja(sx):
     H = np.array(Image.open(R + sx + '.png').convert('RGBA')); n = H.shape[0] // 128
     c = Counter()
     for i in range(n):
         F = H[i*128:(i+1)*128]; m = piel(F); lab, k = ndimage.label(m)
         if k: big = np.argmax(ndimage.sum(m, lab, range(1, k+1))) + 1; c.update(map(tuple, F[lab == big][:, :3].tolist()))
-    pal = {col for col, v in c.items() if v >= 20}
+    pal = {col for col, v in c.items() if v >= (20 if len(sx) == 1 else 6)}
+    if len(sx) > 1: pal |= PALETAS.get(sx[0], set())   # 2.3.1: las edades llevan el cuerpo (brazos, manos) del joven
+    PALETAS[sx] = pal
+    REFS[sx] = list(c.most_common(1)[0][0])   # el tono principal de la cara: desde ahí se escala a los demás tonos
     M = np.zeros(H.shape[:2], bool)
     for i in range(n):
         F = H[i*128:(i+1)*128]
@@ -31,5 +35,9 @@ def mascara_hoja(sx):
     return H, M, pal
 if __name__ == '__main__':
     hojas = ['m', 'f'] + [f'{sx}_{e}' for e in ('nino', 'adulto', 'mayor') for sx in 'mf' if os.path.exists(R + f'{sx}_{e}.png')]
+    import json
+    pj = json.load(open(R + 'pj.json'))
     for sx in hojas:
-        H, M, pal = mascara_hoja(sx); print(sx, 'paleta', len(pal), 'px piel', int(M.sum()))
+        H, M, pal = mascara_hoja(sx); print(sx, 'paleta', len(pal), 'px piel', int(M.sum()), 'tono', REFS[sx])
+        if len(sx) > 1 and sx.endswith('nino'): pj[sx]['ref'] = REFS[sx]   # 2.3.1: los niños tienen su propio tono de cara
+    json.dump(pj, open(R + 'pj.json', 'w'), ensure_ascii=False, separators=(',', ':'))
