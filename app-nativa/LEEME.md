@@ -4,7 +4,7 @@ Esta carpeta es la app de las tiendas (Capacitor 8). Por dentro es la misma app 
 
 - **Avisos del teléfono** (`@capacitor/local-notifications`): mañana, noche y tareas con hora; llegan aunque la app esté cerrada.
 - **Entrada nativa con Google y Apple** (`@capacitor-firebase/authentication`, con `skipNativeAuth`: el teléfono da la credencial y la app entra a Firebase con el mismo SDK web).
-- **Sin conexión**: todo viene adentro de la app; los Evangelios del día se leen de `https://ldiazvidela.github.io/scaeli-daily/evangelio/`.
+- **Sin conexión**: todo viene adentro de la app; los Evangelios del día se leen de `https://daily.scaeli.com.ar/evangelio/`.
 - **Borrar cuenta**: Más → Borrar mi cuenta (lo piden las dos tiendas).
 
 Identificador: `io.github.ldiazvidela.scaelidaily` (se puede cambiar en `capacitor.config.json` **antes** de la primera subida; después, no).
