@@ -8,11 +8,11 @@ Copiá y pegá. Los límites de caracteres ya están respetados.
 - **Categoría:** Estilo de vida (secundaria en Apple: Libros)
 - **Idioma principal:** Español (Latinoamérica) · en Apple: Español (México) es el que se ve en Argentina
 - **Precio:** gratis, sin publicidad. Compras dentro de la app: **Scaeli+** (suscripción opcional, USD 2,99 por mes o USD 19,99 por año) y donaciones voluntarias (USD 1,99 / 4,99 / 9,99)
-- **Términos de uso:** https://ldiazvidela.github.io/scaeli-daily/terminos.html
+- **Términos de uso:** https://daily.scaeli.com.ar/terminos.html
 - **Correo de soporte:** scaeli.app@gmail.com
-- **Sitio web:** https://ldiazvidela.github.io/scaeli-daily/
-- **Política de privacidad:** https://ldiazvidela.github.io/scaeli-daily/privacidad.html
-- **Borrar la cuenta (Google Play):** https://ldiazvidela.github.io/scaeli-daily/borrar-cuenta.html
+- **Sitio web:** https://daily.scaeli.com.ar/
+- **Política de privacidad:** https://daily.scaeli.com.ar/privacidad.html
+- **Borrar la cuenta (Google Play):** https://daily.scaeli.com.ar/borrar-cuenta.html
 - **Identificador de la app:** `io.github.ldiazvidela.scaelidaily` (no se puede cambiar después de la primera subida)
 
 ## Descripción corta (Google Play, 80)
