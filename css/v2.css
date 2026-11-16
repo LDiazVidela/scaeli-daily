@@ -163,12 +163,12 @@ a.libro{text-decoration:none}
 .hab .hrow .ck,.hck{width:32px;height:32px;border-radius:999px}
 .hck b{font-size:13px;font-weight:700}
 .hab .hrow .n b{font-size:16px}
-/* la vela: más grande, con resplandor, dentro de una pastilla */
-.hab .hrow .vela,.hrow3 .vela{padding:5px 11px 5px 8px;border-radius:999px;background:var(--oro-dim);border:1px solid var(--oro-line);color:var(--oro);font-size:14px;font-weight:700;gap:6px;flex:none}
-.hab .hrow .vela svg.vl,.hrow3 .vela svg.vl{width:12px;height:21px}
+/* la vela: solo la velita y el número, sin pastilla */
+.hab .hrow .vela,.hrow3 .vela{padding:0 2px;border-radius:0;background:none;border:0;color:var(--oro);font-size:17px;font-weight:700;gap:6px;flex:none;min-width:44px;justify-content:flex-end}
+.hab .hrow .vela svg.vl,.hrow3 .vela svg.vl{width:13px;height:23px}
 .vela.on .fl{filter:drop-shadow(0 0 3px rgba(255,190,70,.75))}
-.hab .hrow .vela.riesgo,.hrow3 .vela.riesgo{border-style:dashed;background:transparent}
-.hab .hrow .vela.off,.hrow3 .vela.off{background:transparent;border-color:var(--line);color:var(--muted);font-weight:500}
+.hab .hrow .vela.riesgo,.hrow3 .vela.riesgo{background:none;opacity:.7}
+.hab .hrow .vela.off,.hrow3 .vela.off{background:none;color:var(--muted);font-weight:500}
 .vela.grande{padding:0;background:none;border:0}.vela.grande svg.vl{width:26px;height:46px}.vela.grande b{display:none}
 /* la semana en barritas (lunes a domingo) */
 .hbar{display:flex;gap:5px;margin-top:8px;align-items:center;height:8px;width:100%;max-width:240px}
