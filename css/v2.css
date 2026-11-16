@@ -165,11 +165,11 @@ a.libro{text-decoration:none}
 .hab .hrow .n b{font-size:16px}
 /* la vela: solo la velita y el número, sin pastilla */
 .hab .hrow .vela,.hrow3 .vela{padding:0 2px;border-radius:0;background:none;border:0;color:var(--oro);font-size:17px;font-weight:700;gap:6px;flex:none;min-width:46px;justify-content:flex-start;font-variant-numeric:tabular-nums}
-.hab .hrow .vela svg.vl,.hrow3 .vela svg.vl{width:13px;height:23px}
+.hab .hrow .vela svg.vl,.hrow3 .vela svg.vl{width:15px;height:20px}
 .vela.on .fl{filter:drop-shadow(0 0 3px rgba(255,190,70,.75))}
-.hab .hrow .vela.riesgo,.hrow3 .vela.riesgo{background:none;opacity:.7}
+.hab .hrow .vela.riesgo,.hrow3 .vela.riesgo{background:none;color:var(--muted)}
 .hab .hrow .vela.off,.hrow3 .vela.off{background:none;color:var(--muted);font-weight:500}
-.vela.grande{padding:0;background:none;border:0}.vela.grande svg.vl{width:26px;height:46px}.vela.grande b{display:none}
+.vela.grande{padding:0;background:none;border:0}.vela.grande svg.vl{width:32px;height:42px}.vela.grande b{display:none}
 /* la semana en barritas (lunes a domingo) */
 .hbar{display:flex;gap:5px;margin-top:8px;align-items:center;height:8px;width:100%;max-width:240px}
 .hbar i{flex:1;height:8px;border-radius:4px;background:var(--line2)}
@@ -196,3 +196,11 @@ a.libro{text-decoration:none}
 .hab .hrow.h3 .n b{line-height:1.25}
 .hmejor{justify-content:flex-start}.hmejor .vela.grande{margin-left:2px}
 .hmejor+.hrow,.hmejor+.hrow3{border-top:0}
+
+/* 2.2.5 · la racha es una llama sola (sin el cuerpo de la vela) */
+.vela svg.vl{width:12px;height:16px}.vela.chica svg.vl,.chip.vch .vela svg.vl{width:9px;height:12px}.ins svg.vl{width:22px;height:28px}
+.vela .ol{display:none;fill:none;stroke:var(--muted);stroke-width:.9;stroke-linejoin:round}
+.vela.off .ol{display:block}.vela.off .fl,.vela.off .hu{display:none}
+.vela.on .fl{filter:drop-shadow(0 0 3px rgba(255,180,60,.7))}
+.vela.riesgo .fl,.vela.riesgo .hu{opacity:.5}
+.vela.grande.on svg.vl{filter:drop-shadow(0 0 8px rgba(255,180,60,.45))}
