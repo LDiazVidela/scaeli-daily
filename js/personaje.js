@@ -17,15 +17,16 @@ const REF={m:[245,156,107],f:[236,142,93]};
 const hex=h=>[1,3,5].map(i=>parseInt(h.slice(i,i+2),16));
 /* 2.1.3: peinados nuevos, los del creador de personajes del juego (herramientas/peinados.py) */
 export const PEINADOS={m:[["base","Medio"],["corto","Corto"],["ondulado","Ondulado"],["rulos","Rulos"],["lacio","Lacio"],["rapado","Rapado"]],
-  f:[["base","Colita"],["suelto","Suelto"],["corto","Carré"],["ondas","Ondas"],["trenza","Trenza"],["flequillo","Flequillo"]]};
+  f:[["base","Colita"],["suelto","Suelto"],["corto","Carré"],["ondas","Ondas"],["trenza","Trenza"],["flequillo","Flequillo"],["rodete","Rodete"]]};   // rodete: solo la mayor (2.3.1)
 
-/* 2.3: edades. El joven es el dibujo de PixelLab (hojas m y f); niño, adulto y mayor los redibujó Gemini (herramientas/edades.py),
-   cada una en su hoja ({sx}_{edad}.png) con ropa de base, buzo, remera y deportiva o pollera, en los cinco colores, y un solo peinado. */
+/* 2.3.1: edades, todas de PixelLab (herramientas/edades_pixellab.py). Adulto y mayor: la cabeza de la edad (PixelLab editó el
+   dibujo del joven) sobre toda la ropa laica del joven; niño y niña: dibujo propio, más bajo, con base, buzo, remera, deportiva
+   y pollera. La mayor tiene dos peinados (anteojos y rodete). Los consagrados quedan en Joven. */
 export const EDADES=[["nino","Niño"],["joven","Joven"],["adulto","Adulto"],["mayor","Mayor"]];
 export const EDADES_F={nino:"Niña",joven:"Joven",adulto:"Adulta",mayor:"Mayor"};
 const HOJAS=["m","f","m_nino","f_nino","m_adulto","f_adulto","m_mayor","f_mayor"];
-/* 2.3.1: las edades de Gemini no gustaron; se ocultan hasta rehacerlas en PixelLab. Las que estén listas van acá. */
-export const EDADES_LISTAS=["joven"];
+/* las edades que se ofrecen (2.3.1: se ocultaron las de Gemini y volvieron rehechas en PixelLab) */
+export const EDADES_LISTAS=["nino","joven","adulto","mayor"];
 const hojaDe=(sx,edad)=>edad&&edad!=="joven"?sx+"_"+edad:sx;
 let META=null; const HOJA={}, PIEL={}; let listo=null;
 function cargarImg(src){ return new Promise((ok,mal)=>{ const im=new Image(); im.onload=()=>ok(im); im.onerror=mal; im.src=src; }); }

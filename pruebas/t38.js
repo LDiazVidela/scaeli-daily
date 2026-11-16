@@ -14,7 +14,7 @@ const { chromium } = require('playwright'); const fs = require('fs');
   await p.evaluate(() => { localStorage.setItem('daily_ver_vista', '2.2.6'); localStorage.setItem('daily_prueba_novedades', '1'); }); await p.reload(); await p.waitForTimeout(800); if (await p.$('#invitado')) { await p.click('#invitado'); }
   await p.waitForTimeout(2200);
   let sh = await p.evaluate(() => window.DAILY.get().sheet && window.DAILY.get().sheet.view); let t = await p.evaluate(() => (document.querySelector('#sheetIn') || {}).innerText || '');
-  ok(sh === 'novedades' && /Novedades/.test(t) && /tono de piel/.test(t) && !/niño, joven/.test(t) && /2\.2\.7/.test(t), 'al actualizar aparece «Novedades» con lo de esta versión y las anteriores');
+  ok(sh === 'novedades' && /Novedades/.test(t) && /tono de piel/.test(t) && /niño, joven, adulto o mayor/.test(t) && /2\.2\.7/.test(t), 'al actualizar aparece «Novedades» con lo de esta versión y las anteriores');
   ok(await p.evaluate(v => localStorage.getItem('daily_ver_vista') === v, ver), 'queda anotada la versión vista');
   await A('cerrar'); await p.reload(); await p.waitForTimeout(800); if (await p.$('#invitado')) await p.click('#invitado'); await p.waitForTimeout(2200);
   ok(!(await p.evaluate(() => window.DAILY.get().sheet)), 'no vuelve a aparecer');
@@ -39,6 +39,11 @@ const { chromium } = require('playwright'); const fs = require('fs');
   ok(ed.distintos === 8, 'cada edad tiene su propio dibujo: ' + ed.distintos);
   ok(ed.n.edad === 'mayor' && ed.n.tipo === 'base' && ed.n.peinado === 'base' && !ed.prendas.includes('sotana'), 'lo que no hay en una edad cae en lo que sí: ' + JSON.stringify([ed.n.tipo, ed.n.peinado, ed.prendas]));
   ok(ed.colores === 5 && ed.piel, 'las edades tienen los cinco colores y aceptan el tono de piel');
+  const pm = await p.evaluate(async () => { const PJ = await import('./js/personaje.js'); await PJ.cargar(); const o = PJ.opciones(PJ.normal({ sx: 'f', edad: 'mayor', prenda: 'buzo:azul' })); const oj = PJ.opciones(PJ.normal({ sx: 'f', prenda: 'buzo:azul' }));
+    const cv = document.createElement('canvas'), cv2 = document.createElement('canvas'); PJ.pintar(cv, { sx: 'f', edad: 'mayor', peinado: 'rodete', prenda: 'buzo:azul' }); PJ.pintar(cv2, { sx: 'f', edad: 'mayor', prenda: 'buzo:azul' });
+    return { pe: o.peinados.map(x => x[0]), joven: oj.peinados.map(x => x[0]), distinto: cv.toDataURL() !== cv2.toDataURL(), pr: PJ.opciones(PJ.normal({ sx: 'm', edad: 'adulto' })).prendas.map(x => x[0]) }; });
+  ok(pm.pe.join() === 'base,rodete' && !pm.joven.includes('rodete') && pm.distinto, 'la mayor tiene anteojos o rodete (y la joven no tiene rodete): ' + JSON.stringify(pm));
+  ok(['remera', 'buzo', 'camisa', 'deportiva'].every(x => pm.pr.includes(x)) && !pm.pr.includes('sotana'), 'el adulto tiene toda la ropa laica del joven: ' + pm.pr);
   }
   if (listas.includes('nino')) { await p.click('.seg.edad button[data-p="edad|nino"]'); await p.waitForTimeout(600);
   ok(await p.evaluate(() => (JSON.parse(localStorage.getItem('scaeli-daily-local'))['daily_settings/profile'] || {}).edad === 'nino'), 'la edad elegida se guarda'); }
