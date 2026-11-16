@@ -213,5 +213,24 @@ a.libro{text-decoration:none}
 .hab .hrow.h3,.hrow3{gap:10px}
 .hab .hrow.h3 .vela,.hrow3 .vela{margin-right:2px}
 /* 2.2.6 · el lápiz del personaje: arriba, junto a la cabeza (antes quedaba entre las piernas y el texto) */
-.pjbtn::after{right:18px;bottom:auto;top:8px}
+/* 2.3: el lápiz pasa a la esquina de arriba a la izquierda de la tarjeta (Lorenzo: «lo pondría en una esquina») */
+.pjbtn::after{display:none}
+.hero2 .pjedit{position:absolute;top:12px;left:12px;z-index:3;width:36px;height:36px;border-radius:999px;background:rgba(12,13,16,.62);border:1px solid rgba(255,255,255,.18);color:#F2B544;display:grid;place-items:center;padding:0;cursor:pointer;-webkit-backdrop-filter:blur(4px);backdrop-filter:blur(4px)}
+.hero2 .pjedit svg.i{width:17px;height:17px}
+.hero2 .tx.hecho .eyebrow{display:flex;align-items:center;gap:6px;color:var(--oro)}.hero2 .tx.hecho .eyebrow svg.i{width:15px;height:15px}
 .hab .hajuste,.hab .hvirt{padding-left:0}
+/* 2.3 · lo ya rezado hoy: tilde dorado en la esquina de la portada */
+.cov .covok{position:absolute;top:10px;right:10px;z-index:2;width:28px;height:28px;border-radius:999px;background:var(--oro);color:#170A0D;display:grid;place-items:center;box-shadow:0 2px 8px rgba(0,0,0,.35)}
+.cov .covok svg.i{width:16px;height:16px;stroke-width:2.6}
+.card.lhnow .ck.on{width:32px;height:32px;border-radius:999px;flex:none}
+/* 2.3 · Liturgia de las Horas: qué es y para qué sirve */
+.lhque{margin:12px 0}.lhque summary{list-style:none;display:flex;align-items:center;gap:10px;cursor:pointer}.lhque summary::-webkit-details-marker{display:none}
+.lhque summary b{flex:1;font-weight:600}.lhque[open] summary .muted svg{transform:rotate(180deg)}
+.lhque p{margin:10px 0 0;font-size:14.5px;line-height:1.5;color:var(--ink)}
+/* 2.3 · avisos de actualización */
+.aviso-nueva{position:fixed;left:12px;right:12px;bottom:calc(96px + env(safe-area-inset-bottom));z-index:60;max-width:520px;margin:0 auto;display:flex;align-items:center;gap:12px;padding:12px 12px 12px 16px;border-radius:18px;background:var(--surface,#241116);border:1px solid var(--oro-line);box-shadow:0 10px 30px rgba(0,0,0,.45);color:var(--ink);font-size:14px}
+.aviso-nueva span{flex:1;display:flex;align-items:center;gap:8px}.aviso-nueva svg.i{color:var(--oro);width:18px;height:18px}
+.aviso-nueva button{border:0;border-radius:999px;padding:9px 14px;font-weight:700;font-size:13.5px;background:var(--accent);color:#170A0D;cursor:pointer}
+.nov-lista .card{margin-bottom:12px}.nov-lista ul{margin:8px 0 0;padding-left:18px}.nov-lista li{margin:6px 0;line-height:1.45}
+/* 2.3 · edades del personaje: cuatro botones en una fila */
+.seg.edad button{font-size:13.5px;padding-left:4px;padding-right:4px}
