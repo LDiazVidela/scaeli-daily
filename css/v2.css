@@ -232,3 +232,5 @@ a.libro{text-decoration:none}
 .aviso-nueva span{flex:1;display:flex;align-items:center;gap:8px}.aviso-nueva svg.i{color:var(--oro);width:18px;height:18px}
 .aviso-nueva button{border:0;border-radius:999px;padding:9px 14px;font-weight:700;font-size:13.5px;background:var(--accent);color:#170A0D;cursor:pointer}
 .nov-lista .card{margin-bottom:12px}.nov-lista ul{margin:8px 0 0;padding-left:18px}.nov-lista li{margin:6px 0;line-height:1.45}
+/* 2.3 · edades del personaje: cuatro botones en una fila */
+.seg.edad button{font-size:13.5px;padding-left:4px;padding-right:4px}

@@ -1,7 +1,7 @@
 """Daily 2.3 · máscara de la piel del personaje (para los tonos de piel).
 Para cada dibujo de assets/personaje/{m,f}.png marca los píxeles de piel: colores de la paleta de la cara (la cara es el
 componente de piel más grande) que forman manchas de al menos 4 píxeles. Así no se tocan reflejos del pelo ni sombras de la ropa.
-Escribe assets/personaje/{m,f}_piel.png (blanco = piel). La app tiñe solo esos píxeles (js/personaje.js, TONOS).
+Escribe assets/personaje/{hoja}_piel.png para m, f y las hojas de las edades (m_nino, f_mayor, …) (blanco = piel). La app tiñe solo esos píxeles (js/personaje.js, TONOS).
 Uso: python3 herramientas/piel_mascara.py   (cada vez que cambien las hojas del personaje)
 """
 import os, numpy as np
@@ -30,5 +30,6 @@ def mascara_hoja(sx):
     Image.fromarray((M * 255).astype(np.uint8), 'L').convert('1').save(R + sx + '_piel.png', optimize=True)
     return H, M, pal
 if __name__ == '__main__':
-    for sx in 'mf':
+    hojas = ['m', 'f'] + [f'{sx}_{e}' for e in ('nino', 'adulto', 'mayor') for sx in 'mf' if os.path.exists(R + f'{sx}_{e}.png')]
+    for sx in hojas:
         H, M, pal = mascara_hoja(sx); print(sx, 'paleta', len(pal), 'px piel', int(M.sum()))

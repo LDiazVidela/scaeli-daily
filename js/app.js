@@ -401,9 +401,11 @@ function renderYo(){ const raw=profile||{}, P=PJ.normal(raw), nom=raw.nombre||(u
    '<details class="card opt fondos-d"'+(sheet&&sheet.view==="x"?"":"")+'><summary><span class="eyebrow">Fondo</span><b>'+esc((FONDOS.find(x=>x[0]===fondoActual())||["","Mañana"])[1])+'</b><span class="muted">'+ic("down")+'</span></summary><p class="hint" style="margin:8px 0 10px">Se desbloquean con tu nivel y tus logros. El elegido va también al inicio de Hoy.</p>'+fondosHTML()+'</details>'+
    '<div class="card opt">'+
      '<div class="eyebrow">Soy</div><div class="seg">'+[["m","Varón"],["f","Mujer"]].map(x=>'<button data-a="pjSet" data-p="sx|'+x[0]+'" aria-pressed="'+(P.sx===x[0])+'">'+x[1]+'</button>').join("")+'</div>'+
+     /* 2.3: la edad del personaje (niño, joven, adulto, mayor) */
+     (OP.edades&&OP.edades.length>1?'<div class="eyebrow">Edad</div><div class="seg edad">'+OP.edades.map(x=>'<button data-a="pjSet" data-p="edad|'+x[0]+'" aria-pressed="'+(P.edad===x[0])+'">'+esc(x[1])+'</button>').join("")+'</div>':'')+
      (OP.peinados.length<2?'':'<div class="eyebrow">Peinado</div>'+chips("peinado",OP.peinados,P.peinado))+
      '<div class="eyebrow">Ropa</div>'+ropa(x=>x[0]==="base"||x[0]==="deportiva"||PJ.CON_COLOR.includes(x[0]))+
-     '<div class="eyebrow">'+(P.sx==="f"?"Consagradas":"Consagrados")+'</div>'+ropa(x=>x[0]!=="base"&&x[0]!=="deportiva"&&!PJ.CON_COLOR.includes(x[0]))+
+     (OP.prendas.some(x=>x[0]!=="base"&&x[0]!=="deportiva"&&!PJ.CON_COLOR.includes(x[0]))?'<div class="eyebrow">'+(P.sx==="f"?"Consagradas":"Consagrados")+'</div>'+ropa(x=>x[0]!=="base"&&x[0]!=="deportiva"&&!PJ.CON_COLOR.includes(x[0])):'')+
      (P.color&&OP.colores.length>1?'<div class="eyebrow">Color</div><div class="sw">'+OP.colores.map(c=>'<button data-a="pjSet" data-p="prenda|'+P.tipo+':'+c[0]+'" aria-pressed="'+(P.color===c[0])+'" aria-label="'+esc(c[1])+'" title="'+esc(c[1])+'" style="background:'+c[2]+'"></button>').join("")+'</div>':'')+
      '<div class="eyebrow">Piel</div><div class="sw piel">'+PJ.TONOS.map(t=>'<button data-a="pjSet" data-p="tono|'+t[0]+'" aria-pressed="'+(P.tono===t[0])+'" aria-label="'+esc(t[1])+'" title="'+esc(t[1])+'" style="background:'+t[2]+'"></button>').join("")+'</div>'+
      '<div class="eyebrow">Altura</div><div class="seg">'+PJ.ALTURAS.map(x=>'<button data-a="pjSet" data-p="alt|'+x[0]+'" aria-pressed="'+(P.alt===x[0])+'">'+x[1]+'</button>').join("")+'</div>'+
@@ -1855,7 +1857,7 @@ try{ if(localStorage.getItem("daily_theme")==="light") document.documentElement.
    2) Al abrir la versión nueva: una vez, la hoja «Novedades» con lo que cambió desde la última que viste (NOVEDADES, la más nueva primero).
    En cada versión nueva hay que sumar su entrada acá (t38 lo comprueba). */
 const NOVEDADES=[
-  ["2.3",["Elegí el tono de piel de tu personaje (en Yo).","Lo que ya rezaste hoy aparece con un tilde, y el inicio te propone lo que te falta.","El lápiz para editar tu personaje está en la esquina.","Liturgia de las Horas: qué es y para qué sirve cada Hora.","Este aviso: cada vez que actualicemos la app, vas a ver acá las novedades."]],
+  ["2.3",["Elegí el tono de piel de tu personaje (en Yo).","Tu personaje puede ser niño, joven, adulto o mayor.","Lo que ya rezaste hoy aparece con un tilde, y el inicio te propone lo que te falta.","El lápiz para editar tu personaje está en la esquina.","Liturgia de las Horas: qué es y para qué sirve cada Hora.","Este aviso: cada vez que actualicemos la app, vas a ver acá las novedades."]],
   ["2.2.7",["Scaeli Daily está en su dirección propia: daily.scaeli.com.ar."]],
   ["2.2.6",["En Hoy podés anotar una caída de un hábito con el «−».","Lo que rezás en la app marca solo el hábito del mismo nombre.","Ya se puede conectar Google Calendar."]]];
 const cmpV=(a,b)=>{ const x=String(a).split(".").map(Number), y=String(b).split(".").map(Number); for(let i=0;i<3;i++){ const d=(x[i]||0)-(y[i]||0); if(d) return d; } return 0; };
