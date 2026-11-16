@@ -4,7 +4,7 @@
 
 export const RETIROS = {
   consagracion: {
-    n: "Consagración a María", sub: "33 días para entregarte a Jesús por María", dias_txt: "33 días", ilu: "gozosos",
+    n: "Consagración a María", sub: "33 días para entregarte a Jesús por María", dias_txt: "33 días", ilu: "consagracion",
     intro: "Siguiendo el camino que propuso San Luis María Grignion de Montfort, en 33 días te preparás para consagrarte a Jesús por medio de María: doce días para soltar el espíritu del mundo, y tres semanas para conocerte, conocer a la Virgen y conocer a Jesús. El último día rezás tu consagración. Conviene terminarla en una fiesta de la Virgen y, si podés, confesarte y comulgar ese día.",
     etapas: [[0, "Soltar el espíritu del mundo", "Doce días para vaciar el corazón de lo que no es de Dios."], [12, "Conocerme", "Una semana para mirarme con verdad y con misericordia."], [19, "Conocer a María", "Una semana para mirar a la Madre."], [26, "Conocer a Jesús", "Una semana para mirar al Hijo, que es el centro de todo."], [32, "Me consagro", "El día de la entrega."]],
     dias: [
@@ -44,7 +44,7 @@ export const RETIROS = {
     ]
   },
   ejercicios: {
-    n: "Ejercicios en la vida diaria", sub: "30 días con San Ignacio de Loyola", dias_txt: "30 días", ilu: "luminosos",
+    n: "Ejercicios en la vida diaria", sub: "30 días con San Ignacio de Loyola", dias_txt: "30 días", ilu: "ejercicios",
     intro: "Los Ejercicios Espirituales de San Ignacio, adaptados para rezarlos en tu casa, un rato por día. Cuatro semanas: el amor de Dios y su misericordia, el llamado a seguir a Jesús, su Pasión y su Resurrección. Cada día: leé la cita despacio, imaginá la escena, hablá con Jesús como con un amigo (Ignacio lo llama coloquio) y terminá con un Padrenuestro.",
     etapas: [[0, "Principio y fundamento", "Para qué fuimos creados."], [5, "Primera semana", "El pecado y la misericordia."], [12, "Segunda semana", "El llamado del Rey: conocer, amar y seguir a Jesús."], [21, "Tercera semana", "La Pasión: acompañar a Jesús que sufre."], [26, "Cuarta semana", "La Resurrección y la contemplación para alcanzar amor."]],
     dias: [
@@ -81,7 +81,7 @@ export const RETIROS = {
     ]
   },
   retiro7: {
-    n: "Retiro de 7 días", sub: "Una semana para volver a empezar con Dios", dias_txt: "7 días", ilu: "tarde",
+    n: "Retiro de 7 días", sub: "Una semana para volver a empezar con Dios", dias_txt: "7 días", ilu: "retiro",
     intro: "Un retiro corto para hacer en tu casa: siete días para frenar, mirarte con verdad, dejarte perdonar y volver a empezar. Buscá cada día veinte minutos de silencio, leé la cita despacio y quedate con lo que te toque.",
     etapas: [[0, "Volver a empezar", "Siete días con Dios."]],
     dias: [
@@ -95,7 +95,7 @@ export const RETIROS = {
     ]
   },
   marcos: {
-    n: "Lectio de San Marcos", sub: "El Evangelio entero en 16 días", dias_txt: "16 días", ilu: "evangelio",
+    n: "Lectio de San Marcos", sub: "El Evangelio entero en 16 días", dias_txt: "16 días", ilu: "marcos",
     intro: "Un capítulo del Evangelio según San Marcos por día, en el estilo de la Lectio Divina: leer despacio, meditar qué te dice, rezar con tus palabras y contemplar en silencio. Marcos es el Evangelio más corto y el más directo: te muestra a Jesús en acción.",
     etapas: [[0, "Quién es Jesús", "Galilea: Jesús enseña, sana y llama."], [8, "El camino a Jerusalén", "Jesús anuncia la cruz y forma a sus discípulos."], [10, "La Pasión y la Resurrección", "Jerusalén: la entrega y la vida."]],
     dias: [

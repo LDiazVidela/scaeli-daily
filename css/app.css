@@ -1211,3 +1211,7 @@ a.plan{text-decoration:none;cursor:pointer}a.plan:active{transform:scale(.98)}
 .gsw{margin-bottom:12px}.gsw button{overflow:hidden;text-overflow:ellipsis}
 .gotro{margin-top:12px}
 .dlock{margin-top:14px;width:100%}
+/* 2.2.1 · donaciones desde la web y portadas nuevas */
+a.donm{text-decoration:none;cursor:pointer}.donm.off{opacity:.5}
+.pronto{display:flex;flex-direction:column;gap:4px;margin-top:16px;padding:16px;border-radius:16px;border:1px solid var(--accent-line);background:var(--accent-dim);text-align:center}
+.pronto b{font-size:16px;font-weight:600}.pronto small{font-size:13px;color:var(--muted);line-height:1.4}

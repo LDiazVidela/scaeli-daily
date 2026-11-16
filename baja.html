@@ -1,0 +1,68 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Botón de baja · Scaeli Daily</title>
+<meta name="description" content="Cómo dar de baja Scaeli+ pagado desde la web con Mercado Pago o PayPal.">
+<link rel="icon" href="icons/icon-192.png">
+<style>
+:root{--bg:#170A0D;--card:#241116;--tx:#FBF3E4;--su:#A8958F;--ac:#FFF4D2;--li:rgba(255,255,255,.13);--in:#2E161C}
+@media (prefers-color-scheme: light){:root:not([data-theme="dark"]){--bg:#FAF4EA;--card:#FFFFFF;--tx:#2A1216;--su:#7D6862;--ac:#8A2638;--li:rgba(70,20,28,.16);--in:#F4ECE2}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--tx);font:16px/1.6 -apple-system,BlinkMacSystemFont,"SF Pro Text","Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif}
+main{max-width:640px;margin:0 auto;padding:32px 16px 64px}
+header{display:flex;gap:14px;align-items:center;margin-bottom:24px}
+header img{width:56px;height:56px;border-radius:14px}
+h1{font-size:28px;font-weight:600;letter-spacing:-.02em;margin:0;line-height:1.15}
+h2{font-size:18px;font-weight:600;margin:28px 0 8px}
+.su{color:var(--su);font-size:14px}
+a{color:var(--ac)}
+ol{padding-left:22px}li{margin:4px 0}
+.card{background:var(--card);border:1px solid var(--li);border-radius:22px;padding:16px 18px;margin:16px 0}
+.btn{display:inline-flex;align-items:center;justify-content:center;min-height:44px;padding:0 18px;border-radius:999px;border:1px solid var(--ac);text-decoration:none;font-weight:600;margin-top:6px}
+form{display:flex;flex-direction:column;gap:14px}
+label{display:flex;flex-direction:column;gap:6px;font-size:14px;color:var(--su)}
+input,select,textarea{font:inherit;color:var(--tx);background:var(--in);border:1px solid var(--li);border-radius:12px;padding:12px;min-height:48px;width:100%;-webkit-appearance:none;appearance:none}
+textarea{min-height:90px;resize:vertical}
+button{font:inherit;font-weight:600;min-height:54px;border-radius:999px;border:0;background:var(--ac);color:var(--bg);cursor:pointer}
+.ok{display:none}.ok.on{display:block}
+</style>
+</head>
+<body>
+<main>
+<header><img src="icons/icon-192.png" alt=""><div><h1>Botón de baja</h1><div class="su">Scaeli Daily · Scaeli+ pagado desde la web</div></div></header>
+
+<p>Podés dar de baja Scaeli+ cuando quieras, sin dar motivos y sin costo. Si lo cancelás, no se te vuelve a cobrar y Scaeli+ sigue activo hasta que venza el período que ya pagaste. No necesitás tu cuenta de Scaeli para hacerlo.</p>
+
+<div class="card"><h2 style="margin-top:0">Si pagaste con Mercado Pago</h2>
+<ol><li>Entrá a tus suscripciones de Mercado Pago (en la app: Tu perfil → Suscripciones).</li><li>Elegí «Scaeli+».</li><li>Tocá «Cancelar suscripción».</li></ol>
+<a class="btn" href="https://www.mercadopago.com.ar/subscriptions" target="_blank" rel="noopener">Abrir mis suscripciones de Mercado Pago</a></div>
+
+<div class="card"><h2 style="margin-top:0">Si pagaste con PayPal</h2>
+<ol><li>Entrá a «Pagos automáticos» en tu cuenta de PayPal.</li><li>Elegí «Scaeli+».</li><li>Tocá «Cancelar» y confirmá.</li></ol>
+<a class="btn" href="https://www.paypal.com/myaccount/autopay/" target="_blank" rel="noopener">Abrir mis pagos automáticos de PayPal</a></div>
+
+<h2>Pedila por mail</h2>
+<p>Si preferís que la demos de baja nosotros, completá esto. Dentro de las 24 horas te respondemos con un número de trámite y la confirmación de la baja.</p>
+<form id="f">
+<label>Correo con el que pagaste<input type="email" name="correo" required autocomplete="email" placeholder="tu@correo.com"></label>
+<label>Cómo pagaste<select name="medio"><option>Mercado Pago</option><option>PayPal</option></select></label>
+<label>Plan<select name="plan"><option>Scaeli+ mensual</option><option>Scaeli+ anual</option></select></label>
+<label>Algo más que quieras contarnos (opcional)<textarea name="nota" maxlength="500"></textarea></label>
+<button type="submit">Pedir la baja</button>
+</form>
+<div class="card ok" id="ok"><p><b>Listo: se abrió tu correo con el pedido escrito.</b> Solo falta que lo envíes.</p><p>Si no se abrió, mandá un mail a <a href="mailto:scaeli.app@gmail.com">scaeli.app@gmail.com</a> con el asunto «Baja» y el correo con el que pagaste.</p></div>
+
+<h2>Si pagaste en Google Play o en el App Store</h2>
+<p>La baja se hace en la tienda: <a href="https://play.google.com/store/account/subscriptions" target="_blank" rel="noopener">suscripciones de Google Play</a> o, en iPhone, Configuración → tu nombre → <a href="https://apps.apple.com/account/subscriptions" target="_blank" rel="noopener">Suscripciones</a>.</p>
+<p class="su"><a href="arrepentimiento.html">Botón de arrepentimiento</a> · <a href="terminos.html">Términos de uso</a> · <a href="privacidad.html">Privacidad</a> · <a href="./">Volver a la app</a></p>
+</main>
+<script>
+document.getElementById("f").addEventListener("submit",function(e){ e.preventDefault(); var d=new FormData(this);
+  var cuerpo="Quiero dar de baja Scaeli+ (Botón de baja).\n\nCorreo con el que pagué: "+d.get("correo")+"\nMedio de pago: "+d.get("medio")+"\nPlan: "+d.get("plan")+(d.get("nota")?"\n\n"+d.get("nota"):"");
+  location.href="mailto:scaeli.app@gmail.com?subject="+encodeURIComponent("Baja · Scaeli+")+"&body="+encodeURIComponent(cuerpo);
+  document.getElementById("ok").classList.add("on"); });
+</script>
+</body>
+</html>

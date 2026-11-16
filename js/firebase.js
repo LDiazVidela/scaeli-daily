@@ -203,7 +203,8 @@ export function plusBackend(uid){ const ref=()=>F.doc(db,"users/"+uid+"/settings
     async leer(){ try{ const s=await F.getDoc(ref()); return s.exists()?s.data():null; }catch(e){ return null; } },
     escribir(doc){ return F.setDoc(ref(),{...doc,app:"daily",updated:Date.now()},{merge:true}); },
     /* canjear un código: valida max y until, suma un uso y escribe el documento */
-    async canjear(codigo){ const c=String(codigo||"").trim().toUpperCase(); if(!c) return {ok:false,msg:"Escribí el código."};
+    async canjear(codigo){ let c=String(codigo||"").toUpperCase().replace(/[\s_]+/g,""); if(!c) return {ok:false,msg:"Escribí el código."};
+      const sg=c.replace(/-/g,""); if(/^SCAELI[A-Z0-9]{12}$/.test(sg)){ const x=sg.slice(6); c="SCAELI-"+x.slice(0,4)+"-"+x.slice(4,8)+"-"+x.slice(8); }   // 2.2.1: los nuevos, con o sin guiones
       const cref=F.doc(db,"codes/"+c); let s; try{ s=await F.getDoc(cref); }catch(e){ return {ok:false,msg:"No se pudo leer el código. Revisá la conexión."}; }
       if(!s.exists()) return {ok:false,msg:"Ese código no es válido."}; const d=s.data(), hoy=new Date().toISOString().slice(0,10);
       if(d.until&&String(d.until)<hoy) return {ok:false,msg:"Ese código ya venció."}; if(d.max&&(d.uses||0)>=d.max) return {ok:false,msg:"Ese código ya se usó todas las veces posibles."};

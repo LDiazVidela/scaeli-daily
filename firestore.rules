@@ -64,11 +64,12 @@ service cloud.firestore {
       allow delete: if false;
     }
 
-    // Códigos de Scaeli+ (compartidos por las dos apps): cualquier usuario con sesión puede leerlos y sumar un uso.
-    // Se crean desde la consola. Documento: codes/SCAELI-XXXX
+    // Códigos de Scaeli+ (compartidos por las dos apps): un usuario con sesión puede leer un código si lo conoce y sumarle un uso.
+    // Se crean desde la consola. Documento: codes/SCAELI-XXXX-XXXX-XXXX (12 caracteres al azar: node herramientas/codigo_plus.mjs)
     //   { label: "para quién", days: 0 (0 = para siempre), max: 1 (0 = sin límite), uses: 0, until: "2027-12-31" (opcional) }
     match /codes/{code} {
-      allow read: if request.auth != null;
+      // get y no read: se puede leer un código solo si se lo conoce; nadie puede listar la colección.
+      allow get: if request.auth != null;
       allow update: if request.auth != null
         && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['uses'])
         && request.resource.data.uses == resource.data.uses + 1;

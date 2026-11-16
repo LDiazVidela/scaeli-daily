@@ -20,7 +20,7 @@ import * as PJ from "./personaje.js";
 import { RETIROS } from "../data/retiros.js";   // 2.2: caminos largos de oración (Scaeli+)
 import { MUSICAS, musicaPlay, musicaStop, musicaEstado, musicaAlCambiar, campana, vozDisponible, decir, callar } from "./audio.js";
 
-export const VERSION="2.2.0";
+export const VERSION="2.2.1";
 const LOGO_GOOGLE='<svg class="logo-g" viewBox="0 0 48 48" aria-hidden="true"><path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/><path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/><path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/><path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/></svg>';
 const LOGO_APPLE='<svg class="logo-a" viewBox="0 0 814 1000" aria-hidden="true"><path fill="currentColor" d="M788.1 340.9c-5.8 4.5-108.2 62.2-108.2 190.5 0 148.4 130.3 200.9 134.2 202.2-.6 3.2-20.7 71.9-68.7 141.9-42.8 61.6-87.5 123.1-155.5 123.1s-85.5-39.5-164-39.5c-76.5 0-103.7 40.8-165.9 40.8s-105.6-57-155.5-127C46.7 790.7 0 663 0 541.8c0-194.4 126.4-297.5 250.8-297.5 66.1 0 121.2 43.4 162.7 43.4 39.5 0 101.1-46 176.3-46 28.5 0 130.9 2.6 198.3 99.2zm-234-181.5c31.1-36.9 53.1-88.1 53.1-139.3 0-7.1-.6-14.3-1.9-20.1-50.6 1.9-110.8 33.7-147.1 75.8-28.5 32.4-55.1 83.6-55.1 135.5 0 7.8 1.3 15.6 1.9 18.1 3.2.6 8.4 1.3 13.6 1.3 45.4 0 102.5-30.4 135.5-71.3z"/></svg>';
 /* la dirección publicada: la app de las tiendas lee de acá los Evangelios del día (los genera la GitHub Action cada noche) */
@@ -266,14 +266,14 @@ function renderRezar(){ const d=dayOf(hoy()); const nv=novenaEnCurso(); const lh
   const T=[
    caminoActivo()?["camino","camino","Camino de "+esc(caminoActivo()[1].n),esc(caminoActivo()[1].sub)+(esPlus()?"":" · Scaeli+"),1,caminoActivo()[0]]:null,
    ["rosario","rosario","Santo Rosario",dayOf(hoy()).r&&dayOf(hoy()).src==="fit"?"Rezado hoy en Scaeli Fit":MISTERIOS[misteriosHoy()].n+" · 20 min",1],
-   ["retiros","tarde","Caminos de oración",(retiroActual()?esc(RETIROS[retiroActual()].n)+" · día "+(retiroHechos(retiroActual())+1):"Consagración a María, Ejercicios, un retiro…")+(esPlus()?"":" · Scaeli+"),1],
+   ["retiros","retiros","Caminos de oración",(retiroActual()?esc(RETIROS[retiroActual()].n)+" · día "+(retiroHechos(retiroActual())+1):"Consagración a María, Ejercicios, un retiro…")+(esPlus()?"":" · Scaeli+"),1],
    ["evangelio","evangelio","Evangelio del día","5 min"],
    ["palabra","manana","Palabra del día",palHecha(d)?"Ya la rezaste hoy":"Un pasaje y lo que te dice · 5 min"],
    ["horas","horas","Liturgia de las Horas","Ahora: "+esc(LHn[1])],
    ["oraciones","oraciones","Oraciones","Las de siempre"],
    ["novenas","novenas","Novenas",nv?esc(nv.n.n)+" · día "+nv.D.dia:"Nueve días con un santo"],
    ["examen","examen","Examen del día","A la noche · 5 min"],
-   ["musica","noche","Rezar con música",musicaEstado()?"Sonando: "+esc(musicaEstado().n):"Órgano, noche o silencio con campana"+(esPlus()?"":" · Scaeli+")],
+   ["musica","musica","Rezar con música",musicaEstado()?"Sonando: "+esc(musicaEstado().n):"Órgano, noche o silencio con campana"+(esPlus()?"":" · Scaeli+")],
    ["biblia","biblia","La Biblia",bibUltima()?"Seguir en "+esc(bibUltima()):"Buscá un libro, un capítulo o una palabra",1],
    ["libros","biblioteca","Biblioteca",libUltimo()?"Seguir con "+esc(libUltimo().L.t):"Santa Teresa, San Juan de la Cruz, Kempis…"],
    ["confesion","confesion","Confesión","Los pasos y el examen"],
@@ -404,6 +404,9 @@ function renderMas(){ const claro=document.documentElement.getAttribute("data-th
        :'<div class="row"><div class="n"><b>Borrar mis datos</b><small>Lo guardado en este dispositivo</small></div><button class="ghost g peligro" data-a="borrar" data-p="datos">Borrar</button></div>')+
      '<div class="row"><div class="n"><b>Política de privacidad</b><small>Qué guardamos y para qué</small></div><a class="ghost g" href="privacidad.html" target="_blank" rel="noopener">Leer</a></div>'+
      '<div class="row"><div class="n"><b>Términos de uso</b><small>Incluye Scaeli+</small></div><a class="ghost g" href="terminos.html" target="_blank" rel="noopener">Leer</a></div>'+
+     /* 2.2.1: botón de arrepentimiento y de baja (Res. 424/2020), sin pedir cuenta; solo en la web y con los cobros activos */
+     (PAGOS_WEB&&!esNativo()?'<div class="row"><div class="n"><b>Botón de arrepentimiento</b><small>10 días corridos desde el pago para arrepentirte</small></div><a class="ghost g" href="arrepentimiento.html" target="_blank" rel="noopener">Abrir</a></div>'+
+       '<div class="row"><div class="n"><b>Botón de baja</b><small>Cancelar Scaeli+ pagado desde la web</small></div><a class="ghost g" href="baja.html" target="_blank" rel="noopener">Abrir</a></div>':'')+
      '<div class="row"><div class="n"><b>Créditos y licencias</b><small>De dónde viene cada texto</small></div><button class="ghost g" data-a="creditos">Ver</button></div></div>'+
    '<p class="hint" style="text-align:center">Scaeli Daily '+VERSION+' · Biblia Platense (Mons. Straubinger)</p>'; }
 
@@ -968,7 +971,7 @@ async function retirosGuardar(){ await backend.setDoc("daily_settings/retiros",r
 function retiroHoyHTML(){ const k=retiroActual(); if(!k||!esPlus()) return ""; const R=RETIROS[k], i=retiroHechos(k), e=retiroDia(k,i), d=R.dias[i];
   return '<button class="card camhoy" data-a="retiro" data-p="'+k+'"><span class="n"><span class="eyebrow">'+esc(R.n)+' · día '+(i+1)+' de '+R.dias.length+'</span><b>'+esc(d[0])+'</b><small>'+(e.st==="manana"?'Se abre mañana · ya rezaste el de hoy':esc(d[1]))+'</small></span>'+(e.st==="manana"?'<span class="ck on">'+ic("check")+'</span>':ic("right"))+'</button>'; }
 function shRetiros(){ const pl=esPlus();
-  return shTop("Caminos de oración","Para empezar cualquier día y rezar a tu ritmo")+'<div class="scroll"><div class="sbanner"><img src="'+ilu("tarde")+'" alt=""><span class="g"></span></div>'+
+  return shTop("Caminos de oración","Para empezar cualquier día y rezar a tu ritmo")+'<div class="scroll"><div class="sbanner"><img src="'+ilu("retiros")+'" alt=""><span class="g"></span></div>'+
    '<p class="texto chico">Caminos largos, día por día: una cita de la Biblia, una reflexión, una pregunta para rezar y un gesto concreto. Cada día se abre cuando rezaste el anterior.</p>'+
    '<div class="list retl">'+Object.entries(RETIROS).map(([k,R])=>{ const h=retiroHechos(k), en=retiros[k]&&retiros[k].ini, fin=h>=R.dias.length;
      return '<button class="retc" data-a="retiro" data-p="'+k+'"><img src="'+ilu(R.ilu)+'" alt="" loading="lazy"><span class="g"></span><span class="c"><span class="eyebrow">'+esc(R.dias_txt)+(fin?' · terminado':en?' · vas por el día '+(h+1):'')+'</span><b>'+esc(R.n)+'</b><small>'+esc(R.sub)+'</small>'+(en&&!fin?'<span class="bar"><i style="width:'+Math.round(h/R.dias.length*100)+'%"></i></span>':'')+'</span>'+(pl?'':'<span class="plus-mini">'+ic("lock")+' Scaeli+</span>')+'</button>'; }).join("")+'</div>'+
@@ -997,7 +1000,7 @@ function diarioLista(){ return Object.keys(days).filter(f=>/^\d{4}-\d\d-\d\d$/.t
 function shDiario(){ const L=diarioLista(), pl=esPlus(), lim=addDays(hoy(),-DIARIO_GRATIS), V=pl?L:L.filter(x=>x.f>lim), ocultas=L.length-V.length, q=sinTilde(sheet.q||"").trim(), W=q?V.filter(x=>sinTilde(x.t).includes(q)):V;
   let html="", mes="";
   W.forEach(x=>{ const m=x.f.slice(0,7); if(m!==mes){ mes=m; const D=parse(m+"-01"); html+='<div class="sect">'+cap(MESES[D.getMonth()])+' '+D.getFullYear()+'</div>'; } html+='<div class="orc"><div class="orh"><span>'+esc(cap(fLarga(x.f)))+'</span></div><p>'+esc(x.t)+'</p></div>'; });
-  return shTop("Mi diario",L.length?L.length+(L.length===1?" día escrito":" días escritos"):"Lo que Dios te dice, día por día")+'<div class="scroll">'+
+  return shTop("Mi diario",L.length?L.length+(L.length===1?" día escrito":" días escritos"):"Lo que Dios te dice, día por día")+'<div class="scroll"><div class="sbanner"><img src="'+ilu("diario")+'" alt=""><span class="g"></span></div>'+
    (L.length?(pl?'<input type="search" id="diaQ" placeholder="Buscar una palabra…" value="'+esc(sheet.q||"")+'" style="height:46px;margin-bottom:10px">':'')+
      (html||'<p class="empty">No hay días con esa palabra.</p>')+
      (ocultas?'<button class="card plusrow dlock" data-a="plusDesde" data-p="diario"><span class="n"><b>'+ocultas+(ocultas===1?" día más antiguo":" días más antiguos")+'</b><small>Sin Scaeli+ ves los últimos '+DIARIO_GRATIS+' días. Con Scaeli+, todo tu diario, con buscador y para guardar en PDF. No se borra nada.</small></span><span class="plus-mini">'+ic("lock")+' Scaeli+</span></button>':'')
@@ -1020,9 +1023,9 @@ async function diarioPdf(){ const L=diarioLista(); if(!L.length){ toast("Tu diar
 /* ── 2.2 · rezar con música (Scaeli+): suena aunque cierres la pantalla; un botoncito abajo la para ── */
 let musMin=lsGet("daily_mus_min")!=null?+lsGet("daily_mus_min"):15, musSel=lsGet("daily_mus_sel")||"organo";
 function shMusica(){ if(!esPlus()) return shPlusPaywall("musica"); const E=musicaEstado();
-  return shTop("Rezar con música","Para el silencio, la oración o la lectura")+'<div class="scroll"><div class="sbanner"><img src="'+ilu("noche")+'" alt=""><span class="g"></span></div>'+
+  return shTop("Rezar con música","Para el silencio, la oración o la lectura")+'<div class="scroll"><div class="sbanner"><img src="'+ilu("musica")+'" alt=""><span class="g"></span></div>'+
    '<div class="list musl">'+MUSICAS.map(m=>'<button class="musc'+(musSel===m[0]?" on":"")+'" data-a="musSel" data-p="'+m[0]+'" aria-pressed="'+(musSel===m[0])+'"><span class="mi">'+ic(m[0]==="campana"?"bell":E&&E.k===m[0]?"pause":"play")+'</span><span class="n"><b>'+esc(m[1])+'</b><small>'+esc(m[2])+'</small></span>'+(E&&E.k===m[0]?'<span class="eq"><i></i><i></i><i></i></span>':'')+'</button>').join("")+'</div>'+
-   '<div class="eyebrow" style="margin-top:16px">Durante</div><div class="seg mseg">'+[[5,"5 min"],[10,"10"],[15,"15"],[30,"30"],[0,"Sin fin"]].map(x=>'<button data-a="musMin" data-p="'+x[0]+'" aria-pressed="'+(musMin===x[0])+'">'+x[1]+'</button>').join("")+'</div>'+
+   '<div class="eyebrow" style="margin-top:16px">Durante</div><div class="seg mseg">'+[[5,"5 min"],[10,"10 min"],[15,"15 min"],[30,"30 min"],[0,"Sin fin"]].map(x=>'<button data-a="musMin" data-p="'+x[0]+'" aria-pressed="'+(musMin===x[0])+'">'+x[1]+'</button>').join("")+'</div>'+
    '<p class="hint" style="margin-top:10px">Al terminar suena una campana. Podés cerrar esta pantalla y seguir rezando o leyendo: la música sigue hasta que la pares. La música está hecha en el momento por la app.</p>'+
    '</div><div class="grid2">'+(E?'<button class="ghost g" data-a="musStop">'+ic("x")+' Parar</button>':'<button class="ghost g" data-a="cerrar">Volver</button>')+'<button class="primary" data-a="musPlay">'+ic("play")+' '+(E?"Cambiar":"Empezar")+'</button></div>'; }
 function musChip(){ let el=$("#musChip"); const E=musicaEstado();
@@ -1146,13 +1149,17 @@ function shPlusPaywall(desde){ const nat=esNativo(), P=sheet.planes, eq=delEquip
      planesWeb()+
      '<details class="codigo"><summary class="hint">¿Tenés un código?</summary><form data-f="plusCodigo" class="add"><input type="text" name="c" placeholder="Código de Scaeli+" autocomplete="off" style="text-transform:uppercase"><button class="iconbtn acc" type="submit" aria-label="Activar">'+ic("check")+'</button></form></details>'))+
    (eq?'<button class="lnk" data-a="plusComoGratis" style="display:block;margin:12px auto 0">'+(lsGet("daily_plus_como_gratis")==="1"?"Volver a ver Scaeli+":"Ver la app como usuario gratis")+'</button>':'')+
-   '<p class="legal">'+(nat?'La suscripción se renueva sola al final de cada período, al mismo precio, salvo que la canceles al menos 24 horas antes desde tu cuenta de Google Play o del App Store. El pago se cobra en tu cuenta de la tienda.':'Desde la web, la suscripción se renueva sola cada mes o cada año hasta que la canceles desde tu cuenta de Mercado Pago o de PayPal (<a href="gracias.html" target="_blank" rel="noopener">cómo activarla y cancelarla</a>).')+' <a href="terminos.html" target="_blank" rel="noopener">Términos de uso</a> · <a href="privacidad.html" target="_blank" rel="noopener">Privacidad</a></p>'+
+   '<p class="legal">'+(nat?'La suscripción se renueva sola al final de cada período, al mismo precio, salvo que la canceles al menos 24 horas antes desde tu cuenta de Google Play o del App Store. El pago se cobra en tu cuenta de la tienda.':PAGOS_WEB?'Desde la web, la suscripción se renueva sola cada mes o cada año hasta que la canceles desde tu cuenta de Mercado Pago o de PayPal (<a href="gracias.html" target="_blank" rel="noopener">cómo activarla y cancelarla</a>). Si sos menor de 18 años, necesitás la autorización de tu mamá, papá o tutor. <a href="arrepentimiento.html" target="_blank" rel="noopener">Botón de arrepentimiento</a> · <a href="baja.html" target="_blank" rel="noopener">Botón de baja</a> ·':'')+' <a href="terminos.html" target="_blank" rel="noopener">Términos de uso</a> · <a href="privacidad.html" target="_blank" rel="noopener">Privacidad</a></p>'+
    '</div><button class="primary ink" data-a="cerrar">'+(activo?"Volver":"Ahora no")+'</button>'; }
 function shPlus(){ return shPlusPaywall(sheet.desde||""); }
 /* 2.1.3 · Scaeli+ desde la web (solo en el navegador; en las apps de las tiendas no aparece): Mercado Pago en pesos y PayPal en dólares.
    Después del pago, el código llega por mail (gracias.html) y se canjea en «¿Tenés un código?». Un link vacío muestra el plan sin botón. */
 const PAGO_WEB={mp:{mensual:"https://mpago.la/1edv2dB",anual:""},paypal:{mensual:"",anual:""}};
-function planesWeb(){ const L=(href,cls,inner)=>href?'<a class="'+cls+'" href="'+href+'" target="_blank" rel="noopener">'+inner+'</a>':'<div class="'+cls+'">'+inner+'</div>';
+/* 2.2.1 · interruptor de los cobros desde la web (Mercado Pago, PayPal y donaciones). En false: no se muestra ningún botón de pago
+   y el paywall dice «Scaeli+ llega pronto»; los códigos ya entregados se siguen canjeando. Antes de pasarlo a true, el chat de
+   publicación revisa arrepentimiento.html, baja.html y los términos. En la app nativa NUNCA se muestran (solo Google Play / App Store). */
+const PAGOS_WEB=false;
+function planesWeb(){ if(!PAGOS_WEB) return '<div class="pronto"><b>Scaeli+ llega pronto</b><small>Estamos terminando de preparar los pagos. Si ya tenés un código, lo podés activar acá abajo.</small></div>'; const L=(href,cls,inner)=>href?'<a class="'+cls+'" href="'+href+'" target="_blank" rel="noopener">'+inner+'</a>':'<div class="'+cls+'">'+inner+'</div>';
   const hay=PAGO_WEB.mp.mensual||PAGO_WEB.mp.anual, pp=PAGO_WEB.paypal.mensual||PAGO_WEB.paypal.anual;
   if(!hay&&!pp) return '<div class="planes"><div class="plan dest"><span class="ah">Ahorrás 44%</span><b>Anual</b><small>USD 19,99 por año</small></div><div class="plan"><b>Mensual</b><small>USD 2,99 por mes</small></div></div><p class="hint" style="text-align:center">Scaeli+ se activa desde la app de Scaeli Daily para Android o iPhone.</p>';
   return (hay?'<div class="eyebrow" style="margin-top:16px">Desde Argentina · Mercado Pago</div><div class="planes" style="margin-top:10px">'+
@@ -1161,14 +1168,20 @@ function planesWeb(){ const L=(href,cls,inner)=>href?'<a class="'+cls+'" href="'
      L(PAGO_WEB.paypal.anual,"plan dest",'<b>Anual</b><small>USD 19,99 por año</small>')+L(PAGO_WEB.paypal.mensual,"plan",'<b>Mensual</b><small>USD 2,99 por mes</small>')+'</div>':'')+
    '<p class="hint" style="text-align:center;margin-top:12px">Después de pagar te llega por mail un código (en menos de 24 horas). Lo escribís acá abajo, en «¿Tenés un código?», y Scaeli+ queda activo también en Scaeli Fit.</p>'; }
 
+/* 2.2.1 · donar desde la web: links de pago de Mercado Pago (un pago único, en pesos). Un link vacío muestra el monto sin botón. */
+const DONAR_WEB={mp:[["$3.000",""],["$7.500",""],["$15.000",""]]};
+function donarWeb(){ if(!PAGOS_WEB) return '<div class="pronto"><b>Las donaciones llegan pronto</b><small>Estamos terminando de preparar los pagos. ¡Gracias por querer ayudar!</small></div>'; const hay=DONAR_WEB.mp.some(x=>x[1]);
+  return '<div class="eyebrow" style="margin-top:16px">Desde Argentina · Mercado Pago</div><div class="donmontos" style="margin-top:10px">'+DONAR_WEB.mp.map(x=>x[1]?'<a class="donm" href="'+x[1]+'" target="_blank" rel="noopener">'+ic("heart")+'<b>'+esc(x[0])+'</b></a>':'<span class="donm off">'+ic("heart")+'<b>'+esc(x[0])+'</b></span>').join("")+'</div>'+
+   (hay?'<p class="hint" style="margin-top:10px">Es un pago único, con tarjeta, débito o dinero en cuenta. Se abre Mercado Pago y volvés a la app cuando termina. ¡Gracias!</p>':'<p class="hint" style="margin-top:10px">Las donaciones por Mercado Pago se activan en estos días. También podés donar desde la app de Scaeli Daily para Android o iPhone.</p>'); }
 /* donar: para quien quiera ayudar, con o sin Scaeli+ */
 function shDonar(){ const nat=esNativo(), D=sheet.dons;
   if(nat&&comprasDisponibles()&&!D&&!sheet.cargandoD){ sheet.cargandoD=1; donacionesProductos().then(x=>{ if(sheet){ sheet.dons=x||[]; renderSheet(); } }); }
   const montos=["USD 1,99","USD 4,99","USD 9,99"];
   return shTop("Ayudar a Scaeli","Una donación, cuando quieras")+'<div class="scroll"><div class="sbanner"><img src="'+ilu("donar")+'" alt=""><span class="g"></span></div>'+
    '<p class="texto chico">Scaeli es un proyecto personal de un educador católico de Buenos Aires para acercar a los jóvenes a Dios, sin publicidad y sin vender tus datos. Si te sirve y querés ayudar a sostenerlo, podés hacer una donación. No te da nada extra en la app: es un regalo.</p>'+
-   '<div class="donmontos">'+montos.map((m,i)=>{ const p=D&&D.find(x=>x.identifier==="scaeli_donacion_"+(i+1)); return '<button class="donm" data-a="donar" data-p="'+(i+1)+'"'+(nat&&!p?' disabled':'')+'>'+ic("heart")+'<b>'+esc(p&&p.priceString||m)+'</b></button>'; }).join("")+'</div>'+
-   (nat?(comprasDisponibles()?'':'<p class="hint">Las donaciones todavía no están activas en esta versión.</p>'):'<p class="hint">Las donaciones se hacen desde la app de Scaeli Daily para Android o iPhone.</p>')+
+   (nat?'<div class="donmontos">'+montos.map((m,i)=>{ const p=D&&D.find(x=>x.identifier==="scaeli_donacion_"+(i+1)); return '<button class="donm" data-a="donar" data-p="'+(i+1)+'"'+(!p?' disabled':'')+'>'+ic("heart")+'<b>'+esc(p&&p.priceString||m)+'</b></button>'; }).join("")+'</div>'+
+     (comprasDisponibles()?'':'<p class="hint">Las donaciones todavía no están activas en esta versión.</p>')
+    :donarWeb())+
    '</div><button class="primary ink" data-a="cerrar">Volver</button>'; }
 
 /* ── el panel inferior: las oraciones, el rosario, las horas, el examen… ── */
