@@ -1,5 +1,5 @@
 // t37 · Daily 2.2.6: el «−» de las caídas también en Hoy (a la izquierda del círculo), los signos dibujados (centrados), lo que rezás en la app
-// marca solo el hábito que se llama igual (y se descuenta si sacás la marca), sin acceso a Scaeli Fit, el lápiz del personaje junto a la cabeza.
+// marca solo el hábito que se llama igual (y se descuenta si sacás la marca), sin acceso a Scaeli Fit, el lápiz del personaje en la esquina (2.3).
 const { chromium } = require('playwright');
 (async () => { const b = await chromium.launch(); const errs = [], fails = []; const ok = (c, m) => { if (process.env.V) console.log((c ? '  ok ' : '  XX ') + m); if (!c) fails.push(m); };
   const p = await (await b.newContext({ viewport: { width: 390, height: 844 } })).newPage();
@@ -32,7 +32,7 @@ const { chromium } = require('playwright');
   await p.evaluate(() => window.DAILY.ir('mas')); await p.waitForTimeout(400);
   ok(!(await p.$('#app a[href*="scaeli-fit"]')) && !/Ordenar el cuerpo/.test(await p.evaluate(() => document.querySelector('#app').innerText)), 'Más ya no tiene el acceso a Scaeli Fit');
   await p.evaluate(() => window.DAILY.ir('hoy')); await p.waitForTimeout(500);
-  const lap = await p.evaluate(() => { const e = document.querySelector('.pjbtn'); if (!e) return null; const s = getComputedStyle(e, '::after'); return [s.top, s.bottom]; });
-  ok(lap && lap[0] === '8px', 'el lápiz del personaje va arriba: ' + JSON.stringify(lap));
+  const lap = await p.evaluate(() => { const e = document.querySelector('.hero2 .pjedit'), h = document.querySelector('.hero2'); if (!e || !h) return null; const a = e.getBoundingClientRect(), b = h.getBoundingClientRect(); return [Math.round(a.top - b.top), Math.round(a.left - b.left), getComputedStyle(document.querySelector('.pjbtn'), '::after').display]; });
+  ok(lap && lap[0] <= 16 && lap[1] <= 16 && lap[2] === 'none', '2.3: el lápiz del personaje va en la esquina de la tarjeta: ' + JSON.stringify(lap));
   console.log(errs.join('\n')); console.log(fails.length ? 'FALLAS:\n' + fails.join('\n') : 'OK t37');
   await b.close(); process.exit(fails.length || errs.length ? 1 : 0); })();

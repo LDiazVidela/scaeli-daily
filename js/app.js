@@ -20,7 +20,7 @@ import * as PJ from "./personaje.js";
 import { RETIROS } from "../data/retiros.js";   // 2.2: caminos largos de oración (Scaeli+)
 import { MUSICAS, musicaPlay, musicaStop, musicaEstado, musicaAlCambiar, campana, vozDisponible, decir, callar } from "./audio.js";
 
-export const VERSION="2.2.7";
+export const VERSION="2.3";
 const LOGO_GOOGLE='<svg class="logo-g" viewBox="0 0 48 48" aria-hidden="true"><path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/><path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/><path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/><path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/></svg>';
 const LOGO_APPLE='<svg class="logo-a" viewBox="0 0 814 1000" aria-hidden="true"><path fill="currentColor" d="M788.1 340.9c-5.8 4.5-108.2 62.2-108.2 190.5 0 148.4 130.3 200.9 134.2 202.2-.6 3.2-20.7 71.9-68.7 141.9-42.8 61.6-87.5 123.1-155.5 123.1s-85.5-39.5-164-39.5c-76.5 0-103.7 40.8-165.9 40.8s-105.6-57-155.5-127C46.7 790.7 0 663 0 541.8c0-194.4 126.4-297.5 250.8-297.5 66.1 0 121.2 43.4 162.7 43.4 39.5 0 101.1-46 176.3-46 28.5 0 130.9 2.6 198.3 99.2zm-234-181.5c31.1-36.9 53.1-88.1 53.1-139.3 0-7.1-.6-14.3-1.9-20.1-50.6 1.9-110.8 33.7-147.1 75.8-28.5 32.4-55.1 83.6-55.1 135.5 0 7.8 1.3 15.6 1.9 18.1 3.2.6 8.4 1.3 13.6 1.3 45.4 0 102.5-30.4 135.5-71.3z"/></svg>';
 /* la dirección publicada: la app de las tiendas lee de acá los Evangelios del día (los genera la GitHub Action cada noche) */
@@ -179,7 +179,8 @@ const rachaChip=()=>'<span class="chip vch">'+velaHTML(racha(),rezoAlgo(dayOf(ho
 const tile=(k,icn,t,s,done,extra)=>'<button class="tile'+(done?" done":"")+(extra||"")+'" data-a="'+k+'"><div class="ic">'+(done?ic("check"):ic(icn))+'</div><b>'+t+'</b><small>'+s+'</small></button>';
 
 const horaLHahora=()=>{ const h=new Date().getHours(); return h<9?"laudes":h<12?"tercia":h<15?"sexta":h<18?"nona":h<21?"visperas":"completas"; };
-function cov(k,img,t,s,done,cls,p){ return '<button class="cov'+(cls?" "+cls:"")+'" data-a="'+k+'"'+(p?' data-p="'+p+'"':'')+'><img src="'+ilu(img)+'" alt="" loading="lazy"><span class="g"></span><span class="c"><b>'+t+'</b><small>'+s+'</small></span>'+'</button>'; }
+/* 2.3: lo ya rezado hoy lleva el tilde en la esquina (Lorenzo: «marcá las cosas que ya se hicieron») */
+function cov(k,img,t,s,done,cls,p){ return '<button class="cov'+(cls?" "+cls:"")+(done?" hecho":"")+'" data-a="'+k+'"'+(p?' data-p="'+p+'"':'')+'><img src="'+ilu(img)+'" alt="" loading="lazy"><span class="g"></span>'+(done?'<span class="covok" aria-label="Hecho hoy">'+ic("check")+'</span>':'')+'<span class="c"><b>'+t+'</b><small>'+s+'</small></span>'+'</button>'; }
 /* una novena está en curso si llegan los nueve días antes de la fiesta, o si la empezaste vos («libre»): entonces el día es el que sigue al último rezado */
 function novEstado(n){ const D=novDias(n), mia=novenas.find(x=>x.id===n.id)||{}, hechos=mia.dias||[];
   if(mia.libre&&hechos.length<D.d){ const h=hechos.length; const hoyYa=mia.ult===hoy(); return {...D,dia:hoyYa?h:h+1,libre:true,hoyYa,hechos}; }
@@ -253,7 +254,16 @@ function caminoHoyHTML(){ const A=caminoActivo(); if(!A) return ""; const [k,C]=
 /* el inicio de Hoy según la hora: a la mañana y a la noche, tu propia oración; al mediodía, el Ángelus; a la tarde, el Evangelio */
 const ORAR={m:["Tu oración de la mañana","¿Qué le querés decir a Dios al empezar el día?","Contale cómo empezás el día, qué te espera, qué le pedís y por quién rezás."],
   n:["Tu oración de la noche","¿Cómo estuvo tu día con Dios?","Agradecé lo bueno, pedí perdón por lo que no estuvo bien y dejá en sus manos lo que te preocupa."]};
-function heroTexto(mo,d,ev){
+/* 2.3: si lo del momento ya está rezado, el inicio no lo sigue ofreciendo: muestra lo siguiente que falta (Evangelio, Rosario, Examen)
+   y, si ya está todo, un «Amén» tranquilo con el tilde */
+const heroYa=(mo,d)=>mo==="mediodia"?!!d.a:mo==="tarde"?!!d.e:!!d[mo==="manana"?"m":"n"];
+function heroSiguiente(mo,d,ev){
+  if(!d.e) return heroTexto("tarde",d,ev,1);
+  if(!d.r) return '<div class="tx"><div class="eyebrow">Santo Rosario</div><p class="q">'+esc(MISTERIOS[misteriosHoy()].n)+'</p><button class="ghost" data-a="rosario">'+ic("rosary")+' Rezar · 20 min</button></div>';
+  if(!d.x&&(mo==="tarde"||mo==="noche")) return '<div class="tx"><div class="eyebrow">Examen del día</div><p class="q">Mirá tu día con los ojos de Dios</p><button class="ghost" data-a="examen">'+ic("pen")+' Hacer · 5 min</button></div>';
+  return '<div class="tx hecho"><div class="eyebrow">'+ic("check")+' Ya rezaste</div><p class="q">«Todo lo que respira alabe al Señor»</p><button class="ghost" data-a="irDia">Ver tu día</button></div>'; }
+function heroTexto(mo,d,ev,forzar){
+  if(!forzar&&heroYa(mo,d)) return heroSiguiente(mo,d,ev);
   if(mo==="mediodia"){ const H=HORA.mediodia; return '<div class="tx"><div class="eyebrow">'+esc(H.t)+'</div><p class="q">«'+esc(H.txt.split("\n")[0].replace(/[,;:]$/,""))+'»</p><button class="ghost" data-a="hora" data-p="mediodia">'+ic("play")+' Rezar · 1 min</button></div>'; }
   if(mo==="tarde"){ const c=ev&&ev.evangelio?citaCorta(ev.evangelio.cita):""; const fr=ev&&ev.evangelio&&ev.evangelio.texto?String(ev.evangelio.texto).replace(/\s+/g," ").trim().split(/(?<=[.;:!?»])\s/)[0]:""; const q=fr?(fr.length>72?fr.slice(0,fr.lastIndexOf(" ",66))+"…":fr):"Un rato con la Palabra de hoy";
     return '<div class="tx"><div class="eyebrow">Evangelio del día</div><p class="q">'+(fr?'«'+esc(q.replace(/^[«"“]|[»"”]$/g,""))+'»':esc(q))+'</p><button class="ghost" data-a="evangelio">'+ic("book")+' '+(d.e?'Volver a leer':'Leer · 5 min')+'</button></div>'; }
@@ -265,16 +275,16 @@ function renderHoy(){ cargarEvangelio(); const d=dayOf(hoy()), nom=(profile&&pro
   // 2.0.2: ninguna ilustración dos veces en la pantalla (el fondo de arriba puede ser la noche, un misterio, el Evangelio…)
   const heroImg=fondoActual()||mo, usa=new Set([heroImg]), im=(...c)=>{ const k=c.find(x=>!usa.has(x))||c[0]; usa.add(k); return k; };
   return cab(cap(fLarga(hoy()))+' · '+esc(L.l),saludo()+(nom?',<br>'+esc(nom):''),rachaChip())+
-   '<div class="hero2"><img class="bg" src="'+ilu(heroImg)+'" alt=""><span class="sh"></span><button class="pjbtn" data-a="pjIr" aria-label="Personalizar tu personaje">'+personajeHTML("vivo","south",150)+'</button>'+
+   '<div class="hero2"><img class="bg" src="'+ilu(heroImg)+'" alt=""><span class="sh"></span><button class="pjbtn" data-a="pjIr" aria-label="Personalizar tu personaje">'+personajeHTML("vivo","south",150)+'</button><button class="pjedit" data-a="pjIr" aria-label="Editar tu personaje">'+ic("edit")+'</button>'+
      heroTexto(mo,d,ev)+'</div>'+nivelHTML("card")+
    (anioListo()?'<button class="card anioc" data-a="anio"><span class="n"><span class="eyebrow">Cristo Rey · termina el año litúrgico</span><b>Tu año con Dios · '+hoy().slice(0,4)+'</b><small>Mirá tu año en historias y compartilo</small></span>'+(esPlus()?ic("right"):'<span class="plus-mini">'+ic("lock")+' Scaeli+</span>')+'</button>':'')+
-   '<button class="card lhnow" data-a="horaLH" data-p="'+lh+'"><span class="n"><span class="eyebrow">Ahora · Liturgia de las Horas</span><b>'+esc(LHn[1])+'</b><small>'+esc(LHn[2])+'</small></span><span class="ghost">Rezar</span></button>'+caminoHoyHTML()+retiroHoyHTML()+
+   '<button class="card lhnow" data-a="horaLH" data-p="'+lh+'"><span class="n"><span class="eyebrow">Ahora · Liturgia de las Horas</span><b>'+esc(LHn[1])+'</b><small>'+esc(LHn[2])+'</small></span>'+(lhOk?'<span class="ck on" aria-label="Rezada">'+ic("check")+'</span>':'<span class="ghost">Rezar</span>')+'</button>'+caminoHoyHTML()+retiroHoyHTML()+
    actBanner()+'<div class="covers">'+
-     cov("evangelio",im("evangelio","biblia"),"Evangelio",ev?esc(citaCorta(ev.evangelio.cita)):"Del día")+
-     cov("rosario",im(misteriosHoy(),"rosario"),"Rosario",dayOf(hoy()).r&&dayOf(hoy()).src==="fit"?"Rezado en Scaeli Fit":MISTERIOS[misteriosHoy()].n.replace("Misterios ",""))+
-     cov("examen",im("examen","confesion"),"Examen del día","A la noche")+
-     (nv?cov("novena",im("novenas","santo"),"Novena",esc(nv.n.n)+" · día "+nv.D.dia,0,"",nv.n.id):cov("orar",im("noche","oraciones"),"Tu oración de la noche","¿Cómo estuvo tu día con Dios?","","","noche"))+
-     (santo?cov("santo",im("santo","misa"),esc(santo[0].split(",")[0]),"Santo del día"+(fichaSanto(mm).p?" · "+esc(fichaSanto(mm).p[0]):""),0,"w"):'')+
+     cov("evangelio",im("evangelio","biblia"),"Evangelio",ev?esc(citaCorta(ev.evangelio.cita)):"Del día",d.e)+
+     cov("rosario",im(misteriosHoy(),"rosario"),"Rosario",dayOf(hoy()).r&&dayOf(hoy()).src==="fit"?"Rezado en Scaeli Fit":MISTERIOS[misteriosHoy()].n.replace("Misterios ",""),d.r)+
+     cov("examen",im("examen","confesion"),"Examen del día","A la noche",d.x)+
+     (nv?cov("novena",im("novenas","santo"),"Novena",esc(nv.n.n)+" · día "+nv.D.dia,nv.D.hoyYa,"",nv.n.id):cov("orar",im("noche","oraciones"),"Tu oración de la noche","¿Cómo estuvo tu día con Dios?",d.n,"","noche"))+
+     (santo?cov("santo",im("santo","misa"),esc(santo[0].split(",")[0]),"Santo del día"+(fichaSanto(mm).p?" · "+esc(fichaSanto(mm).p[0]):""),d.s,"w"):'')+
    '</div>'+
    habitosHoyHTML()+grupoCardHTML()+(sobreEstado().k==="listo"?albumCard():'')+
    '<div class="card"><div class="eyebrow" style="margin-bottom:12px">Tu semana con Dios</div>'+semanaHTML()+'<p class="hint" style="margin-top:12px">'+esc(mes[0])+'. '+esc(mes[1])+'</p></div>'; }
@@ -395,6 +405,7 @@ function renderYo(){ const raw=profile||{}, P=PJ.normal(raw), nom=raw.nombre||(u
      '<div class="eyebrow">Ropa</div>'+ropa(x=>x[0]==="base"||x[0]==="deportiva"||PJ.CON_COLOR.includes(x[0]))+
      '<div class="eyebrow">'+(P.sx==="f"?"Consagradas":"Consagrados")+'</div>'+ropa(x=>x[0]!=="base"&&x[0]!=="deportiva"&&!PJ.CON_COLOR.includes(x[0]))+
      (P.color&&OP.colores.length>1?'<div class="eyebrow">Color</div><div class="sw">'+OP.colores.map(c=>'<button data-a="pjSet" data-p="prenda|'+P.tipo+':'+c[0]+'" aria-pressed="'+(P.color===c[0])+'" aria-label="'+esc(c[1])+'" title="'+esc(c[1])+'" style="background:'+c[2]+'"></button>').join("")+'</div>':'')+
+     '<div class="eyebrow">Piel</div><div class="sw piel">'+PJ.TONOS.map(t=>'<button data-a="pjSet" data-p="tono|'+t[0]+'" aria-pressed="'+(P.tono===t[0])+'" aria-label="'+esc(t[1])+'" title="'+esc(t[1])+'" style="background:'+t[2]+'"></button>').join("")+'</div>'+
      '<div class="eyebrow">Altura</div><div class="seg">'+PJ.ALTURAS.map(x=>'<button data-a="pjSet" data-p="alt|'+x[0]+'" aria-pressed="'+(P.alt===x[0])+'">'+x[1]+'</button>').join("")+'</div>'+
 
      '<label class="f" style="margin-top:6px">Cómo te llamás<input type="text" data-nombre value="'+esc(raw.nombre||"")+'" placeholder="'+esc(user&&user.displayName||"Tu nombre")+'" maxlength="24"></label></div>'+
@@ -1217,7 +1228,7 @@ function shDonar(){ const nat=esNativo(), D=sheet.dons;
 /* ── el panel inferior: las oraciones, el rosario, las horas, el examen… ── */
 function openSheet(s){ sheet=s; $("#scrim").hidden=false; $("#sheet").hidden=false; renderSheet(); window.scrollTo(0,0); }
 function closeSheet(){ if(sheet&&sheet.timer) clearTimeout(sheet.timer); sheet=null; rosVozSeguir(); if(musicaEstado()) musChip(); $("#scrim").hidden=true; $("#sheet").hidden=true; $("#sheet").classList.remove("full"); document.body.classList.remove("enfoque"); render(); }
-function renderSheet(){ if(!sheet) return; const S={palabra:shPalabra,album:shAlbum,sobre:shSobre,figu:shFigu,diploma:shDiploma,hora:shHora,evangelio:shEvangelio,rosario:shRosario,horas:shHoras,hora_lh:shHoraLH,oraciones:shOraciones,oracion:shOracion,novenas:shNovenas,novena:shNovena,examen:shExamen,confesion:shConfesion,misa:shMisa,santo:shSanto,santoral:shSantoral,lectio:shLectio,lectioGuia:shLectioGuia,creditos:shCreditos,exConf:shExConf,biblia:shBiblia,progreso:shProgreso,camino:shCamino,anio:shAnio,retiros:shRetiros,retiro:shRetiro,diario:shDiario,musica:shMusica,grupo:shGrupo,biblioteca:shBiblioteca,libros:shLibros,libro:shLibro,orar:shOrar,misOraciones:shMisOraciones,plus:shPlus,donar:shDonar,borrar:shBorrar}[sheet.view];
+function renderSheet(){ if(!sheet) return; const S={palabra:shPalabra,album:shAlbum,sobre:shSobre,figu:shFigu,diploma:shDiploma,hora:shHora,evangelio:shEvangelio,rosario:shRosario,horas:shHoras,hora_lh:shHoraLH,oraciones:shOraciones,oracion:shOracion,novenas:shNovenas,novena:shNovena,examen:shExamen,confesion:shConfesion,misa:shMisa,santo:shSanto,santoral:shSantoral,lectio:shLectio,lectioGuia:shLectioGuia,creditos:shCreditos,novedades:shNovedades,exConf:shExConf,biblia:shBiblia,progreso:shProgreso,camino:shCamino,anio:shAnio,retiros:shRetiros,retiro:shRetiro,diario:shDiario,musica:shMusica,grupo:shGrupo,biblioteca:shBiblioteca,libros:shLibros,libro:shLibro,orar:shOrar,misOraciones:shMisOraciones,plus:shPlus,donar:shDonar,borrar:shBorrar}[sheet.view];
   $("#sheetIn").innerHTML=S?S():""; pintarPersonajes(); cartasAjustar(); $("#sheet").classList.toggle("short",!!sheet.short); $("#sheet").classList.toggle("full",!!sheet.full); document.body.classList.toggle("enfoque",!!sheet.full); const sc=$("#sheet .scroll"); if(sc&&sheet.top!==false) sc.scrollTop=0; rosVozSeguir(); if(musicaEstado()) musChip(); }
 function renderSheetQuieto(){ const sc=$("#sheet .scroll"), y=sc?sc.scrollTop:0; renderSheet(); const s2=$("#sheet .scroll"); if(s2) s2.scrollTop=y; }
 const shTop=(t,sub)=>'<h3><span>'+t+(sub?'<small class="muted" style="display:block;font-size:12px;font-weight:400;letter-spacing:0">'+sub+'</small>':'')+'</span><button class="iconbtn ghost" data-a="cerrar" aria-label="Cerrar">'+ic("x")+'</button></h3>';
@@ -1369,14 +1380,26 @@ async function rosAvanzar(){ let r={...(rosario||rosNuevo())}; if(r.f!==hoy()) r
 async function rosAtras(){ let r={...rosario}; if(r.fase==="papa"){ if(r.c>0) r.c--; else r.fase="salve"; } else if(r.fase==="salve"){ r.fase="gloria"; r.mis=4; } else if(r.fase==="ave"){ if(r.c>1) r.c--; else r.fase="padre"; } else if(r.fase==="gloria"){ r.fase="ave"; r.c=10; } else if(r.fase==="padre"){ r.fase="anuncio"; } else if(r.fase==="anuncio"&&r.mis>0){ r.mis--; r.fase="gloria"; } else if(r.fase==="anuncio"){ r.fase="contri"; } else if(r.fase==="contri"){ r.fase="credo"; } else if(r.fase==="ini"){ if(r.c>0) r.c--; else r.fase="credo"; } else if(r.fase==="credo"){ r.fase="intro"; sheet.rset=r.set; } await rosGuardar(r); }
 
 /* la Liturgia de las Horas */
+/* 2.3: al entrar, qué es y para qué sirve (Lorenzo: «explicar cuando entrás a liturgia de las horas qué es y para qué sirve») */
+const LH_PARA={oficio:"Lecturas largas de la Biblia y de los santos, para meditar con calma. Se puede rezar a cualquier hora.",
+  laudes:"Alabar a Dios al empezar el día y ofrecerle todo lo que viene. Es una de las dos Horas principales.",
+  tercia:"Una pausa corta a media mañana para volver a Dios en medio del estudio o el trabajo. Recuerda la venida del Espíritu Santo en Pentecostés.",
+  sexta:"Una pausa corta al mediodía, en el centro de la jornada. Recuerda la cruz de Jesús.",
+  nona:"Una pausa corta a media tarde, a la hora en que Jesús entregó su vida en la cruz.",
+  visperas:"Agradecer el día que termina, al atardecer. Es la otra Hora principal, junto con Laudes.",
+  completas:"La última oración antes de dormir: un breve examen, pedir perdón y ponerse en las manos de Dios."};
+const lhQue=abierto=>'<details class="card pad lhque"'+(abierto?' open':'')+'><summary><span class="eyebrow">¿Qué es?</span><b>La oración de toda la Iglesia</b><span class="muted">'+ic("down")+'</span></summary>'+
+  '<p>La <b>Liturgia de las Horas</b> es la oración oficial de la Iglesia. La rezan el Papa, los sacerdotes, las consagradas y muchos laicos, en todo el mundo, a las mismas horas del día. Está hecha sobre todo de <b>salmos</b>, la oración que rezaba Jesús, con un himno, una lectura breve de la Biblia y peticiones.</p>'+
+  '<p><b>¿Para qué sirve?</b> Para que todo el día sea de Dios, no solo un rato suelto: la mañana, el mediodía, la tarde y la noche. Cuando la rezás te unís a la oración de Cristo y de toda la Iglesia: nunca rezás solo.</p>'+
+  '<p><b>¿Por dónde empiezo?</b> Las principales son <b>Laudes</b> (a la mañana) y <b>Vísperas</b> (a la tarde). Tercia, Sexta y Nona son pausas cortas durante el día, y <b>Completas</b>, antes de dormir. Podés empezar por una sola.</p></details>';
 function shHoras(){ const d=dayOf(hoy()), h=d.h||{}; const ahora=new Date().getHours(); const sug=ahora<9?"laudes":ahora<12?"tercia":ahora<15?"sexta":ahora<18?"nona":ahora<21?"visperas":"completas";
-  return shTop("Liturgia de las Horas",cap(fLarga(hoy())))+'<div class="scroll"><div class="sbanner"><img src="'+ilu("horas")+'" alt=""><span class="g"></span></div><div class="list">'+LH_HORAS.map(x=>'<button class="food" data-a="horaLH" data-p="'+x[0]+'"><div><b>'+esc(x[1])+(h[x[0]]?' <span class="ck on mini-ck">'+ic("check")+'</span>':'')+'</b><br><small>'+esc(x[2])+(x[0]===sug?' · ahora':'')+'</small></div>'+ic("right")+'</button>'+(h[x[0]]?'<div class="deslinea">'+desLink("h:"+x[0],"Marcar "+esc(x[1])+" como no rezada")+'</div>':'')).join("")+'</div><p class="hint" style="margin-top:12px">Cada Hora se abre en liturgiadelashoras.github.io, en tu navegador. Después la marcás acá como rezada.</p></div><button class="primary ink" data-a="cerrar">Volver</button>'; }
+  return shTop("Liturgia de las Horas",cap(fLarga(hoy())))+'<div class="scroll"><div class="sbanner"><img src="'+ilu("horas")+'" alt=""><span class="g"></span></div>'+lhQue(!Object.keys(h).length)+'<div class="list">'+LH_HORAS.map(x=>'<button class="food" data-a="horaLH" data-p="'+x[0]+'"><div><b>'+esc(x[1])+(h[x[0]]?' <span class="ck on mini-ck">'+ic("check")+'</span>':'')+'</b><br><small>'+esc(x[2])+(x[0]===sug?' · ahora':'')+'</small></div>'+ic("right")+'</button>'+(h[x[0]]?'<div class="deslinea">'+desLink("h:"+x[0],"Marcar "+esc(x[1])+" como no rezada")+'</div>':'')).join("")+'</div><p class="hint" style="margin-top:12px">Cada Hora se abre en liturgiadelashoras.github.io, en tu navegador. Después la marcás acá como rezada.</p></div><button class="primary ink" data-a="cerrar">Volver</button>'; }
 const lhConLeyenda=h=>(h.includes('est c2')?'<div class="lhcoros"><span><i></i>Coro 1</span><span><i class="c2"></i>Coro 2, con sangría</span></div>':'')+h;
 /* 2.1: los textos de la Liturgia de las Horas tienen derechos, así que Daily ya no los copia ni los muestra adentro:
    cada Hora se abre en el sitio liturgiadelashoras.github.io (en el navegador) y acá se marca como rezada. */
 function shHoraLH(){ const h=sheet.p, x=LH_HORAS.find(y=>y[0]===h)||[h,h,""], nom=x[1];
   return shTop(esc(nom),"Liturgia de las Horas")+'<div class="scroll"><div class="sbanner"><img src="'+ilu("horas")+'" alt=""><span class="g"></span></div>'+
-   '<div class="card pad lhlink"><div class="eyebrow">'+esc(x[2]||"Liturgia de las Horas")+'</div><h3 style="margin:6px 0 4px">'+esc(nom)+' de hoy</h3><p class="hint" style="margin:0 0 14px">La Liturgia de las Horas se reza con los textos oficiales de la Iglesia. Se abren en el sitio <b>liturgiadelashoras.github.io</b>, en tu navegador. Cuando termines, volvé y marcala como rezada.</p>'+
+   lhQue(false)+'<div class="card pad lhlink"><div class="eyebrow">'+esc(x[2]||"Liturgia de las Horas")+'</div><h3 style="margin:6px 0 4px">'+esc(nom)+' de hoy</h3>'+(LH_PARA[h]?'<p style="margin:0 0 10px">'+esc(LH_PARA[h])+'</p>':'')+'<p class="hint" style="margin:0 0 14px">La Liturgia de las Horas se reza con los textos oficiales de la Iglesia. Se abren en el sitio <b>liturgiadelashoras.github.io</b>, en tu navegador. Cuando termines, volvé y marcala como rezada.</p>'+
    '<a class="primary lhabrir" href="'+esc(lhURL(new Date(),h))+'" target="_blank" rel="noopener">'+ic("right")+' Abrir '+esc(nom)+'</a></div>'+intHTML()+'</div>'+
    '<div class="grid2"><button class="ghost g" data-a="horas">'+ic("left")+' Horas</button>'+(((dayOf(hoy()).h||{})[h])?'<button class="ghost g" data-a="desmarcar" data-p="h:'+h+'">'+ic("x")+' Ya rezada · sacar</button>':'<button class="primary" data-a="lhOk" data-p="'+h+'" style="height:40px;font-size:14px">Amén</button>')+'</div>'; }
 
@@ -1563,7 +1586,7 @@ function renderLogin(){ $("#nav").hidden=true;
    '<div class="pie"><h1>Tu fe, a otro nivel</h1><p class="hint">El Evangelio, el Rosario, las Horas y el examen del día. Tu semana con Dios, guardada en tu cuenta.</p>'+
    (plataforma()!=="android"?'<button class="entrar apple" id="loginApple" data-q="apple">'+LOGO_APPLE+'<span>Continuar con Apple</span></button>':'')+'<button class="entrar google" id="login" data-q="google">'+LOGO_GOOGLE+'<span>Continuar con Google</span></button><button class="ghost g" id="invitado" style="justify-content:center;height:54px;width:100%;font-size:17px">Probar sin cuenta</button>'+
    '<p class="hint" id="status" style="margin:8px 0 0">'+esc(statusTxt||"La misma cuenta que Scaeli Fit y el juego. Nada es público.")+'</p><p class="hint" style="margin:0"><a href="privacidad.html" target="_blank" rel="noopener">Política de privacidad</a></p></div></div>'; }
-function startSession(u,local){ user=u; unsubs.forEach(f=>{try{f()}catch(e){}}); unsubs=[];
+function startSession(u,local){ user=u; unsubs.forEach(f=>{try{f()}catch(e){}}); unsubs=[]; setTimeout(novedadesVer,1600);
   backend=local?localBackend():userBackend(u.uid,e=>{ if(e&&e.code==="permission-denied") setStatus("La base de datos rechazó la operación: hay que publicar firestore.rules.",true); else setStatus("Sin conexión: los cambios se guardan y se sincronizan después."); });
   setStatus(local?"Guardado solo en este dispositivo":"Sincronizado · "+(u.displayName||u.email||"")); $("#nav").hidden=false;
   const w=(fn)=>{ const un=fn(); if(typeof un==="function") unsubs.push(un); };
@@ -1827,7 +1850,30 @@ document.addEventListener("focusout",()=>{ if(dirty){ dirty=false; setTimeout(()
 $("#scrim").addEventListener("click",()=>ACC.cerrar());
 document.addEventListener("keydown",e=>{ if(e.key==="Escape"&&sheet&&!document.querySelector(".dlg")) ACC.cerrar(); });
 try{ if(localStorage.getItem("daily_theme")==="light") document.documentElement.setAttribute("data-theme","light"); }catch(e){}
-if(!esNativo()&&navigator.serviceWorker&&navigator.serviceWorker.register&&location.protocol!=="file:"){ window.addEventListener("load",()=>{ navigator.serviceWorker.register("sw.js").catch(()=>{}); }); }
+/* 2.3: avisos de actualización (Lorenzo: «cada vez que actualicemos la app tiene que aparecer un aviso, ya que la están usando personas»).
+   1) Con la app abierta: si llega una versión nueva (el service worker nuevo toma el control), un aviso fijo «Hay una versión nueva · Actualizar».
+   2) Al abrir la versión nueva: una vez, la hoja «Novedades» con lo que cambió desde la última que viste (NOVEDADES, la más nueva primero).
+   En cada versión nueva hay que sumar su entrada acá (t38 lo comprueba). */
+const NOVEDADES=[
+  ["2.3",["Elegí el tono de piel de tu personaje (en Yo).","Lo que ya rezaste hoy aparece con un tilde, y el inicio te propone lo que te falta.","El lápiz para editar tu personaje está en la esquina.","Liturgia de las Horas: qué es y para qué sirve cada Hora.","Este aviso: cada vez que actualicemos la app, vas a ver acá las novedades."]],
+  ["2.2.7",["Scaeli Daily está en su dirección propia: daily.scaeli.com.ar."]],
+  ["2.2.6",["En Hoy podés anotar una caída de un hábito con el «−».","Lo que rezás en la app marca solo el hábito del mismo nombre.","Ya se puede conectar Google Calendar."]]];
+const cmpV=(a,b)=>{ const x=String(a).split(".").map(Number), y=String(b).split(".").map(Number); for(let i=0;i<3;i++){ const d=(x[i]||0)-(y[i]||0); if(d) return d; } return 0; };
+/* quién ya usaba la app antes de este aviso: se mira al cargar, antes de que esta sesión guarde nada */
+let USO_PREVIO=false; try{ USO_PREVIO=Object.keys(localStorage).some(k=>/^(scaeli-daily-local|daily_(invitado|theme|lecguia|gcal|plus))/.test(k)); if(!USO_PREVIO&&!localStorage.getItem("daily_ver_vista")) localStorage.setItem("daily_ver_vista",VERSION); }catch(e){}
+function novedadesVer(){ let v=null; const viejo=USO_PREVIO; try{ v=localStorage.getItem("daily_ver_vista"); }catch(e){ return; }
+  if(!v&&!viejo){ lsSet("daily_ver_vista",VERSION); return; }   // primera vez: nada que avisar
+  if(v&&cmpV(v,VERSION)>=0) return;
+  const L=NOVEDADES.filter(n=>cmpV(n[0],v||"2.2.7")>0&&cmpV(n[0],VERSION)<=0).slice(0,3);
+  lsSet("daily_ver_vista",VERSION); if(!L.length||sheet) return; openSheet({view:"novedades",L}); }
+function shNovedades(){ const L=sheet.L||[];
+  return shTop("Novedades","Scaeli Daily "+VERSION)+'<div class="scroll nov-lista">'+L.map((n,i)=>'<div class="card pad"><div class="eyebrow">'+(i?'Versión '+esc(n[0]):'Lo nuevo · versión '+esc(n[0]))+'</div><ul>'+n[1].map(t=>'<li>'+esc(t)+'</li>').join("")+'</ul></div>').join("")+'</div><button class="primary" data-a="cerrar">Amén, ¡vamos!</button>'; }
+function avisoVersionNueva(){ if(document.getElementById("avisoNueva")) return; const d=document.createElement("div"); d.id="avisoNueva"; d.className="aviso-nueva"; d.setAttribute("role","status");
+  d.innerHTML='<span>'+ic("star")+' Hay una versión nueva de Scaeli</span><button type="button">Actualizar</button>'; d.querySelector("button").onclick=()=>location.reload(); document.body.appendChild(d); }
+if(!esNativo()&&navigator.serviceWorker&&navigator.serviceWorker.register&&location.protocol!=="file:"){ window.addEventListener("load",()=>{
+  const habia=!!navigator.serviceWorker.controller;
+  navigator.serviceWorker.addEventListener("controllerchange",()=>{ if(habia) avisoVersionNueva(); });
+  navigator.serviceWorker.register("sw.js").then(r=>{ const buscar=()=>{ try{ r.update(); }catch(e){} }; setInterval(buscar,30*60e3); document.addEventListener("visibilitychange",()=>{ if(!document.hidden) buscar(); }); }).catch(()=>{}); }); }
 renderLogin();
 try{ const inv=new URLSearchParams(location.search).get("grupo"); if(inv){ lsSet("daily_grupo_inv",inv.toUpperCase().slice(0,8)); history.replaceState(null,"",location.pathname); } }catch(e){}
 let invitado=false; try{ invitado=localStorage.getItem("daily_invitado")==="1"; }catch(e){}
