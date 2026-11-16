@@ -20,11 +20,12 @@ import * as PJ from "./personaje.js";
 import { RETIROS } from "../data/retiros.js";   // 2.2: caminos largos de oración (Scaeli+)
 import { MUSICAS, musicaPlay, musicaStop, musicaEstado, musicaAlCambiar, campana, vozDisponible, decir, callar } from "./audio.js";
 
-export const VERSION="2.2.5";
+export const VERSION="2.2.6";
 const LOGO_GOOGLE='<svg class="logo-g" viewBox="0 0 48 48" aria-hidden="true"><path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/><path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/><path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/><path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/></svg>';
 const LOGO_APPLE='<svg class="logo-a" viewBox="0 0 814 1000" aria-hidden="true"><path fill="currentColor" d="M788.1 340.9c-5.8 4.5-108.2 62.2-108.2 190.5 0 148.4 130.3 200.9 134.2 202.2-.6 3.2-20.7 71.9-68.7 141.9-42.8 61.6-87.5 123.1-155.5 123.1s-85.5-39.5-164-39.5c-76.5 0-103.7 40.8-165.9 40.8s-105.6-57-155.5-127C46.7 790.7 0 663 0 541.8c0-194.4 126.4-297.5 250.8-297.5 66.1 0 121.2 43.4 162.7 43.4 39.5 0 101.1-46 176.3-46 28.5 0 130.9 2.6 198.3 99.2zm-234-181.5c31.1-36.9 53.1-88.1 53.1-139.3 0-7.1-.6-14.3-1.9-20.1-50.6 1.9-110.8 33.7-147.1 75.8-28.5 32.4-55.1 83.6-55.1 135.5 0 7.8 1.3 15.6 1.9 18.1 3.2.6 8.4 1.3 13.6 1.3 45.4 0 102.5-30.4 135.5-71.3z"/></svg>';
 /* la dirección publicada: la app de las tiendas lee de acá los Evangelios del día (los genera la GitHub Action cada noche) */
 const SITIO="https://ldiazvidela.github.io/scaeli-daily/";
+const FIT_VISIBLE=false;   // 2.2.6: el acceso a Scaeli Fit, oculto por ahora
 const ilu=k=>"assets/ilus/daily_"+k+".png";
 const ic=n=>`<svg class="i" aria-hidden="true"><use href="#i-${n}"/></svg>`;
 const $=s=>document.querySelector(s);
@@ -78,7 +79,19 @@ let days={}, entrenos={}, diasOk=0, profile=null, recordatorios={m:"07:30",n:"22
 let evHoy=null, evEstado="", lhCache={};
 const hoy=()=>iso();
 const dayOf=(s)=>{ const d=days[s]||{}, w=entrenos[s]; return w?{...d,wo:w}:d; };   // wo: el entreno de Scaeli Fit de ese día (solo lectura)
-async function setDay(s,patch){ const viejo=days[s]||{}; if(s===hoy()) actDeDia(viejo,patch); const d={...viejo,...patch}; days[s]=d; await backend.setDoc("daily_days/"+s,d); render(); }
+/* 2.2.6: lo que rezás en la app marca solo el hábito que se llama igual (Rosario, Evangelio, Examen, Ángelus, Misa, Liturgia de las Horas,
+   oración de la mañana o de la noche, santo del día). Se suma una vez por día; si sacás la marca, se descuenta. hba: qué marca sumó a qué hábito */
+const AUTO_HAB={r:/rosario/,e:/evangelio|lectio/,x:/examen/,m:/oracion de la manana|rezar (a |en )?la manana|ofrecimiento|ofrecer el dia/,n:/oracion de la noche|rezar (a |en )?la noche/,a:/angelus/,misa:/\bmisa\b/,h:/liturgia|laudes|visperas|completas|las horas/,s:/santo del dia/};
+const normH=t=>String(t||"").toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g,"");
+const marcasDe=d=>{ const o=Object.keys(AUTO_HAB).filter(k=>k!=="h"&&d[k]); Object.keys(d.h||{}).forEach(x=>{ if(d.h[x]) o.push("h:"+x); }); return o; };
+function autoHab(v,patch){ const H=(typeof rutina!=="undefined"&&rutina&&rutina.habitos)||[]; if(!H.length) return patch;
+  const n={...v,...patch}, antes=marcasDe(v), despues=marcasDe(n), mas=despues.filter(k=>!antes.includes(k)), menos=antes.filter(k=>!despues.includes(k));
+  if(!mas.length&&!menos.length) return patch;
+  const hb={...(n.hb||{})}, hba={...(n.hba||{})}; let cambio=false;
+  mas.forEach(k=>{ const re=AUTO_HAB[k.split(":")[0]], ids=H.filter(h=>re.test(normH(h.t))&&!((hb[h.id]||{}).p>0)).map(h=>h.id); if(!ids.length) return; ids.forEach(id=>{ hb[id]={...(hb[id]||{}),p:1}; }); hba[k]=ids; cambio=true; });
+  menos.forEach(k=>{ if(!hba[k]) return; hba[k].forEach(id=>{ const x={...(hb[id]||{})}; x.p=Math.max(0,(x.p||0)-1); hb[id]=x; }); delete hba[k]; cambio=true; });
+  return cambio?{...patch,hb,hba}:patch; }
+async function setDay(s,patch){ const viejo=days[s]||{}; if(s===hoy()){ actDeDia(viejo,patch); patch=autoHab(viejo,patch); } const d={...viejo,...patch}; days[s]=d; await backend.setDoc("daily_days/"+s,d); render(); }
 const marcar=(k,s)=>setDay(s||hoy(),{[k]:1,t:Date.now()});
 /* 1.8.1: toda marca tiene vuelta atrás. Saca solo la marca; lo escrito (oraciones, Lectio, examen, diario) queda. */
 async function desmarcar(k,f){ f=f||hoy(); const d=dayOf(f);
@@ -225,11 +238,13 @@ function logrosHTML(todos){ const L=logros(), g=L.filter(x=>x.ok); return '<div 
 function semBarras(id){ const lun=lunesDe(hoy()); let o='<span class="hbar" aria-hidden="true">'; for(let i=0;i<7;i++){ const s=addDays(lun,i), x=(dayOf(s).hb||{})[id]||{}; o+='<i class="'+(x.p>0?"on":x.m>0?"cae":"")+(s===hoy()?" hoy":"")+(s>hoy()?" fut":"")+'"></i>'; } return o+'</span>'; }
 /* el círculo para sumar: vacío, con tilde (1) o con el número (2 o más) */
 const habCk=(id,p)=>'<button class="ck hck'+(p>0?' on':'')+'" data-a="habMas" data-p="'+id+'" aria-label="Sumar una vez">'+(p>1?'<b>'+p+'</b>':p>0?ic("check"):'')+'</button>';
+/* 2.2.6: el «−» para anotar una caída, a la izquierda del círculo (Lorenzo: el menos a la izquierda y el más a la derecha); rojizo si hoy hubo caídas */
+const habMn=(id,m)=>'<button class="hmn'+(m>0?' on':'')+'" data-a="habMenos" data-p="'+id+'" aria-label="Anotar una caída">'+ic("minus")+'</button>';
 function habitosHoyHTML(){ const H=rutina.habitos||[], lun=lunesDe(hoy()), n=diasHabitoSemana(lun);
   if(!H.length) return '<div class="card habhoy"><div class="hd"><div class="eyebrow">Tus hábitos esta semana</div></div><p class="hint" style="margin:6px 0 12px">Un hábito es algo que querés hacer crecer: rezar antes de comer, no quejarte, agradecer. Cada vez que lo hacés sumás experiencia; cada caída te baja el ánimo.</p><div class="grid2"><button class="ghost" data-a="biblioteca">'+ic("book")+' Biblioteca</button><button class="ghost g" data-a="irDia">'+ic("plus")+' Escribir uno</button></div></div>';
   /* 2.2.5: lista sobria (opción C): nombre, la semana en barritas, la racha en una pastilla y un círculo para sumar */
   return '<div class="card habhoy"><div class="hd"><div class="eyebrow">Tus hábitos esta semana</div><span class="hint" style="margin:0">'+n+' de 7 días</span></div>'+
-   H.map(h=>{ const p=(((dayOf(hoy()).hb||{})[h.id]||{}).p||0); return '<div class="hrow3"><span class="n"><b>'+esc(h.t)+'</b>'+semBarras(h.id)+'</span>'+velaHTML(rachaHab(h.id),p>0)+habCk(h.id,p)+'</div>'; }).join("")+
+   H.map(h=>{ const x=((dayOf(hoy()).hb||{})[h.id]||{}), p=x.p||0; return '<div class="hrow3"><span class="n"><b>'+esc(h.t)+'</b>'+semBarras(h.id)+(x.m?'<small class="cai">'+x.m+(x.m===1?' caída hoy':' caídas hoy')+'</small>':'')+'</span>'+velaHTML(rachaHab(h.id),p>0)+habMn(h.id,x.m||0)+habCk(h.id,p)+'</div>'; }).join("")+
    '<button class="plusrow" data-a="progreso"><span class="n"><b>Tu progreso y tus virtudes</b><small>'+(esPlus()?'Qué virtudes trabajás y cuáles te faltan':'Con Scaeli+')+'</small></span>'+(esPlus()?ic("right"):'<span class="plus-mini">'+ic("lock")+' Scaeli+</span>')+'</button></div>'; }
 /* el camino del tiempo litúrgico: se ve una semana antes de empezar y hasta el último día */
 function caminoActivo(){ const h=hoy(); return Object.entries(CAMINOS).find(([k,C])=>h>=addDays(C.ini,-7)&&h<=C.fin)||null; }
@@ -315,8 +330,9 @@ function renderDia(){ const s=hoy(), d=dayOf(s), hb=d.hb||{};
    '<div class="card hab">'+ed("Hábitos")+habMejorHTML()+
      ((rutina.habitos||[]).length?(rutina.habitos||[]).map(h=>{ const x=hb[h.id]||{}, ab=habEd===h.id;
        /* 2.2.5 (opción C): círculo para sumar, nombre con la semana en barritas y la racha en una pastilla; las caídas y las correcciones, tocando el nombre */
-       return '<div class="hrow h3">'+habCk(h.id,x.p||0)+'<button class="n" data-a="habEd" data-p="'+h.id+'" aria-expanded="'+ab+'"><b>'+esc(h.t)+'</b>'+semBarras(h.id)+(x.m?'<small class="cai">'+x.m+(x.m===1?' caída hoy':' caídas hoy')+'</small>':'')+'</button>'+velaHTML(rachaHab(h.id),(x.p||0)>0)+(editRut?'<button class="sm" data-a="rutDel" data-p="h|'+h.id+'" aria-label="Borrar">'+ic("trash")+'</button>':'')+'</div>'+
-         (ab?'<div class="hajuste"><span>Hechos hoy</span><button class="pm" data-a="habAj" data-p="'+h.id+'|p|-1">−</button><b>'+(x.p||0)+'</b><button class="pm" data-a="habAj" data-p="'+h.id+'|p|1">+</button><span>Caídas</span><button class="pm" data-a="habAj" data-p="'+h.id+'|m|-1">−</button><b>'+(x.m||0)+'</b><button class="pm" data-a="habAj" data-p="'+h.id+'|m|1">+</button></div><div class="hvirt"><span>Virtud</span>'+VIRTUDES.map(v=>'<button class="'+(virtudDe(h)===v[0]?"on":"")+'" data-a="habVirtud" data-p="'+h.id+'|'+v[0]+'">'+v[1]+'</button>').join("")+'</div>':''); }).join(""):'<p class="empty">Lo que querés hacer crecer: rezar antes de comer, no quejarme… Tocá el círculo cada vez que lo hacés; tocando el nombre anotás una caída o corregís.</p>')+
+       /* 2.2.6: igual que en Hoy: nombre, llama, «−» (caída) y el círculo (sumar) a la derecha; tocando el nombre se corrige */
+       return '<div class="hrow h3"><button class="n" data-a="habEd" data-p="'+h.id+'" aria-expanded="'+ab+'"><b>'+esc(h.t)+'</b>'+semBarras(h.id)+(x.m?'<small class="cai">'+x.m+(x.m===1?' caída hoy':' caídas hoy')+'</small>':'')+'</button>'+velaHTML(rachaHab(h.id),(x.p||0)>0)+(editRut?'<button class="sm" data-a="rutDel" data-p="h|'+h.id+'" aria-label="Borrar">'+ic("trash")+'</button>':habMn(h.id,x.m||0)+habCk(h.id,x.p||0))+'</div>'+
+         (ab?'<div class="hajuste"><span>Hechos hoy</span><button class="pm" data-a="habAj" data-p="'+h.id+'|p|-1" aria-label="Uno menos">'+ic("minus")+'</button><b>'+(x.p||0)+'</b><button class="pm" data-a="habAj" data-p="'+h.id+'|p|1" aria-label="Uno más">'+ic("plus")+'</button><span>Caídas</span><button class="pm" data-a="habAj" data-p="'+h.id+'|m|-1" aria-label="Uno menos">'+ic("minus")+'</button><b>'+(x.m||0)+'</b><button class="pm" data-a="habAj" data-p="'+h.id+'|m|1" aria-label="Uno más">'+ic("plus")+'</button></div><div class="hvirt"><span>Virtud</span>'+VIRTUDES.map(v=>'<button class="'+(virtudDe(h)===v[0]?"on":"")+'" data-a="habVirtud" data-p="'+h.id+'|'+v[0]+'">'+v[1]+'</button>').join("")+'</div>':''); }).join(""):'<p class="empty">Lo que querés hacer crecer: rezar antes de comer, no quejarme… Tocá el círculo cada vez que lo hacés y el «−» si caíste; tocando el nombre corregís.</p>')+
      '<form data-f="habito" class="add"><input type="text" name="t" placeholder="Nuevo hábito…" maxlength="60" required><button class="iconbtn acc" type="submit" aria-label="Agregar">'+ic("plus")+'</button></form>'+
      '<button class="plusrow" data-a="biblioteca"><span class="n"><b>Biblioteca de hábitos y virtudes</b><small>'+BIBLIOTECA.length+' propuestas por virtud y por área, para agregar con un toque</small></span>'+ic("right")+'</button></div>'+
    '<div class="card hab"><div class="hd"><div class="eyebrow">Tareas</div></div>'+
@@ -334,6 +350,7 @@ const gcalOk=()=>gcal.tok&&gcal.exp>Date.now();
 const mesKey=d=>d.getFullYear()+"-"+pad(d.getMonth()+1);
 async function gcalPedir(path,opt){ const r=await fetch("https://www.googleapis.com/calendar/v3/"+path,{...(opt||{}),headers:{Authorization:"Bearer "+gcal.tok,"Content-Type":"application/json"}});
   if(r.status===401){ gcal={tok:null,exp:0}; try{ localStorage.removeItem("daily_gcal"); }catch(e){} throw new Error("El permiso de Google venció: volvé a conectar."); }
+  if(r.status===403) throw new Error("Google Calendar no dejó entrar. Volvé a conectar y aceptá el permiso del calendario.");
   if(!r.ok) throw new Error("Google Calendar respondió "+r.status+"."); return r.json(); }
 async function gcalMes(d){ const k=mesKey(d); if(!gcalOk()||gcalCarga[k]) return; gcalCarga[k]=1;
   try{ const ini=new Date(d.getFullYear(),d.getMonth(),1), fin=new Date(d.getFullYear(),d.getMonth()+1,1);
@@ -355,7 +372,7 @@ function calendarioHTML(){ const hoyS=hoy(); if(!calMes){ const d=new Date(); ca
     (sn?'<button class="row lnkrow" data-a="santo" data-p="'+calSel.slice(5)+'"><div class="n"><b>'+esc(sn[0])+'</b><small>Santoral</small></div>'+ic("right")+'</button>':'')+
     (!evs.length&&!ts.length?'<p class="empty">Nada anotado para este día.</p>':'')+'</div>';
   if(gcalOk()){ o+=calForm?'<form data-f="evento" class="add2"><input type="text" name="t" placeholder="Nuevo evento…" maxlength="80" required><div class="tfila"><label class="f">Empieza<input type="time" name="hi"></label><label class="f">Termina<input type="time" name="hf"></label></div><button class="ghost tadd" type="submit">'+ic("check")+' Guardar evento</button><p class="hint">Sin hora, queda para todo el día. Se guarda en tu Google Calendar.</p></form>':'<button class="ghost" data-a="calNuevo" style="margin-top:10px">'+ic("plus")+' Evento</button>'; }
-  else if(backend&&backend.mode==="firestore") o+='<button class="ghost" data-a="gcalCon" style="margin-top:10px">'+ic("today")+' Conectar Google Calendar</button>';
+  else if(backend&&backend.mode==="firestore") o+='<button class="ghost" data-a="gcalCon" style="margin-top:10px">'+ic("today")+' Conectar Google Calendar</button><p class="hint" style="margin-top:8px">Si Google te avisa que la app no está verificada, tocá «Configuración avanzada» → «Ir a Scaeli» y marcá el permiso del calendario.</p>';
   else o+='<p class="hint" style="margin-top:10px">Entrá con Google (en Más) para ver acá tu Google Calendar.</p>';
   if(gcalErr) o+='<p class="hint" style="color:var(--over);margin-top:8px">'+esc(gcalErr)+'</p>';
   return o+'</div>'; }
@@ -407,8 +424,8 @@ function renderMas(){ const claro=document.documentElement.getAttribute("data-th
    '<div class="row"><div class="n"><b>Compartir mi actividad</b><small>Tu grupo ve qué rezaste, nunca lo que escribiste</small></div>'+swt("actOff",!(profile&&profile.actOff),"Compartir mi actividad")+'</div>'+
    '<div class="row"><div class="n"><b>Exportar mis datos</b><small>Un archivo con todo lo tuyo</small></div><button class="ghost g" data-a="exportar">Exportar</button></div>'+
    '<div class="row"><div class="n"><b>Importar</b><small>Desde un archivo exportado</small></div><button class="ghost g" data-a="importar">Importar</button><input type="file" id="impFile" accept="application/json" hidden></div></div>'+
-   '<div class="card list"><div class="row"><div class="n"><b>Scaeli Fit</b><small>Ordenar el cuerpo desde la templanza</small></div><a class="ghost g" href="https://ldiazvidela.github.io/scaeli-fit/" target="_blank" rel="noopener">Abrir</a></div>'+
-   '</div>'+juegoPronto()+
+   /* 2.2.6: el acceso a Scaeli Fit queda oculto por ahora (pedido de Lorenzo); para volver, poner FIT_VISIBLE=true */
+   (FIT_VISIBLE?'<div class="card list"><div class="row"><div class="n"><b>Scaeli Fit</b><small>Ordenar el cuerpo desde la templanza</small></div><a class="ghost g" href="https://ldiazvidela.github.io/scaeli-fit/" target="_blank" rel="noopener">Abrir</a></div></div>':'')+juegoPronto()+
    '<div class="card list"><div class="row"><div class="n"><b>'+(backend&&backend.mode==="firestore"?esc(user.displayName||user.email||"Tu cuenta"):"Sin cuenta")+'</b><small>'+(backend&&backend.mode==="firestore"?"Guardado en tu cuenta de Google":"Guardado solo en este dispositivo")+'</small></div>'+(backend&&backend.mode==="firestore"?'<button class="ghost g" id="logout">'+ic("out")+' Salir</button>':'<button class="ghost g" id="login" data-q="google">'+LOGO_GOOGLE+' Entrar</button>')+'</div>'+
      (backend&&backend.mode==="firestore"?'<div class="row"><div class="n"><b>Borrar mis datos de Daily</b><small>Tu cuenta sigue</small></div><button class="ghost g" data-a="borrar" data-p="datos">Borrar</button></div><div class="row"><div class="n"><b>Borrar mi cuenta</b><small>La cuenta y todos sus datos (Daily, Fit y el juego)</small></div><button class="ghost g peligro" data-a="borrar" data-p="cuenta">Borrar</button></div>'
        :'<div class="row"><div class="n"><b>Borrar mis datos</b><small>Lo guardado en este dispositivo</small></div><button class="ghost g peligro" data-a="borrar" data-p="datos">Borrar</button></div>')+

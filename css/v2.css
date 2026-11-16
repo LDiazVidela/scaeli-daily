@@ -204,3 +204,14 @@ a.libro{text-decoration:none}
 .vela.on .fl{filter:drop-shadow(0 0 3px rgba(255,180,60,.7))}
 .vela.riesgo .fl,.vela.riesgo .hu{opacity:.5}
 .vela.grande.on svg.vl{filter:drop-shadow(0 0 8px rgba(255,180,60,.45))}
+/* 2.2.6 · «−» para la caída (a la izquierda) y el círculo para sumar (a la derecha), en Hoy y en Día; los signos son dibujos, siempre centrados */
+.hmn{width:32px;height:32px;border-radius:999px;border:1.5px solid var(--line2);background:none;color:var(--muted);flex:none;display:grid;place-items:center;padding:0;cursor:pointer}
+.hmn svg.i{width:16px;height:16px;stroke-width:2.2}
+.hmn.on{border-color:rgba(196,87,78,.6);color:#E07A70;background:rgba(196,87,78,.12)}
+.hmn:active{transform:scale(.94)}
+.pm svg.i{width:16px;height:16px;stroke-width:2.2}
+.hab .hrow.h3,.hrow3{gap:10px}
+.hab .hrow.h3 .vela,.hrow3 .vela{margin-right:2px}
+/* 2.2.6 · el lápiz del personaje: arriba, junto a la cabeza (antes quedaba entre las piernas y el texto) */
+.pjbtn::after{right:18px;bottom:auto;top:8px}
+.hab .hajuste,.hab .hvirt{padding-left:0}
