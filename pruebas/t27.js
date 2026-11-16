@@ -21,7 +21,7 @@ const { chromium } = require('playwright');
   await p.evaluate(() => window.DAILY.ir('rezar')); await p.waitForTimeout(300); t = await p.evaluate(() => document.body.innerText); ok(/Palabra del día/.test(t), 'tile en Rezar');
   // Misiones del grupo
   await A('grupo'); await A('gEjemplo', null, 1000); t = await SH(); ok(/Misiones de hoy/i.test(t) && (await p.$$('.gmis .mrow')).length === 3, 'tres misiones en el grupo'); ok(/perdés 15/.test(t), 'explica la penalización');
-  const mis = await p.evaluate(() => [...document.querySelectorAll('.gmis .mrow')].map(e => e.dataset.a)); ok(new Set(mis).size === 3, 'misiones distintas: ' + mis);
+  const mis = await p.evaluate(() => [...document.querySelectorAll('.gmis .mrow')].map(e => e.dataset.a + '|' + (e.dataset.p || ''))); ok(new Set(mis).size === 3, 'misiones distintas: ' + mis);
   ok(/\d\/3 hoy/.test(t), 'cada miembro muestra sus misiones de hoy');
   // Premios: semana pasada con 7 días con Dios
   await p.evaluate(() => { const K = 'scaeli-daily-local'; const s = JSON.parse(localStorage.getItem(K)); const pad = n => String(n).padStart(2, '0'); const iso = d => d.getFullYear() + '-' + pad(d.getMonth() + 1) + '-' + pad(d.getDate());
@@ -31,7 +31,7 @@ const { chromium } = require('playwright');
   const libre = await p.evaluate(() => [...document.querySelectorAll('#premsec .prem:not(.lock)')].map(e => e.dataset.p)); ok(libre.length === 3, 'desbloqueados: ' + libre);
   const ganado = pr.items[0]; await A('premUsar', ganado, 600);
   if (ganado.startsWith('ac:')) { const a = await p.evaluate(() => document.documentElement.getAttribute('data-acento')); ok(a === ganado.slice(3), 'color de la app aplicado: ' + a); }
-  else { await A('rosario', null, 500); await A('rosAv'); await A('rosAv'); ok(await p.$('svg.anillo.r-' + ganado.slice(4)) !== null, 'rosario con el diseño ganado'); await A('cerrar', null, 300); const d = await p.$('.dlg button.primary'); if (d) await d.click(); }
+  else { await A('rosario', null, 500); if (await p.$('#sheetIn [data-a="rosEmpezar"]')) await A('rosEmpezar', 'gozosos', 500); for (let i = 0; i < 12 && !(await p.$('svg.anillo')); i++) await A('rosAv', null, 250); ok(await p.$('svg.anillo.r-' + ganado.slice(4)) !== null, 'rosario con el diseño ganado'); await A('cerrar', null, 300); const d = await p.$('.dlg button.primary'); if (d) await d.click(); }
   await A('premUsar', 'ros:oro', 300); st = await LS(); ok(st['daily_settings/profile'].ros !== 'oro', 'no se puede usar uno bloqueado');
   // Ajustes: botones de fila del mismo ancho y campos de hora sin alto fijo
   await p.evaluate(() => window.DAILY.ir('mas')); await p.waitForTimeout(400);

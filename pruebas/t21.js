@@ -9,7 +9,7 @@ const { chromium } = require('playwright');
   let t=await p.textContent('#app'); ok(t.includes('Tu oración de la mañana')&&t.includes('¿Qué le querés decir a Dios'),'hero mañana'); ok(!t.includes('Señor, en tus manos pongo este día'),'sin oración inventada');
   await p.screenshot({path:'o_hoy.png'});
   await A('orar','manana',600); ok(await p.$('#orTxt'),'textarea'); await p.fill('#orTxt','Señor, gracias por este día.\nTe pido por mi familia.'); await p.screenshot({path:'o_orar.png'});
-  await A('orGuardar',null,700); t=await p.textContent('#app'); ok(t.includes('Seguir escribiendo'),'hero ya escrito');
+  await A('orGuardar',null,700); t=await p.textContent('#app'); ok(t.includes('Continuar'),'hero ya escrito');
   // datos viejos para comparar
   await p.evaluate(async()=>{ const D=window.DAILY; const be=D.get().backend; });
   await p.evaluate(async()=>{ for(const [f,k,tx] of [['2026-10-01','n','Hace un mes: estaba enojado con mi hermano. Perdón, Señor.'],['2025-10-30','m','Hace un año: no sabía rezar, Señor, enseñame.']]){ await window.DAILY.ACC.__set?.(f); } });

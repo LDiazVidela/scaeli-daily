@@ -1,0 +1,4 @@
+{ "name": "scaeli-reglas", "private": true, "type": "module",
+  "description": "Prueba de firestore.rules con el emulador de Firestore (necesita Java). Una vez: npm install. Correr: npm test",
+  "scripts": { "test": "cp ../../firestore.rules firestore.rules && firebase emulators:exec --only firestore --project demo-scaeli \"node reglas.test.mjs\"" },
+  "dependencies": { "firebase-tools": "13.35.1", "@firebase/rules-unit-testing": "3.0.4", "firebase": "10.14.1" } }

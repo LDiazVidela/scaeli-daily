@@ -158,7 +158,9 @@ export function gruposBackend(uid){
       const u2=F.onSnapshot(col(gid),s=>{ L=s.docs.map(d=>({uid:d.id,...d.data()})); emit(); },e=>cb(null,null,e));
       return ()=>{ u1(); u2(); }; },
     setMiembro(gid,data){ return F.setDoc(m(gid,uid),{...data,t:Date.now()},{merge:true}); },
-    async salir(gid){ await F.deleteDoc(m(gid,uid)); try{ const s=await F.getDocs(col(gid)); if(s.empty){ const d=await F.getDoc(g(gid)); if(d.exists()&&d.data().creador===uid) await F.deleteDoc(g(gid)); } }catch(e){} },
+    /* 2.2.3: se mira si quedás solo ANTES de salir (después ya no sos miembro y las reglas no te dejan listar los miembros) */
+    async salir(gid){ let solo=false; try{ const s=await F.getDocs(col(gid)); solo=s.docs.every(d=>d.id===uid); }catch(e){}
+      await F.deleteDoc(m(gid,uid)); if(solo){ try{ const d=await F.getDoc(g(gid)); if(d.exists()&&d.data().creador===uid) await F.deleteDoc(g(gid)); }catch(e){} } },
     echar(gid,u){ return F.deleteDoc(m(gid,u)); },
     setMeta(gid,patch){ return F.updateDoc(g(gid),patch); },
     /* muro del grupo (1.9): grupos/{gid}/mensajes/{id} = {u, n, tx, t, tipo?, a:{uid:1}, rep:{uid:1}} · últimos 100 */

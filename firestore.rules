@@ -12,15 +12,19 @@ service cloud.firestore {
     }
 
     // Grupos de perseverancia (Daily 1.8) y grupos de entrenamiento (Fit): quien tiene el código del grupo
-    // (y una cuenta) puede leerlo y sumarse. El grupo lo crea y lo cambia su creador; cada miembro escribe
+    // (y una cuenta) puede abrirlo y sumarse; los miembros solo los ven los miembros. El grupo lo crea y lo cambia su creador; cada miembro escribe
     // SOLO su propio documento; el creador puede sacar a alguien.
+    // Privacidad (2.2.3): get y no read: se abre un grupo si se conoce su código (el id), pero nadie puede listar los grupos.
     match /grupos/{gid} {
-      allow read: if request.auth != null;
+      allow get: if request.auth != null;
       allow create: if request.auth != null && request.resource.data.creador == request.auth.uid
                     && request.resource.data.n is string && request.resource.data.n.size() <= 40;
       allow update, delete: if request.auth != null && resource.data.creador == request.auth.uid;
       match /miembros/{uid} {
-        allow read: if request.auth != null;
+        // cada uno lee su propio documento; la lista de miembros solo la ve quien es miembro de ese grupo
+        allow get: if request.auth != null && request.auth.uid == uid;
+        allow list: if request.auth != null
+                    && exists(/databases/$(database)/documents/grupos/$(gid)/miembros/$(request.auth.uid));
         allow create, update: if request.auth != null && request.auth.uid == uid
                               && (!("n" in request.resource.data) || request.resource.data.n.size() <= 24)
                               && (!("int" in request.resource.data) || request.resource.data.int.size() <= 80);
