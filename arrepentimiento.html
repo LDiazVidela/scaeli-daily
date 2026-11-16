@@ -53,7 +53,8 @@ button{font:inherit;font-weight:600;min-height:54px;border-radius:999px;border:0
 <script>
 document.getElementById("f").addEventListener("submit",function(e){ e.preventDefault(); var d=new FormData(this);
   var cuerpo="Quiero arrepentirme de mi pago (Botón de arrepentimiento, 10 días corridos).\n\nCorreo con el que pagué: "+d.get("correo")+"\nFecha del pago: "+d.get("fecha")+"\nMedio de pago: "+d.get("medio")+"\nQué pagué: "+d.get("que")+(d.get("nota")?"\n\n"+d.get("nota"):"");
-  location.href="mailto:scaeli.app@gmail.com?subject="+encodeURIComponent("Arrepentimiento · Scaeli+")+"&body="+encodeURIComponent(cuerpo);
+  window.__mailto="mailto:scaeli.app@gmail.com?subject="+encodeURIComponent("Arrepentimiento · Scaeli+")+"&body="+encodeURIComponent(cuerpo);
+  location.href=window.__mailto;
   document.getElementById("ok").classList.add("on"); });
 </script>
 </body>

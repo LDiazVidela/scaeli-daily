@@ -61,7 +61,8 @@ button{font:inherit;font-weight:600;min-height:54px;border-radius:999px;border:0
 <script>
 document.getElementById("f").addEventListener("submit",function(e){ e.preventDefault(); var d=new FormData(this);
   var cuerpo="Quiero dar de baja Scaeli+ (Botón de baja).\n\nCorreo con el que pagué: "+d.get("correo")+"\nMedio de pago: "+d.get("medio")+"\nPlan: "+d.get("plan")+(d.get("nota")?"\n\n"+d.get("nota"):"");
-  location.href="mailto:scaeli.app@gmail.com?subject="+encodeURIComponent("Baja · Scaeli+")+"&body="+encodeURIComponent(cuerpo);
+  window.__mailto="mailto:scaeli.app@gmail.com?subject="+encodeURIComponent("Baja · Scaeli+")+"&body="+encodeURIComponent(cuerpo);
+  location.href=window.__mailto;
   document.getElementById("ok").classList.add("on"); });
 </script>
 </body>

@@ -35,7 +35,7 @@ const { chromium } = require('playwright');
   await A('camino','adviento',700); const tc=await p.textContent('#sheet'); ok(tc.includes('Semana 1')&&tc.includes('Mc 13,33-37')&&tc.includes('Empieza'),'camino'); await sh('s_cam.png');
   await A('camCita','Mt 24,37-44',1500); const tb=await p.textContent('#sheet'); ok(/Mateo|San Mateo/.test(tb)&&tb.includes('24'),'cita abre biblia'); await sh('s_cam_bib.png');
   // donar
-  await A('donarVer',null,600); ok((await p.textContent('#sheet')).includes('Las donaciones llegan pronto'),'donar (web: llegan pronto)'); await sh('s_donar.png');
+  await A('donarVer',null,600); ok((await p.textContent('#sheet')).includes('$7.500'),'donar (web: montos de Mercado Pago)'); await sh('s_donar.png');
   await A('cerrar'); await p.click('#nav button[data-view="mas"]'); await p.waitForTimeout(500); ok((await p.textContent('#app')).includes('Scaeli+ activo'),'mas plus'); await sh('s_mas.png');
   await A('plus',null,500); await A('plusComoGratis',null,500); await A('cerrar'); await p.waitForTimeout(300); ok((await p.textContent('#app')).includes('desde USD'),'como gratis'); await A('plus',null,400); await A('plusComoGratis',null,400); await A('cerrar');
   await p.context().close();
