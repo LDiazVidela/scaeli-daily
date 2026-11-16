@@ -11,7 +11,7 @@ const { chromium } = require('playwright'); const fs = require('fs');
   const app = fs.readFileSync(__dirname + '/../js/app.js', 'utf8'); const ver = (app.match(/VERSION="([\d.]+)"/) || [])[1];
   ok(new RegExp('\\["' + ver.replace(/\./g, '\\.') + '",\\[').test(app), 'NOVEDADES tiene la entrada de la versión ' + ver);
   // quien venía de una versión anterior ve las novedades una sola vez
-  await p.evaluate(() => localStorage.setItem('daily_ver_vista', '2.2.6')); await p.reload(); await p.waitForTimeout(800); if (await p.$('#invitado')) { await p.click('#invitado'); }
+  await p.evaluate(() => { localStorage.setItem('daily_ver_vista', '2.2.6'); localStorage.setItem('daily_prueba_novedades', '1'); }); await p.reload(); await p.waitForTimeout(800); if (await p.$('#invitado')) { await p.click('#invitado'); }
   await p.waitForTimeout(2200);
   let sh = await p.evaluate(() => window.DAILY.get().sheet && window.DAILY.get().sheet.view); let t = await p.evaluate(() => (document.querySelector('#sheetIn') || {}).innerText || '');
   ok(sh === 'novedades' && /Novedades/.test(t) && /tono de piel/.test(t) && /2\.2\.7/.test(t), 'al actualizar aparece «Novedades» con lo de esta versión y las anteriores');

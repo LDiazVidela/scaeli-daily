@@ -1863,7 +1863,8 @@ const NOVEDADES=[
 const cmpV=(a,b)=>{ const x=String(a).split(".").map(Number), y=String(b).split(".").map(Number); for(let i=0;i<3;i++){ const d=(x[i]||0)-(y[i]||0); if(d) return d; } return 0; };
 /* quién ya usaba la app antes de este aviso: se mira al cargar, antes de que esta sesión guarde nada */
 let USO_PREVIO=false; try{ USO_PREVIO=Object.keys(localStorage).some(k=>/^(scaeli-daily-local|daily_(invitado|theme|lecguia|gcal|plus))/.test(k)); if(!USO_PREVIO&&!localStorage.getItem("daily_ver_vista")) localStorage.setItem("daily_ver_vista",VERSION); }catch(e){}
-function novedadesVer(){ let v=null; const viejo=USO_PREVIO; try{ v=localStorage.getItem("daily_ver_vista"); }catch(e){ return; }
+function novedadesVer(){ let v=null; const viejo=USO_PREVIO; try{ v=localStorage.getItem("daily_ver_vista");
+    if(navigator.webdriver&&!localStorage.getItem("daily_prueba_novedades")) return; }catch(e){ return; }   // en las pruebas automáticas no tapa la pantalla (t38 lo prueba a propósito)
   if(!v&&!viejo){ lsSet("daily_ver_vista",VERSION); return; }   // primera vez: nada que avisar
   if(v&&cmpV(v,VERSION)>=0) return;
   const L=NOVEDADES.filter(n=>cmpV(n[0],v||"2.2.7")>0&&cmpV(n[0],VERSION)<=0).slice(0,3);
