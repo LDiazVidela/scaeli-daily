@@ -53,5 +53,5 @@ const { chromium } = require('playwright');
   // Lo que se instala
   const sw = await p.evaluate(() => fetch('sw.js').then(r => r.text())); ok(/scaeli-daily-v(3[4-9]|[4-9][0-9])/.test(sw) && /data\/retiros\.js/.test(sw) && /js\/audio\.js/.test(sw) && /assets\/cartas\//.test(sw) && /css\/v2\.css/.test(sw) && /assets\/rangos\//.test(sw) && /"biblioteca","donar","grupo","camino"/.test(sw), 'el service worker guarda lo nuevo');
   const mf = await p.evaluate(() => fetch('manifest.webmanifest').then(r => r.json())); ok(mf.theme_color === '#170A0D' && mf.background_color === '#170A0D', 'manifest en bordó');
-  ok(await p.evaluate(() => import('./js/app.js').then(m => m.VERSION)) === '2.2.3', 'versión 2.2.3');
+  ok(await p.evaluate(() => import('./js/app.js').then(m => m.VERSION)) === '2.2.4', 'versión 2.2.4');
   console.log('T31', errs.concat(fails).join('\n') || 'OK'); await b.close(); })();

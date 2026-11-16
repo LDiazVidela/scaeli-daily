@@ -1215,3 +1215,7 @@ a.plan{text-decoration:none;cursor:pointer}a.plan:active{transform:scale(.98)}
 a.donm{text-decoration:none;cursor:pointer}.donm.off{opacity:.5}
 .pronto{display:flex;flex-direction:column;gap:4px;margin-top:16px;padding:16px;border-radius:16px;border:1px solid var(--accent-line);background:var(--accent-dim);text-align:center}
 .pronto b{font-size:16px;font-weight:600}.pronto small{font-size:13px;color:var(--muted);line-height:1.4}
+/* 2.2.4 · el juego: «Muy pronto en las plataformas» (sin enlace) */
+.juegop{display:flex;align-items:center;gap:14px;padding:12px;margin-top:12px}
+.juegop img{width:84px;height:auto;flex:none;border-radius:14px;image-rendering:pixelated;background:#0E1A3A}
+.juegop .n{display:flex;flex-direction:column;gap:2px;min-width:0}.juegop b{font-size:16px;font-weight:600}.juegop small{color:var(--muted);font-size:12.5px;line-height:1.35}
