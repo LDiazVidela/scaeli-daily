@@ -20,6 +20,9 @@ const { chromium } = require('playwright');
   const vd=await p.evaluate(()=>Array.from(document.querySelectorAll('.hab .hrow .vela')).map(v=>v.className+':'+v.querySelector('b').textContent));
   ok(vd.length===8,'8 velas en Tu día: '+vd.length); ok(vd.some(x=>/vela on/.test(x)&&/:4$/.test(x)),'oración de la mañana con vela encendida 4: '+vd.join(' ')); ok(vd.some(x=>/vela riesgo/.test(x)),'una diaria no hecha hoy queda en riesgo');
   ok(!(await p.evaluate(()=>document.querySelector('.hab .str'))),'ya no está la llama vieja');
+  // 2.2.5: hábitos en lista sobria: círculo para sumar, la semana en barritas, la racha en pastilla; sin «−» ni «corregir» en la fila
+  const h3=await p.evaluate(()=>({f:document.querySelectorAll('.hab .hrow.h3').length, b:document.querySelectorAll('.hab .hrow.h3 .hbar i').length, ck:document.querySelectorAll('.hab .hrow.h3 .hck').length, menos:document.querySelectorAll('.hab [data-a="habMenos"]').length, corr:/corregir/.test(document.querySelector('#app').innerText)}));
+  ok(h3.f>=1&&h3.b===h3.f*7&&h3.ck===h3.f&&!h3.menos&&!h3.corr,'hábitos en lista sobria: '+JSON.stringify(h3));
   // 2) biblioteca de hábitos
   await A('biblioteca'); t=await T(); ok(/Biblioteca de hábitos/.test(t)&&/Agregar/.test(t),'biblioteca abre');
   const n0=await p.evaluate(()=>document.querySelectorAll('.bibli .brow').length); ok(n0>=60,'≥60 propuestas: '+n0);

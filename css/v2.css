@@ -155,3 +155,43 @@ form.add2 .tadd{height:44px!important}
 :root[data-theme="light"] .big{background:radial-gradient(circle at 50% 42%,rgba(163,43,65,.1) 0%,var(--surface) 64%)}
 .novmas{display:flex;justify-content:center;align-items:center;gap:8px;height:48px;margin-top:18px;text-decoration:none}
 a.libro{text-decoration:none}
+
+/* ── 2.2.5 · hábitos y velas: lista sobria (opción C). Más aire, una sola acción por fila, la racha en una pastilla dorada ── */
+:root{--oro:#F1C66A;--oro-dim:rgba(241,198,106,.12);--oro-line:rgba(241,198,106,.38)}
+:root[data-theme="light"]{--oro:#8A5A0F;--oro-dim:rgba(170,120,30,.10);--oro-line:rgba(150,100,20,.35)}
+.hab .hrow{padding:14px 0;gap:14px}
+.hab .hrow .ck,.hck{width:32px;height:32px;border-radius:999px}
+.hck b{font-size:13px;font-weight:700}
+.hab .hrow .n b{font-size:16px}
+/* la vela: más grande, con resplandor, dentro de una pastilla */
+.hab .hrow .vela,.hrow3 .vela{padding:5px 11px 5px 8px;border-radius:999px;background:var(--oro-dim);border:1px solid var(--oro-line);color:var(--oro);font-size:14px;font-weight:700;gap:6px;flex:none}
+.hab .hrow .vela svg.vl,.hrow3 .vela svg.vl{width:12px;height:21px}
+.vela.on .fl{filter:drop-shadow(0 0 3px rgba(255,190,70,.75))}
+.hab .hrow .vela.riesgo,.hrow3 .vela.riesgo{border-style:dashed;background:transparent}
+.hab .hrow .vela.off,.hrow3 .vela.off{background:transparent;border-color:var(--line);color:var(--muted);font-weight:500}
+.vela.grande{padding:0;background:none;border:0}.vela.grande svg.vl{width:26px;height:46px}.vela.grande b{display:none}
+/* la semana en barritas (lunes a domingo) */
+.hbar{display:flex;gap:5px;margin-top:8px;align-items:center;height:8px;width:100%;max-width:240px}
+.hbar i{flex:1;height:8px;border-radius:4px;background:var(--line2)}
+.hbar i.on{background:var(--oro)}
+.hbar i.cae{background:#C4574E}
+.hbar i.hoy:not(.on){outline:1.5px solid var(--accent-line);outline-offset:1.5px}
+.hbar i.fut{opacity:.45}
+.hab .hrow .n small.cai{color:#D97A6E;font-size:12px;margin-top:5px}
+/* la mejor racha, arriba */
+.hmejor{display:flex;align-items:center;gap:14px;padding:4px 0 14px;margin-bottom:2px;border-bottom:1px solid var(--line)}
+.hmejor .n{display:flex;flex-direction:column;gap:2px;min-width:0}
+.hmejor b{font-size:26px;font-weight:800;color:var(--oro);line-height:1.05;letter-spacing:-.01em}
+.hmejor small{color:var(--muted);font-size:13px;line-height:1.35}
+/* Hoy: misma fila, sin botones de más */
+.hrow3{display:flex;align-items:center;gap:12px;padding:13px 0;border-top:1px solid var(--line)}
+.habhoy .hd+.hrow3{border-top:0}
+.hrow3 .n{flex:1;min-width:0;display:flex;flex-direction:column}
+.hrow3 .n b{font-size:16px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.hrow3 .hck{flex:none}
+
+/* centrado: el nombre y la semana forman un bloque centrado en alto con el círculo y la pastilla */
+.hab .hrow.h3,.hrow3{align-items:center}
+.hab .hrow.h3 .n,.hrow3 .n{flex:1;min-width:0;display:flex;flex-direction:column;justify-content:center;align-self:stretch}
+.hab .hrow.h3 .n b{line-height:1.25}
+.hmejor{justify-content:flex-start}.hmejor .vela.grande{margin-left:2px}
