@@ -59,11 +59,11 @@ TU PERSONAJE
 • Álbum de santos: 79 cartas que se llenan entre todos los del grupo, con un sobre por semana.
 
 SCAELI+ (OPCIONAL)
-La oración es gratis siempre. Con Scaeli+ sumás:
-• Tu progreso: tus hábitos y tu oración semana a semana y tus rachas de todo el año.
-• Tus virtudes: un esquema de las virtudes que más trabajás con tus hábitos y las que te faltan, con ideas para empezar.
-• Caminos guiados: Adviento, Navidad, Cuaresma y Pascua día por día, con el Evangelio de la Misa y un gesto concreto.
-• Tu año con Dios: tu año en historias (días con Dios, rachas, Rosarios, Evangelios, novenas), con una imagen para compartir.
+La oración de todos los días es gratis siempre. Con Scaeli+ sumás:
+• Caminos largos de oración: la Consagración a María en 33 días, los Ejercicios de San Ignacio en 30, un retiro de 7 días y San Marcos entero en 16. Y los de Adviento, Navidad, Cuaresma y Pascua.
+• Rezar con audio: el Rosario guiado con voz, que pasa solo las cuentas, y música para rezar (órgano, noche o silencio con campana).
+• Hasta 3 grupos a la vez y todo tu diario, con buscador y en PDF.
+• Tu progreso y tus virtudes, y tu año con Dios en historias.
 Scaeli+ cuesta USD 2,99 por mes o USD 19,99 por año (o su equivalente en tu moneda) y se renueva sola hasta que la canceles desde tu cuenta de la tienda. También podés ayudar al proyecto con una donación.
 
 TUS DATOS SON TUYOS
@@ -73,7 +73,7 @@ TUS DATOS SON TUYOS
 Scaeli Daily es parte de Scaeli, junto con Scaeli Fit y el juego Scaeli. Tu fe, a otro nivel.
 
 ## Novedades de esta versión (500)
-Primera versión en las tiendas: la Biblia completa y todas las lecturas con la Biblia Platense, el Rosario completo (Credo, acto penitencial, misterios y las cuentas por el Papa), 30 novenas propias, Lectio y Examen en pantalla completa, la guía de la Misa, la Liturgia de las Horas, grupos de perseverancia con muro, actividad, intenciones y ranking, y Scaeli+ con los caminos de Adviento, Navidad, Cuaresma y Pascua. Entrada con Google o Apple, o sin cuenta.
+Primera versión en las tiendas: la Biblia completa (Biblia Platense), el Rosario completo, 30 novenas, Lectio y Examen en pantalla completa, la guía de la Misa, la Liturgia de las Horas y grupos de perseverancia. Nuevo en Scaeli+: caminos largos de oración (Consagración a María, Ejercicios de San Ignacio, retiro de 7 días y San Marcos), el Rosario guiado con voz, música para rezar, hasta 3 grupos y el diario completo en PDF.
 
 ## Material gráfico (en esta carpeta)
 - `grafico-destacado.png` · 1024×500 (Google Play)

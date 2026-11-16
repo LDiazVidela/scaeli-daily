@@ -51,7 +51,7 @@ const { chromium } = require('playwright');
   await p.click('.swt[data-a="tema"]'); await p.waitForTimeout(500); ok(await p.evaluate(() => document.documentElement.getAttribute('data-theme')) === 'light' && await p.evaluate(() => getComputedStyle(document.body).backgroundColor) === 'rgb(250, 244, 234)', 'modo claro en crema');
   await p.click('.swt[data-a="tema"]'); await p.waitForTimeout(400);
   // Lo que se instala
-  const sw = await p.evaluate(() => fetch('sw.js').then(r => r.text())); ok(/scaeli-daily-v34/.test(sw) && /assets\/cartas\//.test(sw) && /css\/v2\.css/.test(sw) && /assets\/rangos\//.test(sw) && /"biblioteca","donar","grupo","camino"/.test(sw), 'el service worker guarda lo nuevo');
+  const sw = await p.evaluate(() => fetch('sw.js').then(r => r.text())); ok(/scaeli-daily-v(3[4-9]|[4-9][0-9])/.test(sw) && /data\/retiros\.js/.test(sw) && /js\/audio\.js/.test(sw) && /assets\/cartas\//.test(sw) && /css\/v2\.css/.test(sw) && /assets\/rangos\//.test(sw) && /"biblioteca","donar","grupo","camino"/.test(sw), 'el service worker guarda lo nuevo');
   const mf = await p.evaluate(() => fetch('manifest.webmanifest').then(r => r.json())); ok(mf.theme_color === '#170A0D' && mf.background_color === '#170A0D', 'manifest en bordó');
-  ok(await p.evaluate(() => import('./js/app.js').then(m => m.VERSION)) === '2.1.3', 'versión 2.1.3');
+  ok(await p.evaluate(() => import('./js/app.js').then(m => m.VERSION)) === '2.2.0', 'versión 2.2.0');
   console.log('T31', errs.concat(fails).join('\n') || 'OK'); await b.close(); })();
