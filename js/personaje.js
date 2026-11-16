@@ -24,6 +24,8 @@ export const PEINADOS={m:[["base","Medio"],["corto","Corto"],["ondulado","Ondula
 export const EDADES=[["nino","Niño"],["joven","Joven"],["adulto","Adulto"],["mayor","Mayor"]];
 export const EDADES_F={nino:"Niña",joven:"Joven",adulto:"Adulta",mayor:"Mayor"};
 const HOJAS=["m","f","m_nino","f_nino","m_adulto","f_adulto","m_mayor","f_mayor"];
+/* 2.3.1: las edades de Gemini no gustaron; se ocultan hasta rehacerlas en PixelLab. Las que estén listas van acá. */
+export const EDADES_LISTAS=["joven"];
 const hojaDe=(sx,edad)=>edad&&edad!=="joven"?sx+"_"+edad:sx;
 let META=null; const HOJA={}, PIEL={}; let listo=null;
 function cargarImg(src){ return new Promise((ok,mal)=>{ const im=new Image(); im.onload=()=>ok(im); im.onerror=mal; im.src=src; }); }
@@ -39,7 +41,7 @@ export const cargado=()=>!!(META&&HOJA.m&&HOJA.f);
 const hay=(h,prenda,peinado)=>!!(META&&META[h]&&META[h].combos[prenda+"|"+peinado]);
 const hayAlgo=(h,pred)=>!!META&&!!META[h]&&Object.keys(META[h].combos).some(k=>pred(...k.split("|")));
 export function opciones(P){ if(!META) return {peinados:[],prendas:[],colores:[],edades:[]}; const sx=P.hoja, sxx=P.sx;
-  const edades=EDADES.filter(e=>META[hojaDe(sxx,e[0])]).map(e=>[e[0],sxx==="f"?EDADES_F[e[0]]:e[1]]);
+  const edades=EDADES.filter(e=>EDADES_LISTAS.includes(e[0])&&META[hojaDe(sxx,e[0])]).map(e=>[e[0],sxx==="f"?EDADES_F[e[0]]:e[1]]);
   const peinados=P.velo?[]:PEINADOS[sxx].filter(h=>hayAlgo(sx,(pr,pe)=>pe===h[0]&&pr.split(":")[0]===P.tipo));
   const prendas=PRENDAS[sxx].filter(x=>hayAlgo(sx,pr=>pr.split(":")[0]===x[0]));
   const colores=P.color?COLORES.filter(c=>hay(sx,P.tipo+":"+c[0],P.peinado)):[];
@@ -50,7 +52,7 @@ export function normal(p){ p=p||{}; const sx=p.sx==="f"?"f":"m";
   const ok=(L,v,d)=>L.some(x=>x[0]===v)?v:d;
   const [tipo,col]=String(p.prenda||"base").split(":"); let t=ok(PRENDAS[sx],tipo,"base"); let c=CON_COLOR.includes(t)?ok(COLORES,col,"gris"):null;
   let pe=FIJO[t]||(VELO.includes(t)?"base":ok(PEINADOS[sx],p.peinado,"base"));
-  let edad=ok(EDADES,p.edad,"joven"); if(META&&!META[hojaDe(sx,edad)]) edad="joven"; const h=hojaDe(sx,edad);
+  let edad=ok(EDADES,p.edad,"joven"); if(!EDADES_LISTAS.includes(edad)||(META&&!META[hojaDe(sx,edad)])) edad="joven"; const h=hojaDe(sx,edad);
   if(META&&META[h]){ let pr=c?t+":"+c:t;
     if(!hay(h,pr,pe)){ const alt=Object.keys(META[h].combos).map(k=>k.split("|"));
       const m=alt.find(([a,b])=>a===pr)||alt.find(([a,b])=>a.split(":")[0]===t&&b===pe)||alt.find(([a,b])=>a.split(":")[0]===t)||alt.find(([a,b])=>a==="base"&&b===pe)||["base","base"];

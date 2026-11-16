@@ -14,7 +14,7 @@ const { chromium } = require('playwright'); const fs = require('fs');
   await p.evaluate(() => { localStorage.setItem('daily_ver_vista', '2.2.6'); localStorage.setItem('daily_prueba_novedades', '1'); }); await p.reload(); await p.waitForTimeout(800); if (await p.$('#invitado')) { await p.click('#invitado'); }
   await p.waitForTimeout(2200);
   let sh = await p.evaluate(() => window.DAILY.get().sheet && window.DAILY.get().sheet.view); let t = await p.evaluate(() => (document.querySelector('#sheetIn') || {}).innerText || '');
-  ok(sh === 'novedades' && /Novedades/.test(t) && /tono de piel/.test(t) && /2\.2\.7/.test(t), 'al actualizar aparece «Novedades» con lo de esta versión y las anteriores');
+  ok(sh === 'novedades' && /Novedades/.test(t) && /tono de piel/.test(t) && !/niño, joven/.test(t) && /2\.2\.7/.test(t), 'al actualizar aparece «Novedades» con lo de esta versión y las anteriores');
   ok(await p.evaluate(v => localStorage.getItem('daily_ver_vista') === v, ver), 'queda anotada la versión vista');
   await A('cerrar'); await p.reload(); await p.waitForTimeout(800); if (await p.$('#invitado')) await p.click('#invitado'); await p.waitForTimeout(2200);
   ok(!(await p.evaluate(() => window.DAILY.get().sheet)), 'no vuelve a aparecer');
@@ -28,7 +28,9 @@ const { chromium } = require('playwright'); const fs = require('fs');
   await p.click('.sw.piel button[data-p="tono|morena"]'); await p.waitForTimeout(600);
   ok(await p.evaluate(() => (JSON.parse(localStorage.getItem('scaeli-daily-local'))['daily_settings/profile'] || {}).tono === 'morena'), 'el tono elegido se guarda');
   // edades: niño, joven, adulto y mayor, con su dibujo, sus colores y la piel
-  ok((await p.$$('.seg.edad button')).length === 4, 'Yo ofrece las cuatro edades');
+  const listas = await p.evaluate(async () => (await import('./js/personaje.js')).EDADES_LISTAS);
+  ok((await p.$$('.seg.edad button')).length === (listas.length > 1 ? listas.length : 0), 'Yo ofrece solo las edades listas: ' + listas);
+  if (listas.length === 4) {   // con todas las edades listas: cada una con su dibujo
   const ed = await p.evaluate(async () => { const PJ = await import('./js/personaje.js'); await PJ.cargar(); const px = q => { const cv = document.createElement('canvas'); PJ.pintar(cv, q); return cv.toDataURL(); };
     const r = {}; for (const sx of ['m', 'f']) for (const e of ['nino', 'joven', 'adulto', 'mayor']) r[sx + e] = px({ sx, edad: e, prenda: 'buzo:azul' });
     const n = PJ.normal({ sx: 'f', edad: 'mayor', prenda: 'sotana', peinado: 'trenza' }); const o = PJ.opciones(n);
@@ -37,8 +39,10 @@ const { chromium } = require('playwright'); const fs = require('fs');
   ok(ed.distintos === 8, 'cada edad tiene su propio dibujo: ' + ed.distintos);
   ok(ed.n.edad === 'mayor' && ed.n.tipo === 'base' && ed.n.peinado === 'base' && !ed.prendas.includes('sotana'), 'lo que no hay en una edad cae en lo que sí: ' + JSON.stringify([ed.n.tipo, ed.n.peinado, ed.prendas]));
   ok(ed.colores === 5 && ed.piel, 'las edades tienen los cinco colores y aceptan el tono de piel');
-  await p.click('.seg.edad button[data-p="edad|nino"]'); await p.waitForTimeout(600);
-  ok(await p.evaluate(() => (JSON.parse(localStorage.getItem('scaeli-daily-local'))['daily_settings/profile'] || {}).edad === 'nino'), 'la edad elegida se guarda');
+  }
+  if (listas.includes('nino')) { await p.click('.seg.edad button[data-p="edad|nino"]'); await p.waitForTimeout(600);
+  ok(await p.evaluate(() => (JSON.parse(localStorage.getItem('scaeli-daily-local'))['daily_settings/profile'] || {}).edad === 'nino'), 'la edad elegida se guarda'); }
+  else ok(await p.evaluate(async () => { const PJ = await import('./js/personaje.js'); return PJ.normal({ sx: 'm', edad: 'nino' }).edad === 'joven'; }), 'una edad oculta cae en Joven (quien ya la había elegido ve al joven)');
   // lo ya rezado: tilde en las portadas y el inicio pasa a lo que falta
   await p.evaluate(() => window.DAILY.ir('hoy')); await p.waitForTimeout(400);
   await A('evOk', undefined, 600); await p.evaluate(() => window.DAILY.ir('hoy')); await p.waitForTimeout(400);
