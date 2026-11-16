@@ -1034,12 +1034,23 @@ function shPlusPaywall(desde){ const nat=esNativo(), P=sheet.planes, eq=delEquip
      '<button class="plan" data-a="plusComprar" data-p="mensual"'+(mensual?'':' disabled')+'><b>Mensual</b><small>'+esc(precio(mensual,"USD 2,99"))+' por mes</small></button></div>'+
      (comprasDisponibles()?'':'<p class="hint" style="text-align:center">Las compras todavía no están activas en esta versión.</p>')+
      '<button class="lnk" data-a="plusRestaurar" style="display:block;margin:10px auto 0">Restaurar compras</button>':
-     '<div class="planes"><div class="plan dest"><span class="ah">Ahorrás 44%</span><b>Anual</b><small>USD 19,99 por año</small></div><div class="plan"><b>Mensual</b><small>USD 2,99 por mes</small></div></div><p class="hint" style="text-align:center">Scaeli+ se activa desde la app de Scaeli Daily para Android o iPhone.</p>'+
+     planesWeb()+
      '<details class="codigo"><summary class="hint">¿Tenés un código?</summary><form data-f="plusCodigo" class="add"><input type="text" name="c" placeholder="Código de Scaeli+" autocomplete="off" style="text-transform:uppercase"><button class="iconbtn acc" type="submit" aria-label="Activar">'+ic("check")+'</button></form></details>'))+
    (eq?'<button class="lnk" data-a="plusComoGratis" style="display:block;margin:12px auto 0">'+(lsGet("daily_plus_como_gratis")==="1"?"Volver a ver Scaeli+":"Ver la app como usuario gratis")+'</button>':'')+
-   '<p class="legal">La suscripción se renueva sola al final de cada período, al mismo precio, salvo que la canceles al menos 24 horas antes desde tu cuenta de Google Play o del App Store. El pago se cobra en tu cuenta de la tienda. <a href="terminos.html" target="_blank" rel="noopener">Términos de uso</a> · <a href="privacidad.html" target="_blank" rel="noopener">Privacidad</a></p>'+
+   '<p class="legal">'+(nat?'La suscripción se renueva sola al final de cada período, al mismo precio, salvo que la canceles al menos 24 horas antes desde tu cuenta de Google Play o del App Store. El pago se cobra en tu cuenta de la tienda.':'Desde la web, la suscripción se renueva sola cada mes o cada año hasta que la canceles desde tu cuenta de Mercado Pago o de PayPal (<a href="gracias.html" target="_blank" rel="noopener">cómo activarla y cancelarla</a>).')+' <a href="terminos.html" target="_blank" rel="noopener">Términos de uso</a> · <a href="privacidad.html" target="_blank" rel="noopener">Privacidad</a></p>'+
    '</div><button class="primary ink" data-a="cerrar">'+(activo?"Volver":"Ahora no")+'</button>'; }
 function shPlus(){ return shPlusPaywall(""); }
+/* 2.1.3 · Scaeli+ desde la web (solo en el navegador; en las apps de las tiendas no aparece): Mercado Pago en pesos y PayPal en dólares.
+   Después del pago, el código llega por mail (gracias.html) y se canjea en «¿Tenés un código?». Un link vacío muestra el plan sin botón. */
+const PAGO_WEB={mp:{mensual:"https://mpago.la/1edv2dB",anual:""},paypal:{mensual:"",anual:""}};
+function planesWeb(){ const L=(href,cls,inner)=>href?'<a class="'+cls+'" href="'+href+'" target="_blank" rel="noopener">'+inner+'</a>':'<div class="'+cls+'">'+inner+'</div>';
+  const hay=PAGO_WEB.mp.mensual||PAGO_WEB.mp.anual, pp=PAGO_WEB.paypal.mensual||PAGO_WEB.paypal.anual;
+  if(!hay&&!pp) return '<div class="planes"><div class="plan dest"><span class="ah">Ahorrás 44%</span><b>Anual</b><small>USD 19,99 por año</small></div><div class="plan"><b>Mensual</b><small>USD 2,99 por mes</small></div></div><p class="hint" style="text-align:center">Scaeli+ se activa desde la app de Scaeli Daily para Android o iPhone.</p>';
+  return (hay?'<div class="eyebrow" style="margin-top:16px">Desde Argentina · Mercado Pago</div><div class="planes" style="margin-top:10px">'+
+     L(PAGO_WEB.mp.anual,"plan dest",'<span class="ah">Ahorrás 44%</span><b>Anual</b><small>$31.600 por año</small>')+L(PAGO_WEB.mp.mensual,"plan",'<b>Mensual</b><small>$4.700 por mes</small>')+'</div>':'')+
+   (pp?'<div class="eyebrow" style="margin-top:16px">Desde otros países · PayPal</div><div class="planes" style="margin-top:10px">'+
+     L(PAGO_WEB.paypal.anual,"plan dest",'<b>Anual</b><small>USD 19,99 por año</small>')+L(PAGO_WEB.paypal.mensual,"plan",'<b>Mensual</b><small>USD 2,99 por mes</small>')+'</div>':'')+
+   '<p class="hint" style="text-align:center;margin-top:12px">Después de pagar te llega por mail un código (en menos de 24 horas). Lo escribís acá abajo, en «¿Tenés un código?», y Scaeli+ queda activo también en Scaeli Fit.</p>'; }
 
 /* donar: para quien quiera ayudar, con o sin Scaeli+ */
 function shDonar(){ const nat=esNativo(), D=sheet.dons;

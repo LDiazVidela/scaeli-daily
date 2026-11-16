@@ -1173,3 +1173,4 @@ html[data-theme="light"] .cw.hueco{background:none}
 .carta.hueco2 .placa .o{color:#5E5866}
 .carta.hueco2 .fiesta{color:#7E7887}.carta.hueco2 .fiesta .l{background:linear-gradient(90deg,transparent,#5E5866)}
 .carta.hueco2 .ctag{color:color-mix(in srgb,var(--m2) 70%,#888);font-family:Cinzel,serif;font-style:normal;font-weight:700;font-size:11px;letter-spacing:.3em;text-transform:uppercase;top:284px}
+a.plan{text-decoration:none;cursor:pointer}a.plan:active{transform:scale(.98)}
