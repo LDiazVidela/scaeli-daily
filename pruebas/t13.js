@@ -4,7 +4,7 @@ const { chromium } = require('playwright');
   const errs = []; p.on('pageerror', e => errs.push('PAGEERROR ' + e.message));
   const ok=(c,m)=>{ if(!c) errs.push('FALLA '+m); };
   await p.goto('http://localhost:8765/index.html'); await p.evaluate(()=>localStorage.clear()); await p.reload(); await p.waitForTimeout(2000);
-  ok(await p.$('#loginApple'),'boton apple'); ok((await p.textContent('#app')).includes('Política de privacidad'),'link privacidad');
+  { const listo=/const APPLE_LISTO=true/.test(require('fs').readFileSync(__dirname+'/../js/app.js','utf8')); ok(!!(await p.$('#loginApple'))===listo,'boton apple solo si Apple está activado en Firebase'); } ok((await p.textContent('#app')).includes('Política de privacidad'),'link privacidad');
   await p.click('#invitado'); await p.waitForTimeout(1500);
   const A = async (a, q, ms = 300) => { await p.evaluate(([a, q]) => window.DAILY.ACC[a](q), [a, q]); await p.waitForTimeout(ms); };
   await A('horaOk','m'); await p.click('#nav button[data-view="mas"]'); await p.waitForTimeout(400);

@@ -25,7 +25,10 @@ const LOGO_GOOGLE='<svg class="logo-g" viewBox="0 0 48 48" aria-hidden="true"><p
 const LOGO_APPLE='<svg class="logo-a" viewBox="0 0 814 1000" aria-hidden="true"><path fill="currentColor" d="M788.1 340.9c-5.8 4.5-108.2 62.2-108.2 190.5 0 148.4 130.3 200.9 134.2 202.2-.6 3.2-20.7 71.9-68.7 141.9-42.8 61.6-87.5 123.1-155.5 123.1s-85.5-39.5-164-39.5c-76.5 0-103.7 40.8-165.9 40.8s-105.6-57-155.5-127C46.7 790.7 0 663 0 541.8c0-194.4 126.4-297.5 250.8-297.5 66.1 0 121.2 43.4 162.7 43.4 39.5 0 101.1-46 176.3-46 28.5 0 130.9 2.6 198.3 99.2zm-234-181.5c31.1-36.9 53.1-88.1 53.1-139.3 0-7.1-.6-14.3-1.9-20.1-50.6 1.9-110.8 33.7-147.1 75.8-28.5 32.4-55.1 83.6-55.1 135.5 0 7.8 1.3 15.6 1.9 18.1 3.2.6 8.4 1.3 13.6 1.3 45.4 0 102.5-30.4 135.5-71.3z"/></svg>';
 /* la dirección publicada: la app de las tiendas lee de acá los Evangelios del día (los genera la GitHub Action cada noche) */
 const SITIO="https://daily.scaeli.com.ar/";   // 2.2.7: dominio propio (antes ldiazvidela.github.io/scaeli-daily, que redirige acá)
-const FIT_VISIBLE=false;   // 2.2.6: el acceso a Scaeli Fit, oculto por ahora
+const FIT_VISIBLE=false;
+/* «Continuar con Apple» se oculta hasta que Apple esté activado en Firebase (Authentication → Sign-in method → Apple), que pide la
+   cuenta de Apple Developer (Services ID, clave .p8, dominio daily.scaeli.com.ar). Cuando esté, poner true. */
+const APPLE_LISTO=false;   // 2.2.6: el acceso a Scaeli Fit, oculto por ahora
 const ilu=k=>"assets/ilus/daily_"+k+".png";
 const ic=n=>`<svg class="i" aria-hidden="true"><use href="#i-${n}"/></svg>`;
 const $=s=>document.querySelector(s);
@@ -238,7 +241,7 @@ function logrosHTML(todos){ const L=logros(), g=L.filter(x=>x.ok); return '<div 
 /* 2.2.5 · hábitos: la semana (lunes a domingo) en barritas: dorada si lo hiciste, rojiza si solo hubo caídas; hoy con borde */
 function semBarras(id){ const lun=lunesDe(hoy()); let o='<span class="hbar" aria-hidden="true">'; for(let i=0;i<7;i++){ const s=addDays(lun,i), x=(dayOf(s).hb||{})[id]||{}; o+='<i class="'+(x.p>0?"on":x.m>0?"cae":"")+(s===hoy()?" hoy":"")+(s>hoy()?" fut":"")+'"></i>'; } return o+'</span>'; }
 /* el círculo para sumar: vacío, con tilde (1) o con el número (2 o más) */
-const habCk=(id,p)=>'<button class="ck hck'+(p>0?' on':'')+'" data-a="habMas" data-p="'+id+'" aria-label="Sumar una vez">'+(p>1?'<b>'+p+'</b>':p>0?ic("check"):'')+'</button>';
+const habCk=(id,p)=>'<button class="ck hck'+(p>0?' on':'')+'" data-a="habMas" data-p="'+id+'" aria-label="Sumar una vez">'+(p>1?'<b>'+p+'</b>':p>0?ic("check"):ic("plus"))+'</button>';   // 2.3.1: vacío muestra el «+» (sumar)
 /* 2.2.6: el «−» para anotar una caída, a la izquierda del círculo (Lorenzo: el menos a la izquierda y el más a la derecha); rojizo si hoy hubo caídas */
 const habMn=(id,m)=>'<button class="hmn'+(m>0?' on':'')+'" data-a="habMenos" data-p="'+id+'" aria-label="Anotar una caída">'+ic("minus")+'</button>';
 function habitosHoyHTML(){ const H=rutina.habitos||[], lun=lunesDe(hoy()), n=diasHabitoSemana(lun);
@@ -1586,7 +1589,7 @@ function shMisa(){ const ev=evHoy, f=hoy(), O=ordoDia(f), C=cicloDe(f);
 function renderLogin(){ $("#nav").hidden=true;
   $("#app").innerHTML='<div class="login"><div class="marca"><img src="icons/icon-512.png" alt="" width="124" height="124"><div class="wm" role="img" aria-label="Scaeli Daily"><b>Scaeli</b> Daily</div></div>'+
    '<div class="pie"><h1>Tu fe, a otro nivel</h1><p class="hint">El Evangelio, el Rosario, las Horas y el examen del día. Tu semana con Dios, guardada en tu cuenta.</p>'+
-   (plataforma()!=="android"?'<button class="entrar apple" id="loginApple" data-q="apple">'+LOGO_APPLE+'<span>Continuar con Apple</span></button>':'')+'<button class="entrar google" id="login" data-q="google">'+LOGO_GOOGLE+'<span>Continuar con Google</span></button><button class="ghost g" id="invitado" style="justify-content:center;height:54px;width:100%;font-size:17px">Probar sin cuenta</button>'+
+   (APPLE_LISTO&&plataforma()!=="android"?'<button class="entrar apple" id="loginApple" data-q="apple">'+LOGO_APPLE+'<span>Continuar con Apple</span></button>':'')+'<button class="entrar google" id="login" data-q="google">'+LOGO_GOOGLE+'<span>Continuar con Google</span></button><button class="ghost g" id="invitado" style="justify-content:center;height:54px;width:100%;font-size:17px">Probar sin cuenta</button>'+
    '<p class="hint" id="status" style="margin:8px 0 0">'+esc(statusTxt||"La misma cuenta que Scaeli Fit y el juego. Nada es público.")+'</p><p class="hint" style="margin:0"><a href="privacidad.html" target="_blank" rel="noopener">Política de privacidad</a></p></div></div>'; }
 function startSession(u,local){ user=u; unsubs.forEach(f=>{try{f()}catch(e){}}); unsubs=[]; setTimeout(novedadesVer,1600);
   backend=local?localBackend():userBackend(u.uid,e=>{ if(e&&e.code==="permission-denied") setStatus("La base de datos rechazó la operación: hay que publicar firestore.rules.",true); else setStatus("Sin conexión: los cambios se guardan y se sincronizan después."); });

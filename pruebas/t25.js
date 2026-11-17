@@ -22,6 +22,7 @@ const { chromium } = require('playwright');
   ok(!(await p.evaluate(()=>document.querySelector('.hab .str'))),'ya no está la llama vieja');
   // 2.2.5/2.2.6: hábitos en lista sobria: la semana en barritas, la llama, el «−» (caída) a la izquierda y el círculo (sumar) a la derecha; sin «corregir»
   const h3=await p.evaluate(()=>({f:document.querySelectorAll('.hab .hrow.h3').length, b:document.querySelectorAll('.hab .hrow.h3 .hbar i').length, ck:document.querySelectorAll('.hab .hrow.h3 .hck').length, menos:document.querySelectorAll('.hab [data-a="habMenos"]').length, corr:/corregir/.test(document.querySelector('#app').innerText)}));
+  ok(await p.evaluate(()=>{ const v=[...document.querySelectorAll('.hck')].filter(b=>!b.classList.contains('on')); return v.length>0&&v.every(b=>/i-plus/.test(b.innerHTML)); }),'el círculo vacío del hábito muestra el «+»');
   const ord=await p.evaluate(()=>[...document.querySelectorAll('.hab .hrow.h3')].every(r=>{ const k=[...r.children].map(e=>e.dataset.a||e.className.split(' ')[0]); return k[0]==='habEd'&&k.indexOf('habMenos')>0&&k.indexOf('habMenos')===k.indexOf('habMas')-1; }));
   ok(h3.f>=1&&h3.b===h3.f*7&&h3.ck===h3.f&&h3.menos===h3.f&&!h3.corr&&ord,'hábitos: nombre, llama, − y + en ese orden: '+JSON.stringify(h3));
   // 2) biblioteca de hábitos
