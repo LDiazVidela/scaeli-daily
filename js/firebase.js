@@ -15,8 +15,18 @@ export const firebaseConfig = {
   projectId: "scaeli",
   storageBucket: "scaeli.firebasestorage.app",
   messagingSenderId: "985684720340",
-  appId: "1:985684720340:web:1a7cf65f28a56132aad941"
+  appId: "1:985684720340:web:1a7cf65f28a56132aad941",
+  measurementId: "G-0HWEHXEXWY"
 };
+
+/* 2.3.2: Google Analytics (cuántas personas usan la app por día y por semana). Solo cuenta visitas y uso, sin datos personales;
+   la cuenta de Analytics está configurada sin compartir datos con Google. No corre en las pruebas automáticas. */
+let analytics=null;
+async function medir(){
+  if(analytics||!app||navigator.webdriver) return;
+  for(const base of [SDK_LOCAL,SDK_CDN]){ try{ const A=await import(base+"firebase-analytics.js"); if(!(await A.isSupported())) return; analytics=A.getAnalytics(app); medirEv=A.logEvent; return; }catch(e){} } }
+let medirEv=null;
+export function evento(nombre, datos){ try{ if(analytics&&medirEv) medirEv(analytics,nombre,datos||{}); }catch(e){} }
 
 let app=null, auth=null, db=null, provider=null;
 export async function conectar(){
@@ -26,6 +36,7 @@ export async function conectar(){
     app=f.initializeApp(firebaseConfig); auth=f.getAuth(app); provider=new f.GoogleAuthProvider();
     try{ db=f.initializeFirestore(app,{ localCache: f.persistentLocalCache({ tabManager: f.persistentMultipleTabManager() }) }); }
     catch(e){ db=f.initializeFirestore(app,{}); }
+    setTimeout(medir,1500);
     return true;
   }catch(e){ app=null; return false; }
 }
