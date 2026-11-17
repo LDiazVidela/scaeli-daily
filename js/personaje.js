@@ -10,10 +10,12 @@ export const CON_COLOR=["remera","buzo","camisa","pollera"];
 export const VELO=["consagrada","caridad","dominica","carmelita"];
 export const FIJO={};   // 2.1.3: el clergyman y la deportiva ya tienen varios peinados (los que no existen no se ofrecen)
 export const ALTURAS=[["baja","Baja"],["media","Media"],["alta","Alta"]];
-/* 2.3: tonos de piel. Solo se tiñen los píxeles de piel de cada dibujo ({m,f}_piel.png, herramientas/piel_mascara.py),
-   escalando cada canal desde el tono del dibujo (REF) al elegido: se conservan las sombras y los rasgos. "base" = el dibujo tal cual. */
-export const TONOS=[["clara","Clara","#F6CDAE"],["base","Media","#F09C6B"],["triguena","Trigueña","#D0905E"],["morena","Morena","#A9693F"],["oscura","Oscura","#7E4A2B"],["muyoscura","Muy oscura","#55321D"]];
-const REF={m:[245,156,107],f:[236,142,93]};
+/* Tonos de piel. 2.3.1: cada tono es una rampa de 5 colores (luz → sombra) y cada píxel de piel ({hoja}_piel.png,
+   herramientas/piel_mascara.py) toma el color de la rampa según su luz, entre la más clara y la más oscura de la piel de esa hoja
+   (pj.json, «luz»). Así la piel queda pareja y con las sombras del dibujo. "base" = el dibujo tal cual. El color de la muestra es el 2.º de la rampa. */
+const RAMPAS={clara:["FBDDC4","F2C8A7","E4B08D","CC9573","A97558"],triguena:["EFBD93","DFA67B","CB8D63","B0744F","8C5A3C"],
+  morena:["D99A68","C4824F","AC6B40","905532","6F3F24"],oscura:["B8774C","A26340","8A5132","713F27","55301D"],muyoscura:["9A6040","824F34","6C412A","583421","42261A"]};
+export const TONOS=[["clara","Clara","#F2C8A7"],["base","Media","#F09C6B"],["triguena","Trigueña","#DFA67B"],["morena","Morena","#C4824F"],["oscura","Oscura","#A26340"],["muyoscura","Muy oscura","#824F34"]];
 const hex=h=>[1,3,5].map(i=>parseInt(h.slice(i,i+2),16));
 /* 2.1.3: peinados nuevos, los del creador de personajes del juego (herramientas/peinados.py) */
 export const PEINADOS={m:[["base","Medio"],["corto","Corto"],["ondulado","Ondulado"],["rulos","Rulos"],["lacio","Lacio"],["rapado","Rapado"]],
@@ -60,10 +62,13 @@ export function normal(p){ p=p||{}; const sx=p.sx==="f"?"f":"m";
       [pr,pe]=m; [t,c]=pr.split(":"); c=c||null; } }
   return { sx, tipo:t, color:c, prenda:c?t+":"+c:t, peinado:pe, velo:VELO.includes(t), fijo:!!FIJO[t], alt:ok(ALTURAS,p.alt,"media"), tono:ok(TONOS,p.tono,"base"), edad, hoja:h }; }
 /* tiñe la piel del cuadro ya pintado (antes de cambiar la altura, para que la máscara coincida) */
-function tenir(x, P, fila){ if(P.tono==="base"||!PIEL[P.hoja]) return; const T=hex(TONOS.find(t=>t[0]===P.tono)[2]), R0=(META[P.hoja]&&META[P.hoja].ref)||REF[P.sx];   // 2.3.1: los niños tienen su propio tono de cara (pj.json, ref)
+function tenir(x, P, fila){ if(P.tono==="base"||!PIEL[P.hoja]||!RAMPAS[P.tono]) return;
+  const RP=RAMPAS[P.tono].map(h=>[0,2,4].map(i=>parseInt(h.slice(i,i+2),16))), [L0,L1]=(META[P.hoja]&&META[P.hoja].luz)||[90,200], n=RP.length-1;
   const mc=document.createElement("canvas"); mc.width=128; mc.height=128; const mx=mc.getContext("2d"); mx.drawImage(PIEL[P.hoja],0,fila*128,128,128,0,0,128,128);
   const m=mx.getImageData(0,0,128,128).data, im=x.getImageData(0,0,128,128), d=im.data;
-  for(let i=0;i<d.length;i+=4){ if(m[i]<128||!d[i+3]) continue; for(let c=0;c<3;c++) d[i+c]=Math.max(0,Math.min(255,Math.round(T[c]*d[i+c]/R0[c]))); }
+  for(let i=0;i<d.length;i+=4){ if(m[i]<128||!d[i+3]) continue;
+    const L=.299*d[i]+.587*d[i+1]+.114*d[i+2]; const t=Math.pow(Math.min(1,Math.max(0,(L1-L)/(L1-L0))),1.25)*n, a=Math.floor(t), b=Math.min(a+1,n), f=t-a;
+    for(let c=0;c<3;c++) d[i+c]=Math.round(RP[a][c]*(1-f)+RP[b][c]*f); }
   x.putImageData(im,0,0); }
 
 function combo(P){ const C=META[P.hoja].combos; return C[P.prenda+"|"+P.peinado]||C["base|base"]; }
