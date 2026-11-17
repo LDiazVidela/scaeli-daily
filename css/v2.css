@@ -234,3 +234,9 @@ a.libro{text-decoration:none}
 .nov-lista .card{margin-bottom:12px}.nov-lista ul{margin:8px 0 0;padding-left:18px}.nov-lista li{margin:6px 0;line-height:1.45}
 /* 2.3 · edades del personaje: cuatro botones en una fila */
 .seg.edad button{font-size:13.5px;padding-left:4px;padding-right:4px}
+/* 2.3.1: oraciones en orden alfabético con favoritas fijadas arriba (estrella) */
+.orow{display:flex;align-items:stretch;border-bottom:1px solid var(--line)}
+.orow .food{flex:1;min-width:0;border-bottom:0}
+.ofav{flex:none;width:44px;display:flex;align-items:center;justify-content:center;background:none;border:0;color:var(--muted);padding:0;cursor:pointer}
+.ofav svg{fill:none;stroke:currentColor;stroke-width:1.6;stroke-linejoin:round}
+.ofav.on{color:var(--oro)}.ofav.on svg{fill:currentColor}

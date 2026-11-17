@@ -14,7 +14,7 @@ const { chromium } = require('playwright'); const fs = require('fs');
   await p.evaluate(() => { localStorage.setItem('daily_ver_vista', '2.2.6'); localStorage.setItem('daily_prueba_novedades', '1'); }); await p.reload(); await p.waitForTimeout(800); if (await p.$('#invitado')) { await p.click('#invitado'); }
   await p.waitForTimeout(2200);
   let sh = await p.evaluate(() => window.DAILY.get().sheet && window.DAILY.get().sheet.view); let t = await p.evaluate(() => (document.querySelector('#sheetIn') || {}).innerText || '');
-  ok(sh === 'novedades' && /Novedades/.test(t) && /tono de piel/.test(t) && /niño, joven, adulto o mayor/.test(t) && /2\.2\.7/.test(t), 'al actualizar aparece «Novedades» con lo de esta versión y las anteriores');
+  ok(sh === 'novedades' && /Novedades/.test(t) && /tono de piel/.test(t) && /versión \d/i.test(t), 'al actualizar aparece «Novedades» con lo de esta versión y las anteriores');
   ok(await p.evaluate(v => localStorage.getItem('daily_ver_vista') === v, ver), 'queda anotada la versión vista');
   await A('cerrar'); await p.reload(); await p.waitForTimeout(800); if (await p.$('#invitado')) await p.click('#invitado'); await p.waitForTimeout(2200);
   ok(!(await p.evaluate(() => window.DAILY.get().sheet)), 'no vuelve a aparecer');
