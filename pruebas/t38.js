@@ -14,7 +14,7 @@ const { chromium } = require('playwright'); const fs = require('fs');
   await p.evaluate(() => { localStorage.setItem('daily_ver_vista', '2.2.6'); localStorage.setItem('daily_prueba_novedades', '1'); }); await p.reload(); await p.waitForTimeout(800); if (await p.$('#invitado')) { await p.click('#invitado'); }
   await p.waitForTimeout(2200);
   let sh = await p.evaluate(() => window.DAILY.get().sheet && window.DAILY.get().sheet.view); let t = await p.evaluate(() => (document.querySelector('#sheetIn') || {}).innerText || '');
-  ok(sh === 'novedades' && /Novedades/.test(t) && /tono de piel/.test(t) && /2\.2\.7/.test(t), 'al actualizar aparece «Novedades» con lo de esta versión y las anteriores');
+  ok(sh === 'novedades' && /Novedades/.test(t) && /tono de piel/.test(t) && /niño, joven, adulto o mayor/.test(t) && /2\.2\.7/.test(t), 'al actualizar aparece «Novedades» con lo de esta versión y las anteriores');
   ok(await p.evaluate(v => localStorage.getItem('daily_ver_vista') === v, ver), 'queda anotada la versión vista');
   await A('cerrar'); await p.reload(); await p.waitForTimeout(800); if (await p.$('#invitado')) await p.click('#invitado'); await p.waitForTimeout(2200);
   ok(!(await p.evaluate(() => window.DAILY.get().sheet)), 'no vuelve a aparecer');
@@ -28,7 +28,9 @@ const { chromium } = require('playwright'); const fs = require('fs');
   await p.click('.sw.piel button[data-p="tono|morena"]'); await p.waitForTimeout(600);
   ok(await p.evaluate(() => (JSON.parse(localStorage.getItem('scaeli-daily-local'))['daily_settings/profile'] || {}).tono === 'morena'), 'el tono elegido se guarda');
   // edades: niño, joven, adulto y mayor, con su dibujo, sus colores y la piel
-  ok((await p.$$('.seg.edad button')).length === 4, 'Yo ofrece las cuatro edades');
+  const listas = await p.evaluate(async () => (await import('./js/personaje.js')).EDADES_LISTAS);
+  ok((await p.$$('.seg.edad button')).length === (listas.length > 1 ? listas.length : 0), 'Yo ofrece solo las edades listas: ' + listas);
+  if (listas.length === 4) {   // con todas las edades listas: cada una con su dibujo
   const ed = await p.evaluate(async () => { const PJ = await import('./js/personaje.js'); await PJ.cargar(); const px = q => { const cv = document.createElement('canvas'); PJ.pintar(cv, q); return cv.toDataURL(); };
     const r = {}; for (const sx of ['m', 'f']) for (const e of ['nino', 'joven', 'adulto', 'mayor']) r[sx + e] = px({ sx, edad: e, prenda: 'buzo:azul' });
     const n = PJ.normal({ sx: 'f', edad: 'mayor', prenda: 'sotana', peinado: 'trenza' }); const o = PJ.opciones(n);
@@ -37,8 +39,21 @@ const { chromium } = require('playwright'); const fs = require('fs');
   ok(ed.distintos === 8, 'cada edad tiene su propio dibujo: ' + ed.distintos);
   ok(ed.n.edad === 'mayor' && ed.n.tipo === 'base' && ed.n.peinado === 'base' && !ed.prendas.includes('sotana'), 'lo que no hay en una edad cae en lo que sí: ' + JSON.stringify([ed.n.tipo, ed.n.peinado, ed.prendas]));
   ok(ed.colores === 5 && ed.piel, 'las edades tienen los cinco colores y aceptan el tono de piel');
-  await p.click('.seg.edad button[data-p="edad|nino"]'); await p.waitForTimeout(600);
-  ok(await p.evaluate(() => (JSON.parse(localStorage.getItem('scaeli-daily-local'))['daily_settings/profile'] || {}).edad === 'nino'), 'la edad elegida se guarda');
+  const pm = await p.evaluate(async () => { const PJ = await import('./js/personaje.js'); await PJ.cargar(); const o = PJ.opciones(PJ.normal({ sx: 'f', edad: 'mayor', prenda: 'buzo:azul' })); const oj = PJ.opciones(PJ.normal({ sx: 'f', prenda: 'buzo:azul' }));
+    const cv = document.createElement('canvas'), cv2 = document.createElement('canvas'); PJ.pintar(cv, { sx: 'f', edad: 'mayor', peinado: 'rodete', prenda: 'buzo:azul' }); PJ.pintar(cv2, { sx: 'f', edad: 'mayor', prenda: 'buzo:azul' });
+    return { pe: o.peinados.map(x => x[0]), joven: oj.peinados.map(x => x[0]), distinto: cv.toDataURL() !== cv2.toDataURL(), pr: PJ.opciones(PJ.normal({ sx: 'm', edad: 'adulto' })).prendas.map(x => x[0]) }; });
+  ok(pm.pe.join() === 'base,rodete' && !pm.joven.includes('rodete') && pm.distinto, 'la mayor tiene anteojos o rodete (y la joven no tiene rodete): ' + JSON.stringify(pm));
+  const br = await p.evaluate(async () => { const PJ = await import('./js/personaje.js'); await PJ.cargar(); const r = {};
+    for (const [sx, e] of [['m', 'nino'], ['f', 'nino'], ['m', 'adulto'], ['f', 'adulto'], ['m', 'mayor'], ['f', 'mayor']]) { const px = t => { const cv = document.createElement('canvas'); PJ.pintar(cv, { sx, edad: e, tono: t }); return cv.getContext('2d').getImageData(0, 0, 128, 128).data; };
+      const a = px('base'), o = px('oscura'); let cara = 0, brazos = 0; for (let i = 0; i < a.length; i += 4) { if (a[i] !== o[i]) { const y = (i / 4 / 128) | 0; if (y < (e === 'nino' ? 62 : 40)) cara++; else brazos++; } } r[sx + e] = [cara, brazos]; } return r; });
+  ok(Object.values(br).every(([c, b]) => c > 40 && b > 40), 'en todas las edades el tono de piel tiñe la cara y los brazos: ' + JSON.stringify(br));
+  const pn = await p.evaluate(async () => { const PJ = await import('./js/personaje.js'); await PJ.cargar(); return [PJ.opciones(PJ.normal({ sx: 'm', edad: 'nino' })).prendas.map(x => x[0]), PJ.opciones(PJ.normal({ sx: 'f', edad: 'nino' })).prendas.map(x => x[0]), PJ.opciones(PJ.normal({ sx: 'm' })).prendas.map(x => x[0])]; });
+  ok(['guardapolvo', 'rayada', 'jardinero'].every(x => pn[0].includes(x)) && ['guardapolvo', 'vestido', 'jardinero'].every(x => pn[1].includes(x)) && !pn[2].includes('guardapolvo'), 'los chicos tienen ropa de chico (y el joven no): ' + JSON.stringify(pn));
+  ok(['remera', 'buzo', 'camisa', 'deportiva'].every(x => pm.pr.includes(x)) && !pm.pr.includes('sotana'), 'el adulto tiene toda la ropa laica del joven: ' + pm.pr);
+  }
+  if (listas.includes('nino')) { await p.click('.seg.edad button[data-p="edad|nino"]'); await p.waitForTimeout(600);
+  ok(await p.evaluate(() => (JSON.parse(localStorage.getItem('scaeli-daily-local'))['daily_settings/profile'] || {}).edad === 'nino'), 'la edad elegida se guarda'); }
+  else ok(await p.evaluate(async () => { const PJ = await import('./js/personaje.js'); return PJ.normal({ sx: 'm', edad: 'nino' }).edad === 'joven'; }), 'una edad oculta cae en Joven (quien ya la había elegido ve al joven)');
   // lo ya rezado: tilde en las portadas y el inicio pasa a lo que falta
   await p.evaluate(() => window.DAILY.ir('hoy')); await p.waitForTimeout(400);
   await A('evOk', undefined, 600); await p.evaluate(() => window.DAILY.ir('hoy')); await p.waitForTimeout(400);
