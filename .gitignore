@@ -9,3 +9,4 @@ pruebas/salida/
 pruebas/reglas/node_modules/
 pruebas/reglas/*.log
 pruebas/reglas/firestore.rules
+__pycache__/
