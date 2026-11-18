@@ -281,3 +281,29 @@ body.conhoja{overflow:hidden}
 .grow .gmas button{display:flex;align-items:center;gap:10px;height:44px;border:0;background:none;color:var(--ink2);font-size:14px;text-align:left;padding:0 2px}.grow .gmas button svg.i{width:16px;height:16px}
 .grow .gal{padding:10px 0 0}
 .gbot{margin-top:20px}
+/* 2.4 · cancionero */
+.chips.canc{flex-wrap:nowrap;overflow-x:auto;scrollbar-width:none;margin:0 -2px 12px;padding:2px}.chips.canc::-webkit-scrollbar{display:none}.chips.canc button{flex:none;white-space:nowrap}
+.row.canto .cton{flex:none;color:var(--accent);display:inline-flex;align-items:center}.row.canto .cton svg.i{width:16px;height:16px}.row.canto .cton.txt{font-size:11px;color:var(--ink2);letter-spacing:.04em;text-transform:uppercase}
+.cbar{display:flex;flex-direction:column;gap:10px;margin:0 0 16px}
+.ctono{display:flex;align-items:center;justify-content:space-between;gap:10px;border:1px solid var(--line);border-radius:16px;padding:8px 10px}
+.ctono span{display:flex;flex-direction:column;align-items:center;line-height:1.15}.ctono small{font-size:11px;color:var(--ink2);letter-spacing:.06em;text-transform:uppercase}.ctono b{font-size:19px;font-weight:600}
+.cseg button{font-size:12.5px;padding:0 4px}
+.cletra{font-size:16px;line-height:1.5}.cletra.grande{font-size:19px}.cletra.latin{font-style:italic}
+.cest{margin:0 0 18px}.cest.coro{padding-left:12px;border-left:2px solid var(--accent-line);font-weight:600}
+.cl{min-height:1.5em}.cl.ac{margin-top:2px}
+.cs{display:inline-block;vertical-align:bottom;white-space:pre}
+.cs i{display:block;height:1.35em;font-style:normal;font-weight:700;font-size:.82em;color:var(--accent);padding-right:.45em;letter-spacing:.01em}
+.cform textarea{width:100%;min-height:220px;font:inherit;font-size:15px;line-height:1.45;border:1px solid var(--line2);border-radius:14px;background:var(--inset);color:var(--ink);padding:12px;resize:vertical}
+/* 2.4 · biblioteca: pestañas, documentos y formación de cada día */
+.ltabs button{font-size:13px}
+.libro.fuera.doc{padding:12px 4px;border-top:1px solid var(--line);display:flex;align-items:center;gap:10px;text-decoration:none;color:inherit}
+.libro.fuera.doc .n{flex:1;min-width:0;display:flex;flex-direction:column;gap:2px}.libro.fuera.doc .n b{font-size:15px;font-weight:600}.libro.fuera.doc .n small{font-size:12.5px;color:var(--ink2);line-height:1.35}
+.sect+.libro.fuera.doc{border-top:0}
+.catc{display:flex;align-items:center;gap:12px;width:100%;text-align:left;margin:0 0 14px}
+.catc .n{flex:1;min-width:0;display:flex;flex-direction:column;gap:3px}.catc .n b{font-size:16px;font-weight:600;line-height:1.25}.catc .n small{font-size:12.5px;color:var(--ink2)}
+.cath{border:1px solid var(--accent-line);background:var(--accent-dim);border-radius:20px;padding:20px 18px;margin:4px 0 14px}
+.cath h3{font-size:22px;line-height:1.2;margin:8px 0 6px;font-weight:600}.cath p{margin:0;color:var(--ink2);font-size:14px;line-height:1.45}
+.cath .nums{display:inline-block;margin-top:12px;border:1px solid var(--line2);border-radius:999px;padding:5px 12px;font-size:12.5px;font-weight:600;color:var(--ink)}
+.catqa{margin:0 0 14px}.catqa dt{font-weight:600;font-size:15.5px;line-height:1.35;margin:14px 0 4px}.catqa dd{margin:0;font-size:15.5px;line-height:1.5;color:var(--ink2)}
+a.primary.catir{text-decoration:none}
+.gmiem .grow.bloq{display:flex;align-items:center;gap:10px;flex-wrap:wrap}.gmiem .grow.bloq .n{flex:1;min-width:0}.gmiem .grow.bloq .acts{width:100%}

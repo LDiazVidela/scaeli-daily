@@ -35,7 +35,7 @@ const { chromium } = require('playwright');
   await A('cerrar');
   // 3) libros
   await p.evaluate(()=>window.DAILY.ir('rezar')); await p.waitForTimeout(400); t=await T(); ok(/Biblioteca/.test(t)&&/Santa Teresa/.test(t),'portada Biblioteca en Rezar');
-  await A('libros',null,600); t=await T(); ok(/Imitación de Cristo/.test(t)&&/Ejercicios espirituales/.test(t)&&!/Las moradas del castillo/.test(t),'solo los libros de dominio público'); ok(await p.evaluate(()=>document.querySelectorAll('a.libro.fuera[href^="https://archive.org/details/"]').length===6),'Santa Teresa y San Juan de la Cruz como enlaces a archive.org');
+  await A('libros',null,600); t=await T(); ok(/Imitación de Cristo/.test(t)&&/Ejercicios espirituales/.test(t)&&!/Las moradas del castillo/.test(t),'solo los libros de dominio público'); ok(await p.evaluate(()=>document.querySelectorAll('a.libro.fuera[href^="https://archive.org/details/"]').length===5),'las otras obras de Santa Teresa y San Juan de la Cruz como enlaces a archive.org'); ok(/Libro de la vida/.test(t),'el Libro de la vida de Santa Teresa, en la app (2.4)');
   await A('libAbrir','imitacion',1500); t=await T(); ok(/Libro primero/i.test(t)&&/Capítulo 1/.test(t),'capítulos de la Imitación con secciones');
   await A('libIr','imitacion|1',800); t=await T(); ok(/Del bajo aprecio de sí mismo/i.test(t),'texto del capítulo 2 de la Imitación');
   await A('libIr','imitacion|0',1200); t=await T(); ok(/Quien me sigue no anda en tinieblas/.test(t),'Kempis cap. 1');

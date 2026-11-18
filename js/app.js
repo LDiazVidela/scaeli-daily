@@ -11,7 +11,9 @@ import { ORACIONES_MAS } from "../data/oraciones_mas.js";
 import { NOVENAS, NOV_MAS } from "../data/novenas.js";
 import { CAPITALES, CAPITALES_N, VIDA, CONF_CIERRE } from "../data/examen.js";
 import { BIBLIOTECA, AREAS, PUBLICOS } from "../data/habitos.js";
-import { LIBROS, LIBROS_FUERA } from "../data/libros.js";
+import { LIBROS, LIBROS_FUERA, DOCS } from "../data/libros.js";
+import { cancionero } from "./cancionero.js";
+import { CIC, CIC_URL, CIC_PARTES } from "../data/catecismo.js";
 import { MISA_ORDINARIO, PREF_SANTOS, PREF_PROPIO } from "../data/misa.js";
 import { SANTOS_MAS, tipoSanto, oracionSanto } from "../data/santos.js";
 import { SANTORAL } from "../data/santoral.js";
@@ -20,7 +22,7 @@ import * as PJ from "./personaje.js";
 import { RETIROS } from "../data/retiros.js";   // 2.2: caminos largos de oración (Scaeli+)
 import { MUSICAS, musicaPlay, musicaStop, musicaEstado, musicaAlCambiar, campana, vozDisponible, decir, callar } from "./audio.js";
 
-export const VERSION="2.3.2";
+export const VERSION="2.4";
 const LOGO_GOOGLE='<svg class="logo-g" viewBox="0 0 48 48" aria-hidden="true"><path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/><path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/><path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/><path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/></svg>';
 const LOGO_APPLE='<svg class="logo-a" viewBox="0 0 814 1000" aria-hidden="true"><path fill="currentColor" d="M788.1 340.9c-5.8 4.5-108.2 62.2-108.2 190.5 0 148.4 130.3 200.9 134.2 202.2-.6 3.2-20.7 71.9-68.7 141.9-42.8 61.6-87.5 123.1-155.5 123.1s-85.5-39.5-164-39.5c-76.5 0-103.7 40.8-165.9 40.8s-105.6-57-155.5-127C46.7 790.7 0 663 0 541.8c0-194.4 126.4-297.5 250.8-297.5 66.1 0 121.2 43.4 162.7 43.4 39.5 0 101.1-46 176.3-46 28.5 0 130.9 2.6 198.3 99.2zm-234-181.5c31.1-36.9 53.1-88.1 53.1-139.3 0-7.1-.6-14.3-1.9-20.1-50.6 1.9-110.8 33.7-147.1 75.8-28.5 32.4-55.1 83.6-55.1 135.5 0 7.8 1.3 15.6 1.9 18.1 3.2.6 8.4 1.3 13.6 1.3 45.4 0 102.5-30.4 135.5-71.3z"/></svg>';
 /* la dirección publicada: la app de las tiendas lee de acá los Evangelios del día (los genera la GitHub Action cada noche) */
@@ -121,7 +123,7 @@ async function cargarEvangelio(){ const f=hoy(); if(evHoy&&evHoy.fecha===f) retu
 const ideaHoy=()=>IDEAS[semilla(hoy()+"i")%IDEAS.length];
 /* las citas vienen con abreviaturas francesas (Evangelizo): se pasan a las españolas */
 const ABR={Gn:"Gén",Ex:"Éx",Lv:"Lev",Nb:"Núm",Jg:"Jue",Rt:"Rut","1 S":"1 Sam","2 S":"2 Sam","1 R":"1 Re","2 R":"2 Re","1 Ch":"1 Cró","2 Ch":"2 Cró",Ne:"Neh",Tb:"Tob",Jb:"Job",Ps:"Sal",Pr:"Prov",Qo:"Ecl",Ct:"Cant",Sg:"Sab",Si:"Eclo",Jr:"Jer",Lm:"Lam",Ba:"Bar",Dn:"Dan",Jl:"Jl",Mi:"Miq",So:"Sof",Ha:"Hab",Za:"Zac",Ml:"Mal","1 M":"1 Mac","2 M":"2 Mac",Ac:"Hch",Rm:"Rom","1 Co":"1 Cor","2 Co":"2 Cor",Ga:"Gál",Ep:"Ef",Ph:"Flp","1 Th":"1 Tes","2 Th":"2 Tes",Tt:"Tit",Phm:"Flm",He:"Heb",Jc:"Sant","1 P":"1 Pe","2 P":"2 Pe",Jude:"Jds"};
-const citaCorta=c=>{ const s=String(c||"").replace(/_/g," ").replace(/\.$/,"").trim(); const m=s.match(/^((?:[123] )?[A-Z][a-z]{0,3})\s+(.*)$/); return m&&ABR[m[1]]?ABR[m[1]]+" "+m[2]:s; };
+const citaCorta=c=>{ const s=String(c||"").replace(/_/g," ").replace(/\.$/,"").trim(); const m=s.match(/^((?:[123] )?[A-Z][a-z]{0,3})\s+(.*)$/); return m&&ABR[m[1]]?ABR[m[1]]+" "+m[2].replace(/^(\d+)\(\d+\)/,"$1"):s; };   /* 2.4: «Sal 150(149)» → «Sal 150»: el segundo número de Evangelizo no siempre es correcto */
 
 /* ── la Liturgia de las Horas, de liturgiadelashoras.github.io (como en el juego) ── */
 const LH_SITIO="https://liturgiadelashoras.github.io", LH_MES=["ene","feb","mar","abr","may","jun","jul","ago","sep","oct","nov","dic"];
@@ -350,7 +352,8 @@ function renderRezar(){ const d=dayOf(hoy()); const nv=novenaEnCurso(); const lh
    ["examen","examen","Examen del día","A la noche · 5 min"],
    ["musica","musica","Rezar con música",musicaEstado()?"Sonando: "+esc(musicaEstado().n):"Órgano, noche o silencio con campana"+(esPlus()?"":" · Scaeli+")],
    ["biblia","biblia","La Biblia",bibUltima()?"Seguir en "+esc(bibUltima()):"Buscá un libro, un capítulo o una palabra",1],
-   ["libros","biblioteca","Biblioteca",libUltimo()?"Seguir con "+esc(libUltimo().L.t):"Santa Teresa, San Juan de la Cruz, Kempis…"],
+   ["libros","biblioteca","Biblioteca",libUltimo()?"Seguir con "+esc(libUltimo().L.t):"Santa Teresa, Kempis, documentos de la Iglesia…"],
+   ["cancionero","cancionero","Cancionero","Cantos con acordes"+(esPlus()?"":" · Scaeli+")],
    ["confesion","confesion","Confesión","Los pasos y el examen"],
    ["misa","misa","La Misa de hoy","Guía del celebrante y lecturas"],
    ["santoral","santo","Santoral","Todos los santos del año"]].filter(Boolean);
@@ -1171,6 +1174,8 @@ function shMisOraciones(){ const L=misOracionesLista(), q=sinTilde(sheet.q||"").
      :'<p class="empty">Todavía no guardaste ninguna oración. A la mañana y a la noche, en Hoy, escribile a Dios con tus palabras: acá vas a poder releerlas y ver cómo vas creciendo.</p>')+
    '</div><div class="grid2"><button class="ghost g" data-a="orar" data-p="'+(momento()==="manana"||momento()==="mediodia"?"manana":"noche")+'">'+ic("pen")+' Escribir</button><button class="primary ink" data-a="cerrar">Volver</button></div>'; }
 
+/* 2.4 · el cancionero (js/cancionero.js): letras gratis; acordes, tono y «Mis cantos» con Scaeli+ */
+const CANC=cancionero({esc:x=>esc(x),ic:x=>ic(x),shTop:(a,b)=>shTop(a,b),esPlus:()=>esPlus(),hoja:()=>sheet,openSheet:x=>openSheet(x),renderSheet:()=>renderSheet(),renderSheetQuieto:()=>renderSheetQuieto(),toast:x=>toast(x),confirmar:(a,b,c)=>confirmar(a,b,c),tiempoLit:()=>tiempoLit()});
 /* ── los libros: clásicos católicos libres de derechos (herramientas/libros_mb.py), un archivo por libro en libros/ ── */
 const LIB={}, LIB_K="daily_libros";
 function libGuardado(){ try{ return JSON.parse(localStorage.getItem(LIB_K)||"{}")||{}; }catch(e){ return {}; } }
@@ -1179,14 +1184,34 @@ function libTexto(id){ if(LIB[id]) return Promise.resolve(LIB[id]); return fetch
 function libUltimo(){ const g=libGuardado(), L=g.ult&&LIBROS.find(x=>x.id===g.ult); return L?{L,c:(g[g.ult]||{}).c||0}:null; }
 const libMin=L=>Math.max(1,Math.round(L.w/200/L.n));   // minutos por capítulo, a 200 palabras por minuto
 function libParr(p){ if(p.startsWith("## ")) return '<h4 class="bibtit">'+esc(p.slice(3))+'</h4>'; if(p.startsWith("> ")) return '<p class="resumen">'+esc(p.slice(2))+'</p>'; const m=p.match(/^(\d+\.|\[\d+\])\s*/); return '<p'+(p.includes("\n")?' class="verso"':'')+'>'+(m?'<sup>'+esc(m[1].replace(/[\[\].]/g,""))+'</sup>'+esc(p.slice(m[0].length)):esc(p))+'</p>'; }
+/* 2.4 · Formación de cada día (Scaeli+): una sección del Catecismo por día, la misma todo el día; «otra» recomienda una distinta.
+   El texto no se copia (tiene derechos): se abre en vatican.va. data/catecismo.js trae el índice con los números. */
+function catHoy(n){ let h=0; for(const c of hoy()) h=(h*31+c.charCodeAt(0))>>>0; return CIC[(h+(n||0)*37)%CIC.length]; }
+const catLeidaHoy=()=>lsGet("daily_cat_leida")===hoy();
+function catecismoCard(){ const plus=esPlus(), c=catHoy(0);
+  return '<button class="card catc" data-a="catecismo"><span class="n"><span class="eyebrow">Formación de cada día'+(plus?'':' · Scaeli+')+'</span><b>'+(plus?esc(c[1]):'Una sección del Catecismo por día')+'</b><small>'+(plus?'Catecismo · números '+c[2]+' a '+c[3]+(catLeidaHoy()?' · leída hoy':''):'Para ir formándote de a poco, con lo que la Iglesia enseña')+'</small></span>'+(plus?ic("right"):'<span class="plus-mini">'+ic("lock")+' Scaeli+</span>')+'</button>'; }
+function shCatecismo(){ const c=catHoy(sheet.n||0), min=Math.max(3,Math.round((c[3]-c[2]+1)*0.45));
+  return shTop("Formación de hoy","Catecismo de la Iglesia Católica")+'<div class="scroll"><div class="cath"><div class="eyebrow">'+esc(CIC_PARTES[c[4]])+'</div><h3>'+esc(c[1])+'</h3><p>'+(sheet.n?'Otra parte del Catecismo para leer hoy.':'Lo que te propongo leer hoy. Despacio: no hace falta terminarlo, importa que algo te quede.')+'</p><span class="nums">Números '+c[2]+' a '+c[3]+' · unos '+min+' min</span></div>'+
+   '<a class="primary catir" href="'+esc(CIC_URL+c[0])+'" target="_blank" rel="noopener">'+ic("book")+' Leer en vatican.va</a>'+
+   '<div class="grid2" style="margin-top:10px"><button class="ghost g" data-a="catOtra">Recomendame otra</button><button class="ghost g" data-a="catLeida"'+(catLeidaHoy()?' disabled':'')+'>'+ic("check")+' '+(catLeidaHoy()?'Leída hoy':'Ya la leí')+'</button></div>'+
+   '<p class="hint" style="margin-top:16px">Cada día, una sección distinta del Catecismo: en unos tres meses lo recorrés entero. El texto es de la Santa Sede y tiene derechos, por eso se abre en su sitio oficial.</p>'+
+   '</div><button class="ghost g" data-a="libros" data-p="docs" style="justify-content:center;height:48px">'+ic("left")+' Biblioteca</button>'; }
 function shLibros(){ const g=libGuardado(), u=libUltimo();
   const aut=[...new Set(LIBROS.map(x=>x.a.split(" · ")[0]))];
-  return shTop("Biblioteca","Clásicos católicos, libres de derechos")+'<div class="scroll"><div class="sbanner"><img src="'+ilu("biblioteca")+'" alt=""><span class="g"></span></div>'+
+  /* 2.4: dos pestañas. «Libros» se leen en la app (dominio público); «Documentos» de la Iglesia y la Suma se abren en su sitio oficial (tienen derechos) */
+  const tab=sheet.lt==="docs"?"docs":"libros", seg='<div class="seg gtabs ltabs"><button data-a="libTab" data-p="libros" aria-pressed="'+(tab==="libros")+'">Libros</button><button data-a="libTab" data-p="docs" aria-pressed="'+(tab==="docs")+'">Documentos de la Iglesia</button></div>';
+  if(tab==="docs"){ const gs=[...new Set(DOCS.map(x=>x[0]))];
+    return shTop("Biblioteca","El Magisterio y Santo Tomás, en su fuente")+'<div class="scroll"><div class="sbanner"><img src="'+ilu("biblioteca")+'" alt=""><span class="g"></span></div>'+seg+
+     catecismoCard()+
+     gs.map(g=>'<div class="sect">'+esc(g)+'</div>'+DOCS.filter(x=>x[0]===g).map(x=>'<a class="libro fuera doc" href="'+esc(x[3])+'" target="_blank" rel="noopener"><span class="n"><b>'+esc(x[1])+'</b><small>'+esc(x[2])+'</small></span>'+ic("right")+'</a>').join("")).join("")+
+     '<p class="hint" style="margin-top:14px">Estos textos tienen derechos de autor (Librería Editrice Vaticana y otros): por eso no están copiados en la app y se abren en vatican.va o en el sitio que los publica.</p>'+
+     '</div><button class="primary ink" data-a="cerrar">Volver</button>'; }
+  return shTop("Biblioteca","Clásicos católicos, libres de derechos")+'<div class="scroll"><div class="sbanner"><img src="'+ilu("biblioteca")+'" alt=""><span class="g"></span></div>'+seg+catecismoCard()+
    (u?'<button class="card lhnow" data-a="libIr" data-p="'+u.L.id+'|'+u.c+'"><span class="n"><span class="eyebrow">Seguir leyendo</span><b>'+esc(u.L.t)+'</b><small>'+esc(u.L.caps?u.L.caps[u.c].t:"capítulo "+(u.c+1))+'</small></span>'+ic("right")+'</button>':'')+
    aut.map(a=>'<div class="sect">'+esc(a)+'</div>'+LIBROS.filter(x=>x.a.split(" · ")[0]===a).map(x=>{ const m=g[x.id]; return '<button class="libro" data-a="libAbrir" data-p="'+x.id+'"><span class="tapa"><i></i><b>'+esc(x.t)+'</b></span><span class="n"><b>'+esc(x.t)+'</b><small>'+esc(x.sub)+'</small><small class="muted">'+x.n+' capítulos · '+libMin(x)+' min cada uno'+(m?' · vas por el '+(m.c+1):'')+'</small></span>'+ic("right")+'</button>'; }).join("")).join("")+
-   '<div class="sect">Santa Teresa y San Juan de la Cruz</div><p class="hint">Sus obras, en las ediciones antiguas de dominio público, escaneadas en archive.org. Se abren en tu navegador.</p>'+
+   '<div class="sect">Más de Santa Teresa y San Juan de la Cruz</div><p class="hint">Sus otras obras, en las ediciones antiguas de dominio público, escaneadas en archive.org. Se abren en tu navegador.</p>'+
    LIBROS_FUERA.map(x=>'<a class="libro fuera" href="'+esc(x[3])+'" target="_blank" rel="noopener"><span class="tapa"><i></i><b>'+esc(x[1])+'</b></span><span class="n"><b>'+esc(x[1])+'</b><small>'+esc(x[0])+'</small><small class="muted">'+esc(x[2])+' · archive.org</small></span>'+ic("right")+'</a>').join("")+
-   '<p class="hint" style="margin-top:14px">Obras de dominio público: los Ejercicios en el texto autógrafo de San Ignacio y la Imitación de Cristo en la traducción clásica del P. Nieremberg (siglo XVII). Puede haber alguna errata de la edición digital.</p>'+
+   '<p class="hint" style="margin-top:14px">Obras de dominio público: los Ejercicios en el texto autógrafo de San Ignacio la Imitación de Cristo en la traducción clásica del P. Nieremberg (siglo XVII) y el Libro de la vida de Santa Teresa con la ortografía de su época. Puede haber alguna errata de la edición digital.</p>'+
    '</div><button class="primary ink" data-a="cerrar">Volver</button>'; }
 function shLibro(){ const L=LIBROS.find(x=>x.id===sheet.p); if(!L) return shTop("Libro")+'<p class="hint">No está.</p>'; const T=LIB[L.id];
   if(!T){ libTexto(L.id).then(()=>renderSheet()).catch(()=>{ sheet.err="No se pudo abrir este libro. Revisá la conexión."; renderSheet(); }); return shTop(esc(L.t),esc(L.a))+'<p class="hint">'+(sheet.err?esc(sheet.err):"Abriendo…")+'</p>'; }
@@ -1194,7 +1219,7 @@ function shLibro(){ const L=LIBROS.find(x=>x.id===sheet.p); if(!L) return shTop(
   if(sheet.m!=="leer"){ let sec=""; return shTop(esc(L.t),esc(L.a)+(L.y?" · "+esc(L.y):""))+'<div class="scroll"><p class="texto chico">'+esc(L.sub)+'</p>'+
     (g?'<button class="card lhnow" data-a="libIr" data-p="'+L.id+'|'+g.c+'"><span class="n"><span class="eyebrow">Seguir leyendo</span><b>'+esc(T.caps[g.c].t)+'</b></span>'+ic("right")+'</button>':'')+
     '<div class="list libcaps">'+T.caps.map((c,i)=>{ const h=c.s&&c.s!==sec?'<div class="sect">'+esc(c.s)+'</div>':""; sec=c.s||sec; return h+'<button class="row" data-a="libIr" data-p="'+L.id+'|'+i+'"><span class="n"><b>'+esc(c.t)+'</b>'+(c.p[0]&&c.p[0].startsWith("> ")?'<small>'+esc(c.p[0].slice(2))+'</small>':'')+'</span>'+(g&&g.c===i?'<span class="ck on">'+ic("check")+'</span>':ic("right"))+'</button>'; }).join("")+'</div>'+
-    '<p class="hint" style="margin-top:12px">Fuente: <a href="'+esc(L.url)+'" target="_blank" rel="noopener">mercaba.es</a>.</p></div><button class="ghost g" data-a="libros" style="justify-content:center;height:48px">'+ic("left")+' Biblioteca</button>'; }
+    (L.url?'<p class="hint" style="margin-top:12px">Fuente: <a href="'+esc(L.url)+'" target="_blank" rel="noopener">'+esc(L.fu||"mercaba.es")+'</a>.</p>':'')+'</div><button class="ghost g" data-a="libros" style="justify-content:center;height:48px">'+ic("left")+' Biblioteca</button>'; }
   const i=sheet.c||0, C=T.caps[i];
   return shTop(esc(C.t),'<button class="lnk" data-a="libAbrir" data-p="'+L.id+'" style="padding:0;font-size:12px">'+esc(L.t)+(C.s?' · '+esc(C.s):'')+' · capítulos</button>')+'<div class="scroll biblia lib">'+C.p.map(libParr).join("")+
    (i>=T.caps.length-1?'<p class="hint" style="text-align:center;margin-top:20px">Fin del libro. '+esc(L.a)+'.</p>':'')+
@@ -1233,12 +1258,12 @@ function confirmar(tit,txt,ok,no){ return new Promise(res=>{ const el=document.c
 function shPlusPaywall(desde){ const nat=esNativo(), P=sheet.planes, eq=delEquipo()||plusPrueba(), activo=esPlus();
   if(nat&&comprasDisponibles()&&!P&&!sheet.cargandoP){ sheet.cargandoP=1; comprasPlanes().then(x=>{ if(sheet){ sheet.planes=x||{}; renderSheet(); } }); }
   const precio=(p,def)=>p&&p.product&&p.product.priceString?p.product.priceString:def;
-  const ben=[["Caminos largos de oración","La Consagración a María en 33 días, los Ejercicios de San Ignacio en 30, un retiro de 7 días y San Marcos entero en 16. Y los del tiempo litúrgico: Adviento, Navidad, Cuaresma y Pascua."],["Rezar con audio","El Rosario guiado con voz, que pasa solo las cuentas, y música para rezar: órgano suave, noche o silencio con campana."],["Grupos y diario sin límites","Hasta 3 grupos de perseverancia a la vez y todo tu diario, con buscador y para guardar en PDF."],["Tu progreso y tus virtudes","Tus hábitos y tu oración semana a semana, y el esquema de las virtudes que más trabajás y las que te faltan."],["Incluye Scaeli Fit","Una sola suscripción para las dos apps: ayuno con planes, rutinas por objetivo, escaneo de comidas por foto e informes."],["Tu año con Dios","Tu año en historias: días con Dios, rachas, Rosarios, Evangelios, novenas y tu nivel, con una imagen para compartir."],["Sostenés Scaeli","Un proyecto para acercar a los jóvenes a Dios, sin publicidad."]];
+  const ben=[["Caminos largos de oración","La Consagración a María en 33 días, los Ejercicios de San Ignacio en 30, un retiro de 7 días y San Marcos entero en 16. Y los del tiempo litúrgico: Adviento, Navidad, Cuaresma y Pascua."],["Rezar con audio","El Rosario guiado con voz, que pasa solo las cuentas, y música para rezar: órgano suave, noche o silencio con campana."],["Grupos y diario sin límites","Hasta 3 grupos de perseverancia a la vez y todo tu diario, con buscador y para guardar en PDF."],["Cancionero con acordes","Los acordes sobre la letra, en Do Re Mi o cifrado americano, el cambio de tono y tus propios cantos."],["Formación de cada día","Una pregunta del Catecismo por día, con su respuesta, para ir formándote de a poco."],["Tu progreso y tus virtudes","Tus hábitos y tu oración semana a semana, y el esquema de las virtudes que más trabajás y las que te faltan."],["Incluye Scaeli Fit","Una sola suscripción para las dos apps: ayuno con planes, rutinas por objetivo, escaneo de comidas por foto e informes."],["Tu año con Dios","Tu año en historias: días con Dios, rachas, Rosarios, Evangelios, novenas y tu nivel, con una imagen para compartir."],["Sostenés Scaeli","Un proyecto para acercar a los jóvenes a Dios, sin publicidad."]];
   const anual=P&&P.anual, mensual=P&&P.mensual, pa=anual&&anual.product&&anual.product.price, pm=mensual&&mensual.product&&mensual.product.price;
   const ahorro=pa&&pm?Math.round((1-pa/(pm*12))*100):44;
   return shTop("Scaeli+",activo?"Lo tenés activo":"Para crecer en lo que ya rezás")+'<div class="scroll"><div class="plus-hero"><span class="plus-tag">Scaeli<b>+</b></span><p>La oración es gratis siempre. Scaeli+ te ayuda a ver tu camino y a sostenerlo.</p></div>'+
    '<div class="list">'+ben.map(b=>'<div class="benef">'+ic("check")+'<div><b>'+b[0]+'</b><small>'+b[1]+'</small></div></div>').join("")+'</div>'+
-   (activo?'<p class="hint" style="text-align:center;margin-top:14px">'+(plusDoc&&plusDoc.active?(plusDoc.source==="code"?"Activado con el código "+esc(plusDoc.code||"")+(plusDoc.until?" hasta el "+esc(fLarga(plusDoc.until).replace(/^\w+ /,"")):""):plusDoc.source==="team"?"Acceso del equipo.":"Gracias por sostener Scaeli."+(plusDoc.until?" Renueva el "+esc(fLarga(plusDoc.until).replace(/^\w+ /,""))+".":""))+" Vale también en Scaeli Fit.":(eq&&!plusTienda?"Acceso de prueba activo.":"Gracias por sostener Scaeli."))+'</p>'+(desde?'<button class="primary" data-a="'+({camino:"camino",anio:"anio",retiro:"retiros",musica:"musica",diario:"diario",grupos:"grupo",voz:"rosario"}[desde]||"progreso")+'" style="margin-top:8px">Abrir</button>':''):
+   (activo?'<p class="hint" style="text-align:center;margin-top:14px">'+(plusDoc&&plusDoc.active?(plusDoc.source==="code"?"Activado con el código "+esc(plusDoc.code||"")+(plusDoc.until?" hasta el "+esc(fLarga(plusDoc.until).replace(/^\w+ /,"")):""):plusDoc.source==="team"?"Acceso del equipo.":"Gracias por sostener Scaeli."+(plusDoc.until?" Renueva el "+esc(fLarga(plusDoc.until).replace(/^\w+ /,""))+".":""))+" Vale también en Scaeli Fit.":(eq&&!plusTienda?"Acceso de prueba activo.":"Gracias por sostener Scaeli."))+'</p>'+(desde?'<button class="primary" data-a="'+({camino:"camino",anio:"anio",retiro:"retiros",musica:"musica",diario:"diario",grupos:"grupo",voz:"rosario",cancionero:"cancionero",catecismo:"catecismo"}[desde]||"progreso")+'" style="margin-top:8px">Abrir</button>':''):
    (nat?'<div class="planes"><button class="plan dest" data-a="plusComprar" data-p="anual"'+(anual?'':' disabled')+'>'+(ahorro>0?'<span class="ah">Ahorrás '+ahorro+'%</span>':'')+'<b>Anual</b><small>'+esc(precio(anual,"USD 19,99"))+' por año</small></button>'+
      '<button class="plan" data-a="plusComprar" data-p="mensual"'+(mensual?'':' disabled')+'><b>Mensual</b><small>'+esc(precio(mensual,"USD 2,99"))+' por mes</small></button></div>'+
      (comprasDisponibles()?'':'<p class="hint" style="text-align:center">Las compras todavía no están activas en esta versión.</p>')+
@@ -1286,7 +1311,7 @@ function openSheet(s){ if(!sheet){ lugarPrevio=Math.round(window.scrollY); navHo
 function closeSheet(deAtras){ if(sheet&&sheet.timer) clearTimeout(sheet.timer); if(deAtras!==true) navHojaCierra(); document.body.classList.remove("conhoja");
   if(sheet){ const yPrev=lugarPrevio, vPrev=view; requestAnimationFrame(()=>{ if(!sheet&&view===vPrev&&Math.abs(window.scrollY-yPrev)>2) window.scrollTo(0,yPrev); }); }
   sheet=null; htmlHoja=null; rosVozSeguir(); if(musicaEstado()) musChip(); $("#scrim").hidden=true; $("#sheet").hidden=true; $("#sheet").classList.remove("full"); document.body.classList.remove("enfoque"); render(); }
-function renderSheet(){ if(!sheet) return; const S={palabra:shPalabra,album:shAlbum,sobre:shSobre,figu:shFigu,diploma:shDiploma,hora:shHora,evangelio:shEvangelio,rosario:shRosario,horas:shHoras,hora_lh:shHoraLH,oraciones:shOraciones,oracion:shOracion,novenas:shNovenas,novena:shNovena,examen:shExamen,confesion:shConfesion,misa:shMisa,santo:shSanto,santoral:shSantoral,lectio:shLectio,lectioGuia:shLectioGuia,creditos:shCreditos,novedades:shNovedades,exConf:shExConf,biblia:shBiblia,progreso:shProgreso,camino:shCamino,anio:shAnio,retiros:shRetiros,retiro:shRetiro,diario:shDiario,musica:shMusica,grupo:shGrupo,biblioteca:shBiblioteca,libros:shLibros,libro:shLibro,orar:shOrar,misOraciones:shMisOraciones,plus:shPlus,donar:shDonar,borrar:shBorrar}[sheet.view];
+function renderSheet(){ if(!sheet) return; const S={palabra:shPalabra,album:shAlbum,sobre:shSobre,figu:shFigu,diploma:shDiploma,hora:shHora,evangelio:shEvangelio,rosario:shRosario,horas:shHoras,hora_lh:shHoraLH,oraciones:shOraciones,oracion:shOracion,novenas:shNovenas,novena:shNovena,examen:shExamen,confesion:shConfesion,misa:shMisa,santo:shSanto,santoral:shSantoral,lectio:shLectio,lectioGuia:shLectioGuia,creditos:shCreditos,novedades:shNovedades,exConf:shExConf,biblia:shBiblia,progreso:shProgreso,camino:shCamino,anio:shAnio,retiros:shRetiros,retiro:shRetiro,diario:shDiario,musica:shMusica,grupo:shGrupo,biblioteca:shBiblioteca,libros:shLibros,libro:shLibro,catecismo:shCatecismo,cancionero:CANC.shCancionero,canto:CANC.shCanto,cantoEd:CANC.shCantoEd,orar:shOrar,misOraciones:shMisOraciones,plus:shPlus,donar:shDonar,borrar:shBorrar}[sheet.view];
   const hh=S?S():""; if(quietoAhora&&hh===htmlHoja) return;   // 2.4: si la hoja no cambió, no se toca (sin parpadeo ni saltos)
   htmlHoja=hh; $("#sheetIn").innerHTML=hh; pintarPersonajes(); cartasAjustar(); $("#sheet").classList.toggle("short",!!sheet.short); $("#sheet").classList.toggle("full",!!sheet.full); document.body.classList.toggle("enfoque",!!sheet.full); const sc=$("#sheet .scroll"); if(sc&&sheet.top!==false) sc.scrollTop=0; rosVozSeguir(); if(musicaEstado()) musChip(); }
 let quietoAhora=false, htmlHoja=null;
@@ -1719,7 +1744,7 @@ async function exportar(){ const dump=await backend.exportAll(COLS); const b=new
 async function importar(file){ try{ const j=JSON.parse(await file.text()); const n=await backend.importAll(j.datos||j); toast("Importados "+n+" registros"); }catch(e){ toast("No se pudo importar ese archivo"); } }
 
 /* ── acciones ── */
-const ACC={
+const ACC={ ...CANC.ACC,
   hora(p){ p=p||momento(); if(p==="mediodia") openSheet({view:"hora",p}); else if(p==="tarde") ACC.evangelio(); else ACC.orar(p); }, "hora:manana"(){ ACC.orar("manana"); }, "hora:noche"(){ ACC.orar("noche"); },
   orar(p){ openSheet({view:"orar",p:p==="noche"||p==="n"?"noche":p==="manana"||p==="m"?"manana":(momento()==="noche"||momento()==="tarde"?"noche":"manana"),full:1}); },
   async orGuardar(){ const k=sheet.p==="noche"?"n":"m", t=String((($("#orTxt")||{}).value)||sheet.otxt||"").trim(), d=dayOf(hoy()), or={...(d.or||{})};
@@ -1824,7 +1849,9 @@ const ACC={
   async anioCompartir(){ if(!sheet||!sheet.D) return; sheet.pausa=1; clearTimeout(sheet.timer); try{ const b=await anioImagen(sheet.D); const f=new File([b],"mi-anio-con-dios-"+sheet.D.anio+".png",{type:"image/png"});
       if(navigator.canShare&&navigator.canShare({files:[f]})){ await navigator.share({files:[f],title:"Mi año con Dios",text:"Mi año con Dios en Scaeli Daily"}); }
       else { const a=document.createElement("a"); a.href=URL.createObjectURL(b); a.download=f.name; a.click(); toast("Imagen guardada"); } }catch(e){ if(!/abort/i.test(String(e&&e.name))) toast("No se pudo compartir"); } },
-  libros(){ openSheet({view:"libros"}); }, libAbrir(p){ openSheet({view:"libro",p,m:"caps"}); },
+  libros(p){ openSheet({view:"libros",lt:p==="docs"?"docs":"libros"}); }, libTab(p){ sheet.lt=p; renderSheetQuieto(); },
+  catecismo(){ if(!esPlus()){ openSheet({view:"plus",desde:"catecismo"}); return; } openSheet({view:"catecismo"}); },
+  catOtra(){ sheet.n=(sheet.n||0)+1; renderSheet(); }, catLeida(){ lsSet("daily_cat_leida",hoy()); toast("Formación de hoy, hecha"); renderSheetQuieto(); render(); }, libAbrir(p){ openSheet({view:"libro",p,m:"caps"}); },
   libIr(p){ const [id,c]=String(p).split("|"); const L=LIBROS.find(x=>x.id===id); if(!L) return; const n=Math.max(0,+c); libMarcar(id,n,LIB[id]&&n>=LIB[id].caps.length-1?1:0); openSheet({view:"libro",p:id,m:"leer",c:n}); },
   async bibliAddLeer(){ await ACC.bibliAdd("Leer diez minutos de un libro espiritual"); },
   biblioteca(p){ openSheet({view:"biblioteca",a:p||"",v:""}); }, bibliFiltro(p){ const [k,v]=String(p).split("|"); sheet[k]=v; renderSheetQuieto(); },
@@ -1916,6 +1943,7 @@ async function portadaSubir(file){ if(!file||!grupo.gid) return; try{ const url=
     let q=.82, out=c.toDataURL("image/jpeg",q); while(out.length>260000&&q>.4){ q-=.1; out=c.toDataURL("image/jpeg",q); }
     await grupoBE.setMeta(grupo.gid,{portada:out}); toast("Portada cambiada"); }catch(e){ toast("No se pudo usar esa foto"); } }
 document.addEventListener("submit",e=>{ const f=e.target; if(!f.dataset.f) return; e.preventDefault();
+  if(f.dataset.f==="canto"){ CANC.guardarForm(f); return; }
   if(f.dataset.f==="muro"){ const inp=f.querySelector("input"), t=inp.value; inp.value=""; if(document.activeElement&&document.activeElement.blur) document.activeElement.blur(); muroEscribir(t); return; }
   if(f.dataset.f==="plusCodigo"){ const c=String((f.querySelector("input")||{}).value||"").trim().toUpperCase(); if(esNativo()){ toast("Los códigos se canjean desde la web."); return; }
     if(!plusBE){ toast("Para canjear un código, entrá con tu cuenta."); return; } (async()=>{ const r=await plusBE.canjear(c); if(r.ok){ lsSet("daily_plus_como_gratis",null); toast("Scaeli+ activado"+(r.doc.until?" hasta el "+fLarga(r.doc.until).replace(/^\w+ /,""):"")+". Vale también en Scaeli Fit."); } else toast(r.msg); renderSheet(); render(); })(); return; }
@@ -1942,7 +1970,7 @@ document.addEventListener("change",e=>{ const t=e.target; if(t.id==="impFile"&&t
 document.addEventListener("input",e=>{ const t=e.target; if(t.dataset.ex) sheet.ex[t.dataset.ex]=t.value;
   if((t.id==="hojaN"||t.id==="hojaU")&&sheet&&sheet.h) hojaNotas();
   if(t.id==="orTxt"&&sheet) sheet.otxt=t.value;
-  if((t.id==="orQ"||t.id==="diaQ")&&sheet){ const id=t.id; sheet.q=t.value; const pos=t.selectionStart; sheet.top=false; renderSheet(); sheet.top=true; const n=$("#"+id); if(n){ n.focus(); try{ n.setSelectionRange(pos,pos); }catch(e){} } }
+  if((t.id==="orQ"||t.id==="diaQ"||t.id==="cancQ")&&sheet){ const id=t.id; sheet.q=t.value; const pos=t.selectionStart; sheet.top=false; renderSheet(); sheet.top=true; const n=$("#"+id); if(n){ n.focus(); try{ n.setSelectionRange(pos,pos); }catch(e){} } }
   if(t.id==="novQ"&&sheet){ sheet.q=t.value; const pos=t.selectionStart; sheet.top=false; renderSheet(); sheet.top=true; const n=$("#novQ"); if(n){ n.focus(); try{ n.setSelectionRange(pos,pos); }catch(e){} } }
   if(t.id==="salQ"&&sheet){ sheet.q=t.value; const pos=t.selectionStart; renderSheet(); const n=$("#salQ"); if(n){ n.focus(); try{ n.setSelectionRange(pos,pos); }catch(e){} } }
   if(t.id==="lecTxt"&&sheet) sheet.ltxt=t.value; });
@@ -1954,12 +1982,13 @@ try{ if(localStorage.getItem("daily_theme")==="light") document.documentElement.
    1) Con la app abierta: si llega una versión nueva (el service worker nuevo toma el control), un aviso fijo «Hay una versión nueva · Actualizar».
    2) Al abrir la versión nueva: una vez, la hoja «Novedades» con lo que cambió desde la última que viste (NOVEDADES, la más nueva primero).
    En cada versión nueva hay que sumar su entrada acá (t38 lo comprueba). */
-const NOVEDADES=[
-  ["2.3.2",["Oraciones en orden alfabético, y tocando la estrella fijás tus favoritas arriba.","En tus hábitos, el círculo vacío muestra el «+» para sumar."]],
-  ["2.3.1",["Tu personaje puede ser niño, joven, adulto o mayor (en Yo), con toda su ropa y sus colores.","Ropa de chico para el niño y la niña: guardapolvo, jardinero, remera rayada y vestido.","La abuela tiene dos peinados: con anteojos o con rodete."]],
-  ["2.3",["Elegí el tono de piel de tu personaje (en Yo).","Lo que ya rezaste hoy aparece con un tilde, y el inicio te propone lo que te falta.","El lápiz para editar tu personaje está en la esquina.","Liturgia de las Horas: qué es y para qué sirve cada Hora.","Este aviso: cada vez que actualicemos la app, vas a ver acá las novedades."]],
-  ["2.2.7",["Scaeli Daily está en su dirección propia: daily.scaeli.com.ar."]],
-  ["2.2.6",["En Hoy podés anotar una caída de un hábito con el «−».","Lo que rezás en la app marca solo el hábito del mismo nombre.","Ya se puede conectar Google Calendar."]]];
+const NOVEDADES=[   /* 2.4 (Lorenzo: «presentemos lo más importante, no cosas mínimas»): pocas líneas por versión, solo lo que alguien notaría; una versión de arreglos lleva [] y no abre el aviso */
+  ["2.4",["Las lecturas de los próximos días, para preparar con tiempo.","El salmo de la Misa ahora es el que corresponde, y dice «el Señor».","Hábitos: anotá los de ayer o de la semana, y deshacé un toque equivocado.","Cancionero con acordes, y en la Biblioteca: Santa Teresa y los documentos de la Iglesia.","Tu grupo, más claro: Hoy, Muro, Miembros y Ranking."]],
+  ["2.3.2",["Oraciones en orden alfabético, con tus favoritas arriba."]],
+  ["2.3.1",["Tu personaje puede ser niño, joven, adulto o mayor (en Yo)."]],
+  ["2.3",["Elegí el tono de piel de tu personaje (en Yo).","Lo que ya rezaste hoy aparece con un tilde."]],
+  ["2.2.7",[]],
+  ["2.2.6",["Ya se puede conectar Google Calendar."]]];
 const cmpV=(a,b)=>{ const x=String(a).split(".").map(Number), y=String(b).split(".").map(Number); for(let i=0;i<3;i++){ const d=(x[i]||0)-(y[i]||0); if(d) return d; } return 0; };
 /* quién ya usaba la app antes de este aviso: se mira al cargar, antes de que esta sesión guarde nada */
 let USO_PREVIO=false; try{ USO_PREVIO=Object.keys(localStorage).some(k=>/^(scaeli-daily-local|daily_(invitado|theme|lecguia|gcal|plus))/.test(k)); if(!USO_PREVIO&&!localStorage.getItem("daily_ver_vista")) localStorage.setItem("daily_ver_vista",VERSION); }catch(e){}
@@ -1967,10 +1996,10 @@ function novedadesVer(){ let v=null; const viejo=USO_PREVIO; try{ v=localStorage
     if(navigator.webdriver&&!localStorage.getItem("daily_prueba_novedades")) return; }catch(e){ return; }   // en las pruebas automáticas no tapa la pantalla (t38 lo prueba a propósito)
   if(!v&&!viejo){ lsSet("daily_ver_vista",VERSION); return; }   // primera vez: nada que avisar
   if(v&&cmpV(v,VERSION)>=0) return;
-  const L=NOVEDADES.filter(n=>cmpV(n[0],v||"2.2.7")>0&&cmpV(n[0],VERSION)<=0).slice(0,3);
-  lsSet("daily_ver_vista",VERSION); if(!L.length||sheet) return; openSheet({view:"novedades",L}); }
+  const L=[]; NOVEDADES.filter(n=>cmpV(n[0],v||"2.2.7")>0&&cmpV(n[0],VERSION)<=0).forEach(n=>n[1].forEach(t=>L.push(t)));
+  lsSet("daily_ver_vista",VERSION); if(!L.length||sheet) return; openSheet({view:"novedades",L:L.slice(0,5)}); }
 function shNovedades(){ const L=sheet.L||[];
-  return shTop("Novedades","Scaeli Daily "+VERSION)+'<div class="scroll nov-lista">'+L.map((n,i)=>'<div class="card pad"><div class="eyebrow">'+(i?'Versión '+esc(n[0]):'Lo nuevo · versión '+esc(n[0]))+'</div><ul>'+n[1].map(t=>'<li>'+esc(t)+'</li>').join("")+'</ul></div>').join("")+'</div><button class="primary" data-a="cerrar">Amén, ¡vamos!</button>'; }
+  return shTop("Novedades","Scaeli Daily "+VERSION)+'<div class="scroll nov-lista"><div class="card pad"><div class="eyebrow">Lo más importante · versión '+esc(VERSION)+'</div><ul>'+L.map(t=>'<li>'+esc(t)+'</li>').join("")+'</ul></div></div><button class="primary" data-a="cerrar">Amén, ¡vamos!</button>'; }
 function avisoVersionNueva(){ if(document.getElementById("avisoNueva")) return; const d=document.createElement("div"); d.id="avisoNueva"; d.className="aviso-nueva"; d.setAttribute("role","status");
   d.innerHTML='<span>'+ic("star")+' Hay una versión nueva de Scaeli</span><button type="button">Actualizar</button>'; d.querySelector("button").onclick=()=>location.reload(); document.body.appendChild(d); }
 if(!esNativo()&&navigator.serviceWorker&&navigator.serviceWorker.register&&location.protocol!=="file:"){ window.addEventListener("load",()=>{
