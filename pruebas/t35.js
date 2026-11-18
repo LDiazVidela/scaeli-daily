@@ -47,7 +47,9 @@ const { chromium } = require('playwright');
   // grupos: gratis, uno
   await A('gEjemplo', null, 700); ok(/Los de la parroquia/.test(await H()), 'grupo de ejemplo');
   const g2 = await p.evaluate(() => window.DAILY.grupoBE().crear('Confirmación', { n: 'Ana' }));
-  await A('gUnirme', g2, 700); ok(await titulo() === 'Scaeli+', 'gratis: sumarse a un 2.º grupo lleva a Scaeli+');
+  await A('gUnirme', g2, 800); ok(await p.evaluate(() => window.DAILY.get().grupo.gid) === g2 && (await p.$$('#sheetIn .gsw button')).length === 2, 'gratis: se puede estar en 2 grupos (2.6)');
+  const g2b = await p.evaluate(() => window.DAILY.grupoBE().crear('Un tercero', { n: 'Z' }));
+  await A('gUnirme', g2b, 700); ok(await titulo() === 'Scaeli+', 'gratis: sumarse a un 3.er grupo lleva a Scaeli+');
 
   // ── con Scaeli+ ──
   await p.evaluate(() => localStorage.setItem('daily_plus_prueba', '1')); await p.reload(); await p.waitForTimeout(1200);
@@ -95,15 +97,17 @@ const { chromium } = require('playwright');
   const g3 = await p.evaluate(() => window.DAILY.grupoBE().crear('Familia', { n: 'Papá' }));
   await A('gUnirme', g3, 800); ok((await p.$$('#sheetIn .gsw button')).length === 3, 'un 3.er grupo');
   const g4 = await p.evaluate(() => window.DAILY.grupoBE().crear('Otro más', { n: 'X' }));
-  await A('gUnirme', g4, 800); ok((await p.$$('#sheetIn .gsw button')).length === 3 && await p.evaluate(() => window.DAILY.get().grupo.gid) === g3, 'el tope es 3 grupos');
+  await A('gUnirme', g4, 800); ok((await p.$$('#sheetIn .gsw button')).length === 4, 'con Scaeli+ ya no hay tope de 3');
+  for (let i = 5; i <= 11; i++) { const gx = await p.evaluate(i => window.DAILY.grupoBE().crear('Grupo ' + i, { n: 'X' }), i); await A('gUnirme', gx, 700); }
+  ok((await p.$$('#sheetIn .gsw button')).length === 10, 'el tope con Scaeli+ es 10 grupos: ' + (await p.$$('#sheetIn .gsw button')).length);
   const primero = await p.evaluate(() => [...document.querySelectorAll('#sheetIn .gsw button')].map(b => b.dataset.p).find(g => g !== window.DAILY.get().grupo.gid));
-  await A('gCambiar', primero, 700); ok(await p.evaluate(() => window.DAILY.get().grupo.gid) === primero && (await p.$$('#sheetIn .gsw button')).length === 3, 'cambiar de grupo con el selector');
+  await A('gCambiar', primero, 700); ok(await p.evaluate(() => window.DAILY.get().grupo.gid) === primero && (await p.$$('#sheetIn .gsw button')).length === 10, 'cambiar de grupo con el selector');
   // la ficha se publica en todos los grupos
   await p.waitForTimeout(1500);
   const enTodos = await p.evaluate(([a, b2, c]) => { const st = JSON.parse(localStorage.getItem('scaeli-daily-grupos') || '{}'); return [a, b2, c].map(g => !!(st[g] && st[g].m && st[g].m.local)); }, [g2, g3, primero]);
   ok(enTodos.every(Boolean), 'estás como miembro en los 3 grupos: ' + enTodos);
   await p.evaluate(() => { window.DAILY.ACC.gSalir(); }); await p.waitForTimeout(400); const c1 = await p.$('.dlg [data-r="1"]'); if (c1) await c1.click(); await p.waitForTimeout(900);
-  ok((await p.$$('#sheetIn .gsw button')).length === 2 && await p.evaluate(() => !!window.DAILY.get().grupo.gid), 'salir de uno: pasás al siguiente y quedan 2');
+  ok((await p.$$('#sheetIn .gsw button')).length === 9 && await p.evaluate(() => !!window.DAILY.get().grupo.gid), 'salir de uno: pasás al siguiente y quedan 9');
   await p.screenshot({ path: 't35.png' });
 
   console.log(errs.join('\n')); console.log(fails.length ? 'FALLAS:\n' + fails.join('\n') : 'OK t35');
