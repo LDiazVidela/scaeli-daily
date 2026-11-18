@@ -1331,7 +1331,7 @@ async function cargarEvDe(f){ if(evOtros[f]!==undefined) return; evOtros[f]=null
   try{ const r=await fetch((esNativo()?SITIO:"")+"evangelio/"+f+".json",{cache:"no-store"}); if(!r.ok) throw 0; const j=await r.json(); if(!j||!j.evangelio||!j.evangelio.texto) throw 0; evOtros[f]=j; }
   catch(e){ evOtros[f]=false; setTimeout(()=>{ if(evOtros[f]===false) delete evOtros[f]; },60000); }
   if(sheet&&sheet.view==="evangelio"&&sheet.f===f) renderSheet(); }
-function evTira(sel){ const DS=["dom","lun","mar","mié","jue","vie","sáb"]; let h='<div class="evtira" role="tablist" aria-label="Elegir el día">';
+function evTira(sel){ const DS=["dom","lun","mar","mié","jue","vie","sáb"]; let h='<div class="evtira hscroll" role="tablist" aria-label="Elegir el día">';
   for(let i=0;i<=EV_DIAS;i++){ const f=fechaMas(i), d=new Date(f+"T12:00:00"); h+='<button role="tab" aria-selected="'+(f===sel)+'" data-a="evDia" data-p="'+f+'"><small>'+(i===0?"Hoy":i===1?"Mañana":DS[d.getDay()])+'</small><b>'+d.getDate()+'</b></button>'; }
   return h+'</div>'; }
 const evTit=x=>esc(String(x||"").replace(/\.\s*$/,""));

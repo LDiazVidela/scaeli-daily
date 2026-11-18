@@ -41,7 +41,7 @@ const { chromium } = require('playwright');
   const amId = await p.evaluate(() => document.querySelector('.gact .amen2[data-a=actAmen]').dataset.p); await A('actAmen', amId, 800);
   ok(await p.evaluate(id => document.querySelector('.gact .amen2[data-p="' + id + '"]').getAttribute('aria-pressed') === 'true', amId), 'Amén marcado');
   let st = await LS(); ok(st['daily_settings/actividad'] && st['daily_settings/actividad'].am[amId], 'Amén guardado'); await A('cerrar');
-  await p.evaluate(() => window.DAILY.ir('hoy')); await p.waitForTimeout(500); t = await p.evaluate(() => (document.querySelector('.actban') || {}).innerText || ''); ok(/ya rezaron el Rosario hoy|ya rezó el Rosario hoy/.test(t) && /Me sumo/.test(t), 'aviso en Hoy: ' + t);
+  await p.evaluate(() => window.DAILY.ir('hoy')); await p.waitForTimeout(1200); t = await p.evaluate(() => (document.querySelector('.actban') || {}).innerText || ''); ok(/ya rezaron el Rosario hoy|ya rezó el Rosario hoy/.test(t) && /Me sumo/.test(t), 'aviso en Hoy: ' + t);
   // registro propio: Evangelio y Rosario
   await A('diaria', 'e', 700); st = await LS(); let L = (st['daily_settings/actividad'] || {}).L || []; ok(L.some(a => a.k === 'e'), 'mi Evangelio queda en la actividad');
   await p.waitForTimeout(1500); const fic = await p.evaluate(() => { const st = JSON.parse(localStorage.getItem('scaeli-daily-grupos')); const g = Object.values(st)[0]; return Object.values(g.m).filter(x => (x.act || []).some(a => a[1] === 'e' && a[0].startsWith('e') && a[0].length > 3)).length; }); ok(fic >= 1, 'viaja en la ficha del grupo');
