@@ -349,3 +349,9 @@ button.sbanner.gpage{display:block;width:100%;padding:0;border:0;text-align:left
 .gpage .gavs{position:absolute;right:12px;bottom:12px;display:flex}.gpage .gavs>*{margin-left:-8px}
 .gvacio h3{font-size:20px;margin:14px 0 6px}.gvacio .primary{margin-top:14px}
 .seg.gsw.muchos{overflow-x:auto;scrollbar-width:none;justify-content:flex-start}.seg.gsw.muchos::-webkit-scrollbar{display:none}.seg.gsw.muchos button{flex:none;min-width:31%;padding:0 12px}
+
+/* 2.7 · de cuándo es cada intención del grupo; fondos de Scaeli+ */
+.grow .gint .gcu{display:block;margin-top:5px;font-size:12px;font-weight:600;letter-spacing:.02em;color:var(--ink2)}
+.grow .gint .gcu.nv{color:var(--accent)}.grow .gint .gcu.vj{opacity:.75;font-weight:500}
+.fondo.plus small{color:var(--accent);font-weight:700}
+.fondos-sub{margin:16px 0 10px}

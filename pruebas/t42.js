@@ -62,6 +62,6 @@ const { chromium } = require('playwright'); const fs = require('fs');
   await A('pjSet', 'sx|f'); ok(!(await p.$('#app button[data-p^="barba|"]')) && await p.$('#app button[data-p="cara|rubor"]'), 'ella: sin barba, con sus caras');
   await A('pjSet', 'edad|mayor'); ok(!(await p.$('#app button[data-p^="cara|"]')), 'las otras edades tienen su propia cara');
   ok(/"\.\/assets\/personaje\/extras\.png"/.test(sw), 'la hoja de capas queda guardada para usar sin conexión');
-  ok(/VERSION="2\.6"/.test(app) && /\["2\.6",\[/.test(app), 'versión 2.6 con sus novedades');
+  ok(/\["2\.6",\[/.test(app), 'las novedades de la 2.6 siguen en la lista');
   await b.close(); if (errs.length) fails.push(...errs);
   if (fails.length) { console.log('t42 FALLA\n - ' + fails.join('\n - ')); process.exit(1); } console.log('t42 OK'); })();

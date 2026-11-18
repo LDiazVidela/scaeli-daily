@@ -5,6 +5,7 @@
 # que cambió en la cara (la diferencia con el dibujo base) y se arma assets/personaje/extras.png: una fila de celdas de 40×40
 # por capa — [color][máscara de piel] — más la celda de referencia (la cara base) de cada sexo. En pj.json queda «extras»
 # (qué celda es cada capa) y, en cada dibujo del joven, «cara»: cuánto está corrida su cara respecto de la base.
+# 2.7: la barba «corta» se rehízo (la primera era casi igual al candado: quedó como m_barba_fina_descartada.png).
 # Uso: python3 herramientas/caras_barbas.py     (después de pj_armar / caras.py / consagrados_edades.py)
 import json, os
 import numpy as np
@@ -14,7 +15,7 @@ X0,Y0,N=44,8,40          # la caja de la cara dentro del cuadro de 128
 T=45                      # cuánto tiene que cambiar un punto (suma de R, G y B) para contar
 BASE={'m':'atleta_south.png','f':'atleta_f_south.png'}
 # capa: (archivo, filas y columnas del cuadro donde se mira, mínimo de puntos pegados para no ser ruido)
-CAPAS={'m':{'barba':[('corta','m_barba_corta',(22,47,46,82),4),('candado','m_barba_candado',(23,47,46,82),4),('bigote','m_barba_bigote',(23,29,52,76),4),('completa','m_barba_completa',(21,47,46,82),4)],
+CAPAS={'m':{'barba':[('corta','m_barba_corta',(19,47,46,82),4),('candado','m_barba_candado',(23,47,46,82),4),('bigote','m_barba_bigote',(23,29,52,76),4),('completa','m_barba_completa',(21,47,46,82),4)],
             'cara':[('anteojos','m_cara_anteojos',(15,25,48,80),1),('pecas','m_cara_pecas',(17,28,52,76),1),('cejas','m_cara_cejas',(16,22,53,75),1)]},
        'f':{'cara':[('anteojos','f_cara_anteojos',(15,25,48,80),1),('pecas','f_cara_pecas',(17,28,52,76),1),('rubor','f_cara_rubor',(17,27,52,76),1)]}}
 def img(p): return np.array(Image.open(p).convert('RGBA')).astype(int)
