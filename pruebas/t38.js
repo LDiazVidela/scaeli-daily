@@ -49,7 +49,7 @@ const { chromium } = require('playwright'); const fs = require('fs');
   ok(Object.values(br).every(([c, b]) => c > 40 && b > 40), 'en todas las edades el tono de piel tiñe la cara y los brazos: ' + JSON.stringify(br));
   const pn = await p.evaluate(async () => { const PJ = await import('./js/personaje.js'); await PJ.cargar(); return [PJ.opciones(PJ.normal({ sx: 'm', edad: 'nino' })).prendas.map(x => x[0]), PJ.opciones(PJ.normal({ sx: 'f', edad: 'nino' })).prendas.map(x => x[0]), PJ.opciones(PJ.normal({ sx: 'm' })).prendas.map(x => x[0])]; });
   ok(['guardapolvo', 'rayada', 'jardinero'].every(x => pn[0].includes(x)) && ['guardapolvo', 'vestido', 'jardinero'].every(x => pn[1].includes(x)) && !pn[2].includes('guardapolvo'), 'los chicos tienen ropa de chico (y el joven no): ' + JSON.stringify(pn));
-  ok(['remera', 'buzo', 'camisa', 'deportiva'].every(x => pm.pr.includes(x)) && !pm.pr.includes('sotana'), 'el adulto tiene toda la ropa laica del joven: ' + pm.pr);
+  ok(['remera', 'buzo', 'camisa', 'deportiva'].every(x => pm.pr.includes(x)) && pm.pr.includes('sotana'), 'el adulto tiene toda la ropa laica del joven y, desde 2.6, la de consagrado: ' + pm.pr);
   }
   if (listas.includes('nino')) { await p.click('.seg.edad button[data-p="edad|nino"]'); await p.waitForTimeout(600);
   ok(await p.evaluate(() => (JSON.parse(localStorage.getItem('scaeli-daily-local'))['daily_settings/profile'] || {}).edad === 'nino'), 'la edad elegida se guarda'); }

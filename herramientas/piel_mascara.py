@@ -40,7 +40,7 @@ def mascara_hoja(sx):
     if len(sx) == 1: CONTORNO[sx] = contorno_de(H, sx, pal)
     for i in range(n):
         F = H[i*128:(i+1)*128]
-        m = piel(F) & np.array([[tuple(p) in pal for p in fila] for fila in F[:, :, :3].tolist()])
+        m = piel(F) & np.array([[tuple(p) in pal for p in fila] for fila in F[:, :, :3].tolist()]); suelto = m.copy()
         lab, k = ndimage.label(m)
         if k:
             sz = ndimage.sum(m, lab, range(1, k+1)); keep = np.isin(lab, [j+1 for j, s in enumerate(sz) if s >= 4]); m &= keep
@@ -48,6 +48,9 @@ def mascara_hoja(sx):
         c = F[..., :3].astype(int); r, g, b = c[..., 0], c[..., 1], c[..., 2]; L = 0.299*r + 0.587*g + 0.114*b
         suelta = (F[..., 3] > 0) & (r >= g) & (g >= b - 6) & (r - b > 28) & (L > 78) & (r > 110)
         for _ in range(3): m = m | (ndimage.binary_dilation(m) & suelta)
+        # 2.6: las orejas y las puntas de los dedos son manchitas de 2 o 3 puntos (quedaban afuera por chicas y, con la piel oscura,
+        # se veían anaranjadas): se suman los puntos con color exacto de la piel que están a 3 o menos de la piel, de las cejas para abajo.
+        cerca = ndimage.binary_dilation(m, iterations=3) & suelto & ~m; cerca[:14] = False; m = m | cerca
         M[i*128:(i+1)*128] = m
         # 2.6 («en el tríceps está medio medio»): el contorno oscuro y rojizo de brazos y manos quedaba del color original y, con la
         # piel oscura, se veía como una línea anaranjada. Se suma a la máscara el borde pegado a la piel cuyo color exacto es uno de

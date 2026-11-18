@@ -27,6 +27,12 @@ export const PEINADOS={m:[["base","Medio"],["corto","Corto"],["ondulado","Ondula
 export const EDADES=[["nino","Niño"],["joven","Joven"],["adulto","Adulto"],["mayor","Mayor"]];
 export const EDADES_F={nino:"Niña",joven:"Joven",adulto:"Adulta",mayor:"Mayor"};
 const HOJAS=["m","f","m_nino","f_nino","m_adulto","f_adulto","m_mayor","f_mayor"];
+/* 2.6: barbas (él) y caras (él y ella) del joven. Son capas de PixelLab sobre la cara de siempre (herramientas/caras_barbas.py →
+   extras.png y «extras» en pj.json): solo lo que cambia. La piel de la capa toma el tono elegido; la barba, las cejas y los anteojos no. */
+export const BARBAS=[["no","Sin barba"],["corta","Corta"],["candado","Candado"],["bigote","Bigote"],["completa","Larga"]];
+export const CARAS={m:[["base","Clásica"],["anteojos","Anteojos"],["pecas","Pecas"],["cejas","Cejas marcadas"]],f:[["base","Clásica"],["anteojos","Anteojos"],["pecas","Pecas"],["rubor","Rubor"]]};
+let EXTRA=null;
+const capa=(h,tipo,v)=>{ const e=META&&META.extras&&EXTRA&&(h==="m"||h==="f")&&META.extras[h]; return e&&e[tipo]&&e[tipo][v]!=null?e[tipo][v]:null; };
 /* las edades que se ofrecen (2.3.1: se ocultaron las de Gemini y volvieron rehechas en PixelLab) */
 export const EDADES_LISTAS=["nino","joven","adulto","mayor"];
 const hojaDe=(sx,edad)=>edad&&edad!=="joven"?sx+"_"+edad:sx;
@@ -36,6 +42,7 @@ export function cargar(base){ if(listo) return listo; base=base||"assets/persona
   listo=(async()=>{ META=await (await fetch(base+"pj.json")).json();
     await Promise.all(HOJAS.filter(h=>META[h]).map(async h=>{ try{ HOJA[h]=await cargarImg(base+h+".png"); }catch(e){ if(h.length===1) throw e; delete META[h]; } }));
     await Promise.all(HOJAS.filter(h=>META[h]).map(async h=>{ try{ PIEL[h]=await cargarImg(base+h+"_piel.png"); }catch(e){} }));   // sin la máscara, tono original
+    if(META.extras){ try{ const im=await cargarImg(base+"extras.png"), c=document.createElement("canvas"); c.width=im.width; c.height=im.height; const x=c.getContext("2d"); x.drawImage(im,0,0); EXTRA={w:im.width,d:x.getImageData(0,0,im.width,im.height).data}; }catch(e){ EXTRA=null; } }   // sin la hoja, no se ofrecen
     return true; })();
   return listo; }
 export const cargado=()=>!!(META&&HOJA.m&&HOJA.f);
@@ -43,12 +50,13 @@ export const cargado=()=>!!(META&&HOJA.m&&HOJA.f);
 /* qué hay dibujado: solo se ofrecen las combinaciones que existen (pj.json) */
 const hay=(h,prenda,peinado)=>!!(META&&META[h]&&META[h].combos[prenda+"|"+peinado]);
 const hayAlgo=(h,pred)=>!!META&&!!META[h]&&Object.keys(META[h].combos).some(k=>pred(...k.split("|")));
-export function opciones(P){ if(!META) return {peinados:[],prendas:[],colores:[],edades:[]}; const sx=P.hoja, sxx=P.sx;
+export function opciones(P){ if(!META) return {peinados:[],prendas:[],colores:[],edades:[],barbas:[],caras:[]}; const sx=P.hoja, sxx=P.sx;
+  const barbas=BARBAS.filter(b=>b[0]==="no"||capa(sx,"barba",b[0])!=null), caras=CARAS[sxx].filter(c=>c[0]==="base"||capa(sx,"cara",c[0])!=null);
   const edades=EDADES.filter(e=>EDADES_LISTAS.includes(e[0])&&META[hojaDe(sxx,e[0])]).map(e=>[e[0],sxx==="f"?EDADES_F[e[0]]:e[1]]);
   const peinados=P.velo?[]:PEINADOS[sxx].filter(h=>hayAlgo(sx,(pr,pe)=>pe===h[0]&&pr.split(":")[0]===P.tipo));
   const prendas=PRENDAS[sxx].filter(x=>hayAlgo(sx,pr=>pr.split(":")[0]===x[0]));
   const colores=P.color?COLORES.filter(c=>hay(sx,P.tipo+":"+c[0],P.peinado)):[];
-  return {peinados,prendas,colores,edades}; }
+  return {peinados,prendas,colores,edades,barbas:barbas.length>1?barbas:[],caras:caras.length>1?caras:[]}; }
 
 /* perfil por defecto: siempre cae en un dibujo que existe */
 export function normal(p){ p=p||{}; const sx=p.sx==="f"?"f":"m";
@@ -60,13 +68,26 @@ export function normal(p){ p=p||{}; const sx=p.sx==="f"?"f":"m";
     if(!hay(h,pr,pe)){ const alt=Object.keys(META[h].combos).map(k=>k.split("|"));
       const m=alt.find(([a,b])=>a===pr)||alt.find(([a,b])=>a.split(":")[0]===t&&b===pe)||alt.find(([a,b])=>a.split(":")[0]===t)||alt.find(([a,b])=>a==="base"&&b===pe)||["base","base"];
       [pr,pe]=m; [t,c]=pr.split(":"); c=c||null; } }
-  return { sx, tipo:t, color:c, prenda:c?t+":"+c:t, peinado:pe, velo:VELO.includes(t), fijo:!!FIJO[t], alt:ok(ALTURAS,p.alt,"media"), tono:ok(TONOS,p.tono,"base"), edad, hoja:h }; }
+  return { sx, tipo:t, color:c, prenda:c?t+":"+c:t, peinado:pe, velo:VELO.includes(t), fijo:!!FIJO[t], alt:ok(ALTURAS,p.alt,"media"), tono:ok(TONOS,p.tono,"base"), edad, hoja:h,
+    barba:capa(h,"barba",p.barba)!=null?p.barba:"no", cara:capa(h,"cara",p.cara)!=null?p.cara:"base" }; }
+/* 2.6: pone la cara y la barba elegidas sobre el cuadro (antes de teñir). Devuelve, para cada punto que tocó, si es piel (1) o no (2).
+   La cara solo se pone donde la cara está a la vista (piel, o igual a la cara base): un flequillo no se pisa. La barba va siempre. */
+function capas(x, P, k){ const ic=capa(P.hoja,"cara",P.cara), ib=capa(P.hoja,"barba",P.barba); if(ic==null&&ib==null) return null;
+  const [X0,Y0,N]=META.extras.caja, [dx,dy]=k.cara||[0,0], E=EXTRA.d, W=EXTRA.w, ref=META.extras[P.hoja].ref;
+  const im=x.getImageData(0,0,128,128), d=im.data, ov=new Uint8Array(128*128); let m=null;
+  if(PIEL[P.hoja]){ const mc=document.createElement("canvas"); mc.width=128; mc.height=128; const mx=mc.getContext("2d"); mx.drawImage(PIEL[P.hoja],0,k.fila*128,128,128,0,0,128,128); m=mx.getImageData(0,0,128,128).data; }
+  const poner=(celda,cuidar)=>{ for(let y=0;y<N;y++) for(let xx=0;xx<N;xx++){ const e=((celda*N+y)*W+xx)*4; if(!E[e+3]) continue;
+      const px=X0+xx+dx, py=Y0+y+dy; if(px<0||py<0||px>127||py>127) continue; const j=py*128+px, i=j*4; if(!d[i+3]) continue;
+      if(cuidar&&!(m&&m[i]>=128)){ const r=((ref*N+y)*W+xx)*4; if(Math.abs(d[i]-E[r])+Math.abs(d[i+1]-E[r+1])+Math.abs(d[i+2]-E[r+2])>40) continue; }
+      d[i]=E[e]; d[i+1]=E[e+1]; d[i+2]=E[e+2]; ov[j]=E[e+N*4]>=128?1:2; } };
+  if(ic!=null) poner(ic,true); if(ib!=null) poner(ib,false);
+  x.putImageData(im,0,0); return ov; }
 /* tiñe la piel del cuadro ya pintado (antes de cambiar la altura, para que la máscara coincida) */
-function tenir(x, P, fila){ if(P.tono==="base"||!PIEL[P.hoja]||!RAMPAS[P.tono]) return;
+function tenir(x, P, fila, ov){ if(P.tono==="base"||!PIEL[P.hoja]||!RAMPAS[P.tono]) return;
   const RP=RAMPAS[P.tono].map(h=>[0,2,4].map(i=>parseInt(h.slice(i,i+2),16))), [L0,L1]=(META[P.hoja]&&META[P.hoja].luz)||[90,200], n=RP.length-1;
   const mc=document.createElement("canvas"); mc.width=128; mc.height=128; const mx=mc.getContext("2d"); mx.drawImage(PIEL[P.hoja],0,fila*128,128,128,0,0,128,128);
   const m=mx.getImageData(0,0,128,128).data, im=x.getImageData(0,0,128,128), d=im.data;
-  for(let i=0;i<d.length;i+=4){ if(m[i]<128||!d[i+3]) continue;
+  for(let i=0;i<d.length;i+=4){ const o=ov?ov[i>>2]:0; if((o?o!==1:m[i]<128)||!d[i+3]) continue;
     const L=.299*d[i]+.587*d[i+1]+.114*d[i+2]; const t=Math.pow(Math.min(1,Math.max(0,(L1-L)/(L1-L0))),1.25)*n, a=Math.floor(t), b=Math.min(a+1,n), f=t-a;
     const k=L<L0?Math.max(.62,.62+.38*L/L0):1;   /* 2.6: el contorno de la piel (más oscuro que su sombra) también toma el tono, un poco más oscuro */
     for(let c=0;c<3;c++) d[i+c]=Math.round((RP[a][c]*(1-f)+RP[b][c]*f)*k); }
@@ -79,11 +100,11 @@ export function pintar(cv, perfil, vista, cssObjetivo){
   if(!cargado()) return false; const P=normal(perfil), v=0, k=combo(P);
   /* 2.4: el mismo personaje no se vuelve a armar en cada pantalla (teñir la piel y cambiar la altura recorre los 16.000 puntos):
      el dibujo ya armado se guarda y después solo se copia. */
-  const clave=P.hoja+"|"+k.fila+"|"+P.tono+"|"+P.alt, listo=HECHOS.get(clave);
+  const clave=P.hoja+"|"+k.fila+"|"+P.tono+"|"+P.alt+"|"+P.barba+"|"+P.cara, listo=HECHOS.get(clave);
   cv.width=128; cv.height=128; const x=cv.getContext("2d"); x.imageSmoothingEnabled=false; x.clearRect(0,0,128,128);
   if(listo){ x.drawImage(listo,0,0); tamano(cv,cssObjetivo); return true; }
   x.drawImage(HOJA[P.hoja],v*128,k.fila*128,128,128,0,0,128,128);
-  tenir(x,P,k.fila);
+  tenir(x,P,k.fila,capas(x,P,k));
   /* altura: se repiten (alta) o se sacan (baja) tres filas enteras, una del torso y dos de las piernas; la cara y los pies no se tocan */
   if(P.alt!=="media"){ const im=x.getImageData(0,0,128,128), d=im.data; let top=128, bot=-1;
     for(let y=0;y<128;y++) for(let xx=0;xx<128;xx++) if(d[(y*128+xx)*4+3]){ if(y<top) top=y; if(y>bot) bot=y; }
