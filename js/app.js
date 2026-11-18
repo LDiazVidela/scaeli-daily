@@ -125,7 +125,22 @@ const citaCorta=c=>{ const s=String(c||"").replace(/_/g," ").replace(/\.$/,"").t
 
 /* ── la Liturgia de las Horas, de liturgiadelashoras.github.io (como en el juego) ── */
 const LH_SITIO="https://liturgiadelashoras.github.io", LH_MES=["ene","feb","mar","abr","may","jun","jul","ago","sep","oct","nov","dic"];
-const lhURL=(d,h)=>LH_SITIO+"/sync/"+d.getFullYear()+"/"+LH_MES[d.getMonth()]+"/"+pad(d.getDate())+"/"+h+".htm";
+const lhDia=d=>LH_SITIO+"/sync/"+d.getFullYear()+"/"+LH_MES[d.getMonth()]+"/"+pad(d.getDate())+"/";
+/* 2.4: el sitio no siempre tiene la Hora en la dirección directa del día. Cuando hay más de una celebración (por ejemplo, la
+   memoria propia de la Argentina y la del calendario general) deja en esa dirección una página para elegir y las Horas van en
+   «1/» (la primera opción, la de la Argentina) y «2/»; y el mes que viene todavía puede no estar publicado. Antes se abría una
+   página de «no encontrado» (lo que reportaron). Ahora se averigua una vez por día dónde están:
+   lhDonde = {f, base, tipo: "directo" | "opcion" (hay para elegir; se abre la primera) | "dia" (solo la página del día) | "sitio"} */
+let lhDonde={f:null,base:null,tipo:"directo"};
+async function lhResolver(){ const f=hoy(); if(lhDonde.f===f) return; const d=new Date(), dia=lhDia(d); lhDonde={f,base:dia,tipo:"directo"};
+  const hay=async u=>{ const r=await fetch(u,{cache:"no-store"}); return r.ok; };
+  try{ if(await hay(dia+"laudes.htm")) lhDonde={f,base:dia,tipo:"directo"};
+    else if(await hay(dia+"1/laudes.htm")) lhDonde={f,base:dia+"1/",tipo:"opcion",dia};
+    else if(await hay(dia)) lhDonde={f,base:dia,tipo:"dia"};
+    else lhDonde={f,base:LH_SITIO+"/",tipo:"sitio"}; }
+  catch(e){ lhDonde={f:null,base:dia,tipo:"directo"}; }   // sin conexión: queda la dirección directa y se vuelve a probar
+  if(sheet&&(sheet.view==="hora_lh"||sheet.view==="horas")) renderSheetQuieto(); }
+const lhURL=(d,h)=>{ const D=lhDonde.f===hoy()?lhDonde:{base:lhDia(d),tipo:"directo"}; return D.tipo==="directo"||D.tipo==="opcion"?D.base+h+".htm":D.base; };
 function lhParse(html){ const doc=new DOMParser().parseFromString(String(html),"text/html"); const raiz=doc.querySelector("#cuerpo")||doc.body; if(!raiz) return "";
   raiz.querySelectorAll("script,style").forEach(e=>e.remove());
   /* los títulos del sitio van en rojo y negrita: los marco como encabezados */
@@ -164,11 +179,33 @@ const momKey={manana:"m",mediodia:"a",tarde:"ta",noche:"n"};
 const typing=()=>{const a=document.activeElement;return a&&(a.tagName==="INPUT"||a.tagName==="TEXTAREA")};
 let dirty=false;
 function render(){ if(typing()){dirty=true;return} renderNow(); }
-function irA(v){ if(typing()&&document.activeElement.blur) document.activeElement.blur(); view=v; sub=null; dirty=false; window.scrollTo(0,0); renderNow(); }
-function renderNow(){ if(!ready){ renderLogin(); return; }
+function irA(v,deAtras){ if(typing()&&document.activeElement.blur) document.activeElement.blur(); view=v; sub=null; dirty=false; if(!deAtras) navTab(v); window.scrollTo(0,0); renderNow(); recordarLugar(); }
+/* 2.4: la pantalla solo se vuelve a armar si cambió algo (antes se rehacía entera con cada dato que llegaba de la nube: parpadeaban
+   las imágenes y se perdía fluidez). htmlApp = lo último que se pintó. */
+let htmlApp=null;
+function renderNow(){ if(!ready){ htmlApp=null; renderLogin(); return; }
   document.querySelectorAll(".nav button").forEach(b=>{ if(b.dataset.view===view) b.setAttribute("aria-current","page"); else b.removeAttribute("aria-current"); });
   const R={hoy:renderHoy,rezar:renderRezar,dia:renderDia,yo:renderYo,mas:renderMas}[view]||renderHoy;
-  $("#app").innerHTML=R(); pintarPersonajes(); if(sheet) renderSheetQuieto(); }
+  const h=R(); if(h!==htmlApp){ htmlApp=h; $("#app").innerHTML=h; pintarPersonajes(); } if(sheet) renderSheetQuieto(); }
+/* ── 2.4: navegación. El botón «atrás» del teléfono cierra la hoja abierta o vuelve a Hoy (antes salía de la app); al cerrar una
+   hoja se vuelve al mismo lugar de la pantalla (antes subía al principio); y si la app se recarga, abre en la pestaña y el lugar
+   donde estabas (se recuerda 30 minutos). Historial: [base] → [pestaña] → [hoja]. ── */
+let navMudo=0, lugarPrevio=0;
+const navEstado=()=>{ try{ return history.state||{}; }catch(e){ return {}; } };
+function navTab(v){ try{ const st=navEstado(); if(st.hoja) return;
+    if(v==="hoy"){ if(st.tab){ navMudo++; history.back(); } }
+    else if(st.tab) history.replaceState({tab:v},""); else history.pushState({tab:v},""); }catch(e){} }
+function navHojaAbre(){ try{ if(!navEstado().hoja) history.pushState({hoja:1,tab:navEstado().tab||null},""); }catch(e){} }
+function navHojaCierra(){ try{ if(navEstado().hoja){ navMudo++; history.back(); } }catch(e){} }
+window.addEventListener("popstate",e=>{ if(navMudo>0){ navMudo--; return; } const st=e.state||{};
+  if(sheet){ closeSheet(true); return; }
+  if(document.querySelector(".dlg,.consent")) return;
+  const v=st.tab||"hoy"; if(ready&&v!==view) irA(v,true); });
+try{ if("scrollRestoration" in history) history.scrollRestoration="manual"; if(history.state) history.replaceState(null,""); }catch(e){}
+function recordarLugar(){ try{ sessionStorage.setItem("daily_lugar",JSON.stringify({v:view,y:sheet?lugarPrevio:Math.round(window.scrollY),t:Date.now()})); }catch(e){} }
+function volverAlLugar(){ try{ const L=JSON.parse(sessionStorage.getItem("daily_lugar")||"null"); if(!L||Date.now()-L.t>30*60e3) return;
+    if(["rezar","dia","yo","mas"].includes(L.v)){ view=L.v; navTab(L.v); } renderNow(); if(L.y>0) requestAnimationFrame(()=>window.scrollTo(0,L.y)); }catch(e){} }
+window.addEventListener("pagehide",recordarLugar); document.addEventListener("visibilitychange",()=>{ if(document.hidden) recordarLugar(); });
 function setStatus(t,bad){ statusTxt=t; const e=$("#status"); if(e){ e.textContent=t; e.style.color=bad?"var(--over)":""; } }
 let deshacerFn=null;
 function toast(t,deshacer){ const e=$("#toast"); deshacerFn=deshacer||null; e.innerHTML=esc(t)+(deshacer?' <button class="lnk" data-a="deshacer">Deshacer</button>':''); e.hidden=false; clearTimeout(toast.t); toast.t=setTimeout(()=>{ e.hidden=true; deshacerFn=null; },deshacer?4000:2200); }
@@ -1231,11 +1268,15 @@ function shDonar(){ const nat=esNativo(), D=sheet.dons;
    '</div><button class="primary ink" data-a="cerrar">Volver</button>'; }
 
 /* ── el panel inferior: las oraciones, el rosario, las horas, el examen… ── */
-function openSheet(s){ sheet=s; $("#scrim").hidden=false; $("#sheet").hidden=false; renderSheet(); window.scrollTo(0,0); }
-function closeSheet(){ if(sheet&&sheet.timer) clearTimeout(sheet.timer); sheet=null; rosVozSeguir(); if(musicaEstado()) musChip(); $("#scrim").hidden=true; $("#sheet").hidden=true; $("#sheet").classList.remove("full"); document.body.classList.remove("enfoque"); render(); }
+function openSheet(s){ if(!sheet){ lugarPrevio=Math.round(window.scrollY); navHojaAbre(); } sheet=s; htmlHoja=null; $("#scrim").hidden=false; $("#sheet").hidden=false; document.body.classList.add("conhoja"); renderSheet(); }
+function closeSheet(deAtras){ if(sheet&&sheet.timer) clearTimeout(sheet.timer); if(deAtras!==true) navHojaCierra(); document.body.classList.remove("conhoja");
+  if(sheet){ const yPrev=lugarPrevio, vPrev=view; requestAnimationFrame(()=>{ if(!sheet&&view===vPrev&&Math.abs(window.scrollY-yPrev)>2) window.scrollTo(0,yPrev); }); }
+  sheet=null; htmlHoja=null; rosVozSeguir(); if(musicaEstado()) musChip(); $("#scrim").hidden=true; $("#sheet").hidden=true; $("#sheet").classList.remove("full"); document.body.classList.remove("enfoque"); render(); }
 function renderSheet(){ if(!sheet) return; const S={palabra:shPalabra,album:shAlbum,sobre:shSobre,figu:shFigu,diploma:shDiploma,hora:shHora,evangelio:shEvangelio,rosario:shRosario,horas:shHoras,hora_lh:shHoraLH,oraciones:shOraciones,oracion:shOracion,novenas:shNovenas,novena:shNovena,examen:shExamen,confesion:shConfesion,misa:shMisa,santo:shSanto,santoral:shSantoral,lectio:shLectio,lectioGuia:shLectioGuia,creditos:shCreditos,novedades:shNovedades,exConf:shExConf,biblia:shBiblia,progreso:shProgreso,camino:shCamino,anio:shAnio,retiros:shRetiros,retiro:shRetiro,diario:shDiario,musica:shMusica,grupo:shGrupo,biblioteca:shBiblioteca,libros:shLibros,libro:shLibro,orar:shOrar,misOraciones:shMisOraciones,plus:shPlus,donar:shDonar,borrar:shBorrar}[sheet.view];
-  $("#sheetIn").innerHTML=S?S():""; pintarPersonajes(); cartasAjustar(); $("#sheet").classList.toggle("short",!!sheet.short); $("#sheet").classList.toggle("full",!!sheet.full); document.body.classList.toggle("enfoque",!!sheet.full); const sc=$("#sheet .scroll"); if(sc&&sheet.top!==false) sc.scrollTop=0; rosVozSeguir(); if(musicaEstado()) musChip(); }
-function renderSheetQuieto(){ const sc=$("#sheet .scroll"), y=sc?sc.scrollTop:0; renderSheet(); const s2=$("#sheet .scroll"); if(s2) s2.scrollTop=y; }
+  const hh=S?S():""; if(quietoAhora&&hh===htmlHoja) return;   // 2.4: si la hoja no cambió, no se toca (sin parpadeo ni saltos)
+  htmlHoja=hh; $("#sheetIn").innerHTML=hh; pintarPersonajes(); cartasAjustar(); $("#sheet").classList.toggle("short",!!sheet.short); $("#sheet").classList.toggle("full",!!sheet.full); document.body.classList.toggle("enfoque",!!sheet.full); const sc=$("#sheet .scroll"); if(sc&&sheet.top!==false) sc.scrollTop=0; rosVozSeguir(); if(musicaEstado()) musChip(); }
+let quietoAhora=false, htmlHoja=null;
+function renderSheetQuieto(){ const sc=$("#sheet .scroll"), y=sc?sc.scrollTop:0; quietoAhora=true; try{ renderSheet(); }finally{ quietoAhora=false; } const s2=$("#sheet .scroll"); if(s2&&s2!==sc) s2.scrollTop=y; }
 const shTop=(t,sub)=>'<h3><span>'+t+(sub?'<small class="muted" style="display:block;font-size:12px;font-weight:400;letter-spacing:0">'+sub+'</small>':'')+'</span><button class="iconbtn ghost" data-a="cerrar" aria-label="Cerrar">'+ic("x")+'</button></h3>';
 const intHTML=()=>intents.length?'<p class="hint">'+ic("heart")+' Tus intenciones: '+intents.map(esc).join(" · ")+'</p>':'';
 
@@ -1243,8 +1284,29 @@ const amen='<button class="primary" data-a="AOK">Amén</button>';
 function shHora(){ const H=HORA[sheet.p]||HORA.mediodia, k=momKey[sheet.p], d=dayOf(hoy());
   return '<div class="scroll"><div class="sbanner"><img src="'+ilu(sheet.p)+'" alt=""><span class="g"></span><button class="iconbtn x" data-a="cerrar" aria-label="Cerrar">'+ic("x")+'</button></div><div class="eyebrow">'+esc(H.s)+'</div><h2 class="st">'+esc(H.t)+'</h2><div class="pray"><p class="q">'+esc(H.txt)+'</p>'+intHTML()+'<p class="hint"><b class="ref">'+esc(H.fin)+'</b></p></div></div>'+
    amen.replace("AOK","horaOk").replace('">',  '" data-p="'+k+'">'); }
-function shEvangelio(){ const ev=evHoy; if(!ev) return shTop("Evangelio del día")+'<p class="hint">Cargando…</p>';
-  return '<div class="scroll lecturas"><div class="sbanner"><img src="'+ilu("evangelio")+'" alt=""><span class="g"></span><button class="iconbtn x" data-a="cerrar" aria-label="Cerrar">'+ic("x")+'</button></div><div class="eyebrow">'+esc(String(ev.dia||"Evangelio del día").replace(/(\d+)a (semana|domingo)/gi,"$1.ª $2"))+'</div><h2 class="st">'+esc(citaCorta(ev.evangelio.cita))+'</h2><h4>'+esc(String(ev.evangelio.titulo||"").replace(/\.\s*$/,""))+'</h4><p>'+esc(ev.evangelio.texto)+'</p>'+(ev.respaldo?'<p class="hint">Hoy no se pudieron traer las lecturas del día; este es un pasaje para quedarse con Él.</p>':'<p class="novsrc">Texto: Biblia Platense (Mons. Juan Straubinger)</p>')+
+/* 2.4: las lecturas de los próximos días (para preparar una misa, una catequesis o un grupo). GitHub deja listo cerca de un mes
+   (evangelio/AAAA-MM-DD.json); acá se ofrecen hoy y los 14 días que siguen. sheet.f = el día que se mira; evOtros = lo ya traído. */
+const EV_DIAS=14, evOtros={};
+const fechaMas=n=>{ const d=new Date(); d.setDate(d.getDate()+n); return d.getFullYear()+"-"+pad(d.getMonth()+1)+"-"+pad(d.getDate()); };
+async function cargarEvDe(f){ if(evOtros[f]!==undefined) return; evOtros[f]=null;
+  try{ const r=await fetch((esNativo()?SITIO:"")+"evangelio/"+f+".json",{cache:"no-store"}); if(!r.ok) throw 0; const j=await r.json(); if(!j||!j.evangelio||!j.evangelio.texto) throw 0; evOtros[f]=j; }
+  catch(e){ evOtros[f]=false; setTimeout(()=>{ if(evOtros[f]===false) delete evOtros[f]; },60000); }
+  if(sheet&&sheet.view==="evangelio"&&sheet.f===f) renderSheet(); }
+function evTira(sel){ const DS=["dom","lun","mar","mié","jue","vie","sáb"]; let h='<div class="evtira" role="tablist" aria-label="Elegir el día">';
+  for(let i=0;i<=EV_DIAS;i++){ const f=fechaMas(i), d=new Date(f+"T12:00:00"); h+='<button role="tab" aria-selected="'+(f===sel)+'" data-a="evDia" data-p="'+f+'"><small>'+(i===0?"Hoy":i===1?"Mañana":DS[d.getDay()])+'</small><b>'+d.getDate()+'</b></button>'; }
+  return h+'</div>'; }
+const evTit=x=>esc(String(x||"").replace(/\.\s*$/,""));
+function shEvangelioDe(f){ const j=evOtros[f], cab='<div class="scroll lecturas"><div class="sbanner"><img src="'+ilu("evangelio")+'" alt=""><span class="g"></span><button class="iconbtn x" data-a="cerrar" aria-label="Cerrar">'+ic("x")+'</button></div>'+evTira(f);
+  const pie='</div><div class="grid2"><button class="ghost g" data-a="evDia" data-p="'+hoy()+'">'+ic("left")+' Volver a hoy</button><button class="primary" data-a="cerrar" style="height:40px;font-size:14px">Listo</button></div>';
+  if(j===undefined||j===null){ cargarEvDe(f); return cab+'<p class="hint">Cargando las lecturas…</p>'+pie; }
+  if(j===false) return cab+'<div class="eyebrow">'+esc(fLarga(f))+'</div><p class="hint">Las lecturas de ese día todavía no están disponibles o no hay conexión. Probá de nuevo en un rato.</p>'+pie;
+  const lec=(rot,x)=>x&&x.texto?'<div class="eyebrow" style="margin-top:18px">'+rot+'</div><h3 class="st" style="font-size:20px;margin:4px 0 2px">'+esc(citaCorta(x.cita))+'</h3>'+(x.titulo?'<h4>'+evTit(x.titulo)+'</h4>':'')+'<p>'+esc(x.texto)+'</p>':'';
+  return cab+'<div class="eyebrow">'+esc(fLarga(f))+'</div><h2 class="st" style="font-size:22px">'+esc(String(j.dia||"Lecturas del día").replace(/(\d+)a (semana|domingo)/gi,"$1.ª $2"))+'</h2>'+
+   lec("Evangelio",j.evangelio)+lec("Primera lectura",j.primera)+lec("Salmo",j.salmo)+lec("Segunda lectura",j.segunda)+
+   '<p class="novsrc">Texto: Biblia Platense (Mons. Juan Straubinger)</p>'+pie; }
+function shEvangelio(){ if(sheet.f&&sheet.f!==hoy()) return shEvangelioDe(sheet.f);
+  const ev=evHoy; if(!ev) return shTop("Evangelio del día")+'<p class="hint">Cargando…</p>';
+  return '<div class="scroll lecturas"><div class="sbanner"><img src="'+ilu("evangelio")+'" alt=""><span class="g"></span><button class="iconbtn x" data-a="cerrar" aria-label="Cerrar">'+ic("x")+'</button></div>'+(ev.respaldo?'':evTira(hoy()))+'<div class="eyebrow">'+esc(String(ev.dia||"Evangelio del día").replace(/(\d+)a (semana|domingo)/gi,"$1.ª $2"))+'</div><h2 class="st">'+esc(citaCorta(ev.evangelio.cita))+'</h2><h4>'+esc(String(ev.evangelio.titulo||"").replace(/\.\s*$/,""))+'</h4><p>'+esc(ev.evangelio.texto)+'</p>'+(ev.respaldo?'<p class="hint">Hoy no se pudieron traer las lecturas del día; este es un pasaje para quedarse con Él.</p>':'<p class="novsrc">Texto: Biblia Platense (Mons. Juan Straubinger)</p>')+
    '<div class="card pad" style="margin-top:12px"><div class="eyebrow">Para hoy</div><p style="margin:6px 0 0">'+esc(ideaHoy())+'</p></div></div>'+'<div class="grid2"><button class="ghost g" data-a="lectio">'+ic("pen")+' Hacer lectio</button>'+(dayOf(hoy()).e?'<button class="ghost g" data-a="desmarcar" data-p="e">'+ic("x")+' Ya leído · sacar</button>':'<button class="primary" data-a="evOk" style="height:40px;font-size:14px">Amén</button>')+'</div>'; }
 /* los otros santos de cada día (data/santoral-mas.js, del Martirologio Romano): se cargan recién cuando se abre el santoral */
 let MAS=null, masCarga=null;
@@ -1405,7 +1467,10 @@ const lhConLeyenda=h=>(h.includes('est c2')?'<div class="lhcoros"><span><i></i>C
 function shHoraLH(){ const h=sheet.p, x=LH_HORAS.find(y=>y[0]===h)||[h,h,""], nom=x[1];
   return shTop(esc(nom),"Liturgia de las Horas")+'<div class="scroll"><div class="sbanner"><img src="'+ilu("horas")+'" alt=""><span class="g"></span></div>'+
    lhQue(false)+'<div class="card pad lhlink"><div class="eyebrow">'+esc(x[2]||"Liturgia de las Horas")+'</div><h3 style="margin:6px 0 4px">'+esc(nom)+' de hoy</h3>'+(LH_PARA[h]?'<p style="margin:0 0 10px">'+esc(LH_PARA[h])+'</p>':'')+'<p class="hint" style="margin:0 0 14px">La Liturgia de las Horas se reza con los textos oficiales de la Iglesia. Se abren en el sitio <b>liturgiadelashoras.github.io</b>, en tu navegador. Cuando termines, volvé y marcala como rezada.</p>'+
-   '<a class="primary lhabrir" href="'+esc(lhURL(new Date(),h))+'" target="_blank" rel="noopener">'+ic("right")+' Abrir '+esc(nom)+'</a></div>'+intHTML()+'</div>'+
+   '<a class="primary lhabrir" href="'+esc(lhURL(new Date(),h))+'" target="_blank" rel="noopener">'+ic("right")+' Abrir '+esc(nom)+'</a>'+
+   (lhDonde.f===hoy()&&lhDonde.tipo==="opcion"?'<p class="hint" style="margin:12px 0 0">Hoy hay más de una celebración: se abre la de la Argentina. <a href="'+esc(lhDonde.dia)+'" target="_blank" rel="noopener">Ver las otras</a></p>'
+    :lhDonde.f===hoy()&&lhDonde.tipo==="dia"?'<p class="hint" style="margin:12px 0 0">Hoy el sitio te deja elegir la celebración: tocá la que corresponda y después «'+esc(nom)+'».</p>'
+    :lhDonde.f===hoy()&&lhDonde.tipo==="sitio"?'<p class="hint" style="margin:12px 0 0">El sitio todavía no publicó las Horas de hoy: se abre su portada, con el calendario.</p>':'')+'</div>'+intHTML()+'</div>'+
    '<div class="grid2"><button class="ghost g" data-a="horas">'+ic("left")+' Horas</button>'+(((dayOf(hoy()).h||{})[h])?'<button class="ghost g" data-a="desmarcar" data-p="h:'+h+'">'+ic("x")+' Ya rezada · sacar</button>':'<button class="primary" data-a="lhOk" data-p="'+h+'" style="height:40px;font-size:14px">Amén</button>')+'</div>'; }
 
 /* las oraciones de siempre */
@@ -1621,7 +1686,7 @@ function startSession(u,local){ user=u; unsubs.forEach(f=>{try{f()}catch(e){}});
   w(()=>backend.watchDoc("daily_settings/grupo",v=>{ const gid=v&&v.gid||null; gOtros=((v&&v.otros)||[]).filter(x=>x&&x.gid&&x.gid!==gid).slice(0,GRUPOS_PLUS-1); if(gid!==grupo.gid) grupoAbrir(gid); else { render(); if(sheet&&sheet.view==="grupo") renderSheetQuieto(); } }));
   w(()=>backend.watchDoc("daily_settings/retiros",v=>{ retiros=v||{}; if(view==="hoy"||view==="rezar") render(); if(sheet&&(sheet.view==="retiro"||sheet.view==="retiros")) renderSheetQuieto(); }));
   w(()=>backend.watchDoc("daily_settings/rutina",v=>{ rutina={diarias:(v&&v.diarias)||[],habitos:(v&&v.habitos)||[]}; if(view==="dia"||view==="hoy") render(); if(sheet&&sheet.view==="progreso") renderSheetQuieto(); grupoSync(); }));
-  ready=true; render(); cargarEvangelio(); plusRefrescar().catch(()=>{});
+  ready=true; render(); volverAlLugar(); cargarEvangelio(); plusRefrescar().catch(()=>{});
   const inv=lsGet("daily_grupo_inv"); if(inv){ if(local) setTimeout(()=>openSheet({view:"grupo"}),300); else setTimeout(()=>openSheet({view:"grupo",m:"codigo",inv,nuevo:1}),300); } }
 function endSession(){ nivelAntes=null; retiros={}; gOtros=[]; rosVoz=false; rosVozK=""; callar(); musicaStop(); plusBE=null; plusDoc=null; grupoCerrar(); grupoBE=null; user=null; backend=null; ready=false; unsubs.forEach(f=>{try{f()}catch(e){}}); unsubs=[]; days={}; entrenos={}; diasOk=0; profile=null; intents=[]; rosario=null; novenas=[]; propositos=[]; rutina={diarias:[],habitos:[]}; sheet=null; $("#scrim").hidden=true; $("#sheet").hidden=true; renderLogin(); }
 
@@ -1650,7 +1715,8 @@ const ACC={
     if(k==="lec"){ await setDay(f,{lec:{...(d.lec||{}),t:""},t:Date.now()}); } else if(k==="pal"){ await setDay(f,{pal:{...(d.pal||{}),q:"",v:""},t:Date.now()}); } else { const or={...(d.or||{})}; delete or[k]; await setDay(f,{or,t:Date.now()}); } toast("Oración borrada"); },
   async horaOk(p){ await marcar(p); closeSheet(); amenToast(p); },
   async desmarcar(p){ await desmarcar(String(p)); toast("Marca sacada"); if(sheet) renderSheetQuieto(); },
-  evangelio(){ openSheet({view:"evangelio"}); }, async evOk(){ await marcar("e"); closeSheet(); amenToast("e"); },
+  evangelio(){ openSheet({view:"evangelio"}); },
+  evDia(p){ if(!sheet||sheet.view!=="evangelio") return; const x=$("#sheet .evtira"), sl=x?x.scrollLeft:0; sheet.f=p===hoy()?null:p; if(sheet.f) cargarEvDe(sheet.f); renderSheet(); const y=$("#sheet .evtira"); if(y) y.scrollLeft=sl; const sc=$("#sheet .scroll"); if(sc) sc.scrollTop=0; }, async evOk(){ await marcar("e"); closeSheet(); amenToast("e"); },
   lectio(){ let vista=false; try{ vista=localStorage.getItem("daily_lecguia")==="1"; localStorage.setItem("daily_lecguia","1"); }catch(e){}
     openSheet(vista?{view:"lectio",lp:0,full:1}:{view:"lectioGuia",desde:1}); },
   lecGuia(){ openSheet({view:"lectioGuia"}); }, creditos(){ openSheet({view:"creditos"}); }, lectioYa(){ openSheet({view:"lectio",lp:0,full:1}); }, lecPaso(p){ const t=$("#lecTxt"); if(t) sheet.ltxt=t.value; sheet.lp=Math.max(0,Math.min(4,(sheet.lp||0)+(+p))); renderSheet(); },
@@ -1669,7 +1735,7 @@ const ACC={
   async rosCero(){ sheet.rset=rosario&&rosario.set; await rosGuardar(rosNuevo(rosario&&rosario.set)); },
   async rosLat(){ await backend.setDoc("daily_settings/profile",{...(profile||{}),rosLat:!rosLat()}); renderSheet(); },
   async rosSolo(){ await backend.setDoc("daily_settings/profile",{...(profile||{}),rosSolo:!(profile&&profile.rosSolo)}); renderSheet(); },
-  horas(){ openSheet({view:"horas"}); }, horaLH(p){ openSheet({view:"hora_lh",p}); }, async lhOk(p){ const d=dayOf(hoy()); await setDay(hoy(),{h:{...(d.h||{}),[p]:1},t:Date.now()}); closeSheet(); amenToast("h:"+p); },
+  horas(){ openSheet({view:"horas"}); lhResolver(); }, horaLH(p){ openSheet({view:"hora_lh",p}); lhResolver(); }, async lhOk(p){ const d=dayOf(hoy()); await setDay(hoy(),{h:{...(d.h||{}),[p]:1},t:Date.now()}); closeSheet(); amenToast("h:"+p); },
   oraciones(){ openSheet({view:"oraciones",lat:latDef()}); }, oracion(p){ openSheet({view:"oracion",p,lat:latDef()}); }, oraLat(p){ sheet.lat=+p; renderSheet(); },
   novenas(){ openSheet({view:"novenas"}); }, novena(p){ openSheet({view:"novena",p}); novChip(); }, novVer(p){ sheet.vd=+p; sheet.cerrarTodos=1; renderSheet(); novChip(); },
   async novOk(p){ const [id,dia]=p.split("|"); const mia=novenas.find(x=>x.id===id)||{}; const dias=Array.from(new Set([...(mia.dias||[]),+dia])).sort((a,b)=>a-b);
@@ -1791,7 +1857,7 @@ const ACC={
   async intDel(p){ intents.splice(+p,1); await backend.setDoc("daily_settings/intents",{list:intents}); },
   async recAng(){ recordatorios={...recordatorios,ang:!recordatorios.ang}; await backend.setDoc("daily_settings/recordatorios",recordatorios); programarAvisos(); render(); },
   async oraFav(p){ const o=TODAS_ORA()[+p]; if(!o) return; const F=oraFavs(), on=F.includes(o.n), N=on?F.filter(x=>x!==o.n):F.concat(o.n);
-    profile={...(profile||{}),oraFav:N}; renderSheet(); toast(on?"Se quitó de favoritas":"Fijada arriba, en Favoritas"); await backend.setDoc("daily_settings/profile",{...(profile||{}),oraFav:N}); },
+    profile={...(profile||{}),oraFav:N}; renderSheetQuieto(); toast(on?"Se quitó de favoritas":"Fijada arriba, en Favoritas"); await backend.setDoc("daily_settings/profile",{...(profile||{}),oraFav:N}); },
   async prefLat(){ await backend.setDoc("daily_settings/profile",{...(profile||{}),lat:!(profile&&profile.lat)}); },
   async recOn(){ if(esNativo()){ if(!recordatorios.on&&!(await pedirPermisoAvisos())){ toast("Sin permiso para avisar: activalo en los ajustes del teléfono"); return; } }
     else if("Notification" in window&&Notification.permission!=="granted"){ const r=await Notification.requestPermission(); if(r!=="granted"){ toast("Sin permiso para avisar"); return; } } recordatorios={...recordatorios,on:!recordatorios.on}; await backend.setDoc("daily_settings/recordatorios",recordatorios); programarAvisos(); },

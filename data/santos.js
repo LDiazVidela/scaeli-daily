@@ -89,7 +89,7 @@ export const SANTOS_MAS={
 "11-02":{p:["Por los difuntos"],f:["Yo soy la resurrección y la vida.","Jn 11,25"],b:"La Iglesia reza por todos los que murieron, para que lleguen a ver el rostro de Dios."},
 "11-03":{p:["Patrono de la justicia social"],b:"Fraile dominico de Lima (1579–1639), hijo de un español y una mujer liberta. Con la escoba y la caridad sirvió a todos: pobres, enfermos y hasta los animales."},
 "11-13":{p:["Enfermero","Pariente de los pobres"],b:"Salesiano italiano que vivió en Viedma (1880–1951). Hizo del hospital su casa y de los enfermos pobres su familia. Fue canonizado en 2022."},
-"11-17":{p:["Mártires del Río de la Plata"],b:"Roque González, jesuita nacido en Asunción (1576–1628), fundador de reducciones guaraníes. Murió mártir junto a dos compañeros."},
+"11-17":{p:["Princesa y viuda","Patrona de la caridad"],b:"Isabel de Hungría (1207–1231), princesa y madre de tres hijos, sirvió con sus manos a los pobres y a los enfermos y fundó un hospital en Marburgo."},
 "11-22":{p:["Virgen y mártir","Patrona de la música"],b:"Joven romana, mártir de los primeros siglos. Es la patrona de los músicos."},
 "11-27":{p:["La Virgen"],f:["Oh María sin pecado concebida, rogá por nosotros que recurrimos a vos.","La inscripción de la Medalla"],b:"En 1830 la Virgen se apareció a Santa Catalina Labouré en París y le pidió acuñar una medalla para los que confían en ella."},
 "11-30":{p:["Apóstol"],f:["Hemos encontrado al Mesías.","Jn 1,41"],b:"Pescador, hermano de Pedro. Fue de los primeros en seguir a Jesús y el que le presentó a su hermano."},

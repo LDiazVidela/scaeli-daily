@@ -240,3 +240,13 @@ a.libro{text-decoration:none}
 .ofav{flex:none;width:44px;display:flex;align-items:center;justify-content:center;background:none;border:0;color:var(--muted);padding:0;cursor:pointer}
 .ofav svg{fill:none;stroke:currentColor;stroke-width:1.6;stroke-linejoin:round}
 .ofav.on{color:var(--oro)}.ofav.on svg{fill:currentColor}
+/* 2.4: la tira de días del Evangelio (hoy y los que siguen) */
+.evtira{display:flex;gap:8px;overflow-x:auto;margin:0 -2px 14px;padding:2px;scrollbar-width:none;-webkit-overflow-scrolling:touch}
+.evtira::-webkit-scrollbar{display:none}
+.evtira button{flex:none;min-width:54px;height:54px;border-radius:16px;border:1px solid var(--line);background:none;color:var(--ink);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1px;padding:0 8px}
+.evtira button small{font-size:10.5px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
+.evtira button b{font-size:17px;font-weight:600;line-height:1}
+.evtira button[aria-selected="true"]{background:var(--ink);border-color:var(--ink);color:var(--bg)}
+.evtira button[aria-selected="true"] small{color:inherit;opacity:.75}
+/* 2.4: con una hoja abierta, la pantalla de atrás no se mueve (y al cerrar se vuelve al mismo lugar) */
+body.conhoja{overflow:hidden}
