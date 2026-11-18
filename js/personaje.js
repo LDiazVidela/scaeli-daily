@@ -23,7 +23,7 @@ export const PEINADOS={m:[["base","Medio"],["corto","Corto"],["ondulado","Ondula
 
 /* 2.3.1: edades, todas de PixelLab (herramientas/edades_pixellab.py). Adulto y mayor: la cabeza de la edad (PixelLab editó el
    dibujo del joven) sobre toda la ropa laica del joven; niño y niña: dibujo propio, más bajo, con base, buzo, remera, deportiva
-   y pollera. La mayor tiene dos peinados (anteojos y rodete). Los consagrados quedan en Joven. */
+   y pollera. La mayor tiene dos peinados (anteojos y rodete). 2.6: consagrados también adultos y mayores (herramientas/consagrados_edades.py). */
 export const EDADES=[["nino","Niño"],["joven","Joven"],["adulto","Adulto"],["mayor","Mayor"]];
 export const EDADES_F={nino:"Niña",joven:"Joven",adulto:"Adulta",mayor:"Mayor"};
 const HOJAS=["m","f","m_nino","f_nino","m_adulto","f_adulto","m_mayor","f_mayor"];
@@ -68,7 +68,8 @@ function tenir(x, P, fila){ if(P.tono==="base"||!PIEL[P.hoja]||!RAMPAS[P.tono]) 
   const m=mx.getImageData(0,0,128,128).data, im=x.getImageData(0,0,128,128), d=im.data;
   for(let i=0;i<d.length;i+=4){ if(m[i]<128||!d[i+3]) continue;
     const L=.299*d[i]+.587*d[i+1]+.114*d[i+2]; const t=Math.pow(Math.min(1,Math.max(0,(L1-L)/(L1-L0))),1.25)*n, a=Math.floor(t), b=Math.min(a+1,n), f=t-a;
-    for(let c=0;c<3;c++) d[i+c]=Math.round(RP[a][c]*(1-f)+RP[b][c]*f); }
+    const k=L<L0?Math.max(.62,.62+.38*L/L0):1;   /* 2.6: el contorno de la piel (más oscuro que su sombra) también toma el tono, un poco más oscuro */
+    for(let c=0;c<3;c++) d[i+c]=Math.round((RP[a][c]*(1-f)+RP[b][c]*f)*k); }
   x.putImageData(im,0,0); }
 
 function combo(P){ const C=META[P.hoja].combos; return C[P.prenda+"|"+P.peinado]||C["base|base"]; }

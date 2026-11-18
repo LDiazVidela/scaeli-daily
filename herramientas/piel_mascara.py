@@ -13,7 +13,19 @@ R = os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', 'assets', 'pe
 def piel(H):
     r, g, b, a = [H[..., k].astype(int) for k in range(4)]
     return (a > 0) & (r > 140) & (r > g) & (g > b) & (r - b > 60)
-PALETAS = {}; REFS = {}
+PALETAS = {}; REFS = {}; CONTORNO = {}
+def contorno_de(H, sx, pal):
+    """los colores del contorno de la piel en los brazos desnudos: oscuros, cálidos y pegados a la piel, en los dibujos de manga corta"""
+    import json
+    combos = json.load(open(R + 'pj.json'))[sx]['combos']; cols = Counter()
+    for k in ('remera:gris|base', 'deportiva|base', 'remera:blanco|base'):
+        if k not in combos: continue
+        F = H[combos[k]['fila']*128:(combos[k]['fila']+1)*128]; c = F[..., :3].astype(int); r, g, b = c[..., 0], c[..., 1], c[..., 2]; L = 0.299*r + 0.587*g + 0.114*b
+        m = piel(F) & np.array([[tuple(p) in pal for p in fila] for fila in F[:, :, :3].tolist()])
+        borde = ndimage.binary_dilation(m) & ~m & (F[..., 3] > 0); borde[:44] = False; borde[100:] = False
+        calido = (r > g + 18) & (g >= b - 8) & (r - b > 35) & (L < 125) & (L > 28)
+        cols.update(map(tuple, F[borde & calido][:, :3].tolist()))
+    return {c for c, v in cols.items() if v >= 6}
 def mascara_hoja(sx):
     H = np.array(Image.open(R + sx + '.png').convert('RGBA')); n = H.shape[0] // 128
     c = Counter()
@@ -24,7 +36,8 @@ def mascara_hoja(sx):
     if len(sx) > 1: pal |= PALETAS.get(sx[0], set())   # 2.3.1: las edades llevan el cuerpo (brazos, manos) del joven
     PALETAS[sx] = pal
     REFS[sx] = list(c.most_common(1)[0][0])   # el tono principal de la cara: desde ahí se escala a los demás tonos
-    M = np.zeros(H.shape[:2], bool)
+    M = np.zeros(H.shape[:2], bool); M2 = np.zeros(H.shape[:2], bool)
+    if len(sx) == 1: CONTORNO[sx] = contorno_de(H, sx, pal)
     for i in range(n):
         F = H[i*128:(i+1)*128]
         m = piel(F) & np.array([[tuple(p) in pal for p in fila] for fila in F[:, :, :3].tolist()])
@@ -36,7 +49,13 @@ def mascara_hoja(sx):
         suelta = (F[..., 3] > 0) & (r >= g) & (g >= b - 6) & (r - b > 28) & (L > 78) & (r > 110)
         for _ in range(3): m = m | (ndimage.binary_dilation(m) & suelta)
         M[i*128:(i+1)*128] = m
-    Image.fromarray((M * 255).astype(np.uint8), 'L').convert('1').save(R + sx + '_piel.png', optimize=True)
+        # 2.6 («en el tríceps está medio medio»): el contorno oscuro y rojizo de brazos y manos quedaba del color original y, con la
+        # piel oscura, se veía como una línea anaranjada. Se suma a la máscara el borde pegado a la piel cuyo color exacto es uno de
+        # los del contorno de los brazos desnudos (CONTORNO, aprendido de los dibujos de remera y deportiva), del cuello para abajo.
+        borde = ndimage.binary_dilation(m, iterations=2) & ~m & (F[..., 3] > 0); borde[:38] = False
+        cont = borde & np.array([[tuple(p) in CONTORNO.get(sx[0], set()) for p in fila] for fila in F[:, :, :3].tolist()])
+        M2[i*128:(i+1)*128] = cont
+    Image.fromarray(((M | M2) * 255).astype(np.uint8), 'L').convert('1').save(R + sx + '_piel.png', optimize=True)
     return H, M, pal
 if __name__ == '__main__':
     hojas = ['m', 'f'] + [f'{sx}_{e}' for e in ('nino', 'adulto', 'mayor') for sx in 'mf' if os.path.exists(R + f'{sx}_{e}.png')]
