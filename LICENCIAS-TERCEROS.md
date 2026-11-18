@@ -7,6 +7,11 @@
 | Liturgia de las Horas | liturgiadelashoras.github.io | No se copia: se abre el sitio en el navegador. |
 | Calendario litúrgico de la Argentina (`data/ordo/`) | GCatholic.org | Datos de fechas y celebraciones. |
 | Biblioteca (`libros/`) | Ejercicios espirituales de San Ignacio (transcripción literal del autógrafo) e Imitación de Cristo (trad. P. Juan Eusebio Nieremberg, s. XVII) | Obras de dominio público, sin notas de ediciones modernas. |
+| Biblioteca (`libros/vida.json`) | «Su vida» de Santa Teresa de Jesús, edición de Espasa-Calpe (Madrid, 1927), transcrita en es.wikisource.org | Obra de dominio público; se quitaron las notas del editor. |
+| Biblioteca · Documentos (`data/libros.js`, `DOCS`) | Documentos del Magisterio, Catecismo, Código de Derecho Canónico y Suma Teológica | **No se copian**: tienen derechos (Librería Editrice Vaticana y otros). La app solo enlaza a vatican.va, hjg.com.ar y corpusthomisticum.org. |
+| Formación de cada día (`data/catecismo.js`) | Índice del Catecismo de la Iglesia Católica | Solo el nombre de la página de vatican.va, un título propio y los números que abarca; el texto se lee en vatican.va. |
+| Cancionero (`data/cancionero.js`) | Cantos tradicionales, gregorianos o de autores muertos hace más de 70 años | Letras de dominio público. Los acordes son una armonización propia de Scaeli. **No se cargan cantos de autores actuales** (tienen derechos); cada persona puede sumar los suyos en su dispositivo. |
+| Lecturas de la Misa (`evangelio/`) | Biblia Platense (Mons. Juan Straubinger) | En las lecturas, «Yahvé» se lee «el Señor», como pide la liturgia; la Biblia de la app queda como el original. |
 | Santa Teresa de Jesús y San Juan de la Cruz | Ediciones de 1915 (Burgos) y 1912 (Toledo) en archive.org | No se copian: se abren como enlace. (Los textos de la Editorial Monte Carmelo que tenía la app se sacaron en la 2.1.) |
 | Oraciones tradicionales y sus textos latinos | Tradición de la Iglesia | Dominio público. |
 | Novenas, examen de conciencia, caminos, Te Deum, Ven Espíritu Creador, Regina caeli | Texto y traducciones propias de Scaeli | © Scaeli. |

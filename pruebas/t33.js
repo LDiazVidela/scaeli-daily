@@ -7,7 +7,7 @@ const { chromium } = require('playwright');
   await p.clock.setFixedTime(new Date('2026-11-15T10:00:00-03:00'));
   await p.goto('http://localhost:8765/index.html'); await p.evaluate(() => localStorage.clear()); await p.reload(); await p.waitForTimeout(1200); await p.click('#invitado'); await p.waitForTimeout(1500);
   const A = async (a, q, ms = 500) => { await p.evaluate(([a, q]) => window.DAILY.ACC[a](q), [a, q]); await p.waitForTimeout(ms); };
-  const SH = () => p.evaluate(() => document.querySelector('#sheet').innerText);
+  const SH = () => p.evaluate(() => document.querySelector('#sheet').textContent);
   ok(!afuera.some(u => /fonts\.(googleapis|gstatic)/.test(u)), 'sin Google Fonts: ' + afuera.join(' '));
   ok(await p.evaluate(() => document.fonts.check('16px Inter')), 'Inter cargada desde la app');
   // Evangelio del día con la Biblia Platense

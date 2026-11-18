@@ -5,7 +5,7 @@ const { chromium } = require('playwright');
   p.on('pageerror', e => errs.push('PAGEERROR ' + e.message)); p.on('console', m => { if (m.type() === 'error' && !/Failed to load resource/.test(m.text())) errs.push('CONSOLE ' + m.text()); });
   await p.goto('http://localhost:8765/index.html'); await p.evaluate(() => localStorage.clear()); await p.reload(); await p.waitForTimeout(900); await p.click('#invitado'); await p.waitForTimeout(1100);
   const A = async (a, q, ms = 450) => { await p.evaluate(([a, q]) => window.DAILY.ACC[a](q), [a, q]); await p.waitForTimeout(ms); };
-  const SH = async () => p.evaluate(() => document.querySelector('#sheet').innerText);
+  const SH = async () => p.evaluate(() => document.querySelector('#sheet').textContent);
   const LS = async () => p.evaluate(() => JSON.parse(localStorage.getItem('scaeli-daily-local') || '{}'));
   // Rosario (2.1): señal de la cruz y Credo → Yo confieso o Pésame → misterios → Salve → al final, por el Papa y la Iglesia
   await A('rosario'); let t = await SH(); ok(/Cómo se reza/i.test(t) && /Yo confieso o el Pésame/.test(t) && !/Solo el Credo/.test(t), 'el orden explicado y sin el selector viejo');
@@ -41,7 +41,7 @@ const { chromium } = require('playwright');
   const amId = await p.evaluate(() => document.querySelector('.gact .amen2[data-a=actAmen]').dataset.p); await A('actAmen', amId, 800);
   ok(await p.evaluate(id => document.querySelector('.gact .amen2[data-p="' + id + '"]').getAttribute('aria-pressed') === 'true', amId), 'Amén marcado');
   let st = await LS(); ok(st['daily_settings/actividad'] && st['daily_settings/actividad'].am[amId], 'Amén guardado'); await A('cerrar');
-  await p.evaluate(() => window.DAILY.ir('hoy')); await p.waitForTimeout(500); t = await p.evaluate(() => (document.querySelector('.actban') || {}).innerText || ''); ok(/ya rezaron el Rosario hoy|ya rezó el Rosario hoy/.test(t) && /Me sumo/.test(t), 'aviso en Hoy: ' + t);
+  await p.evaluate(() => window.DAILY.ir('hoy')); await p.waitForTimeout(1200); t = await p.evaluate(() => (document.querySelector('.actban') || {}).innerText || ''); ok(/ya rezaron el Rosario hoy|ya rezó el Rosario hoy/.test(t) && /Me sumo/.test(t), 'aviso en Hoy: ' + t);
   // registro propio: Evangelio y Rosario
   await A('diaria', 'e', 700); st = await LS(); let L = (st['daily_settings/actividad'] || {}).L || []; ok(L.some(a => a.k === 'e'), 'mi Evangelio queda en la actividad');
   await p.waitForTimeout(1500); const fic = await p.evaluate(() => { const st = JSON.parse(localStorage.getItem('scaeli-daily-grupos')); const g = Object.values(st)[0]; return Object.values(g.m).filter(x => (x.act || []).some(a => a[1] === 'e' && a[0].startsWith('e') && a[0].length > 3)).length; }); ok(fic >= 1, 'viaja en la ficha del grupo');

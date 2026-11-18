@@ -76,7 +76,11 @@ function combo(P){ const C=META[P.hoja].combos; return C[P.prenda+"|"+P.peinado]
 /* pinta en un <canvas> el dibujo tal cual: el lienzo queda a 128 y el tamaño en pantalla se ajusta para que cada píxel sea entero */
 export function pintar(cv, perfil, vista, cssObjetivo){
   if(!cargado()) return false; const P=normal(perfil), v=0, k=combo(P);
+  /* 2.4: el mismo personaje no se vuelve a armar en cada pantalla (teñir la piel y cambiar la altura recorre los 16.000 puntos):
+     el dibujo ya armado se guarda y después solo se copia. */
+  const clave=P.hoja+"|"+k.fila+"|"+P.tono+"|"+P.alt, listo=HECHOS.get(clave);
   cv.width=128; cv.height=128; const x=cv.getContext("2d"); x.imageSmoothingEnabled=false; x.clearRect(0,0,128,128);
+  if(listo){ x.drawImage(listo,0,0); tamano(cv,cssObjetivo); return true; }
   x.drawImage(HOJA[P.hoja],v*128,k.fila*128,128,128,0,0,128,128);
   tenir(x,P,k.fila);
   /* altura: se repiten (alta) o se sacan (baja) tres filas enteras, una del torso y dos de las piernas; la cara y los pies no se tocan */
@@ -87,8 +91,10 @@ export function pintar(cv, perfil, vista, cssObjetivo){
       const out=new Uint8ClampedArray(128*128*4), sobra=filas.length-128, off=sobra>0?Math.min(sobra,top):sobra;   // al crecer se usa el aire de arriba (nunca se corta la cabeza)
       for(let y=0;y<128;y++){ const src=filas[y+off]; if(src==null) continue; out.set(d.subarray(src*512,src*512+512),y*512); }
       x.putImageData(new ImageData(out,128,128),0,0); } }
-  if(cssObjetivo){ const dpr=window.devicePixelRatio||1; const s=Math.max(1,Math.round(cssObjetivo*dpr/128)); const css=128*s/dpr; cv.style.width=css+"px"; cv.style.height=css+"px"; }
-  return true; }
+  try{ const c=document.createElement("canvas"); c.width=128; c.height=128; c.getContext("2d").drawImage(cv,0,0); if(HECHOS.size>60) HECHOS.clear(); HECHOS.set(clave,c); }catch(e){}
+  tamano(cv,cssObjetivo); return true; }
+const HECHOS=new Map();
+function tamano(cv,cssObjetivo){ if(cssObjetivo){ const dpr=window.devicePixelRatio||1; const s=Math.max(1,Math.round(cssObjetivo*dpr/128)); const css=128*s/dpr; cv.style.width=css+"px"; cv.style.height=css+"px"; } }
 
 /* el cuadro como ImageData (para las hojas de control) */
 export function cuadro(perfil, vista){ const cv=document.createElement("canvas"); if(!pintar(cv,perfil,vista)) return null; return cv.getContext("2d").getImageData(0,0,128,128); }

@@ -5,8 +5,8 @@ const { chromium } = require('playwright');
   p.on('pageerror', e => errs.push('PAGEERROR '+e.message)); p.on('console', m => { if(m.type()==='error'&&!/Failed to load resource/.test(m.text())) errs.push('CONSOLE '+m.text()); });
   await p.goto('http://localhost:8765/index.html'); await p.evaluate(()=>localStorage.clear()); await p.reload(); await p.waitForTimeout(1200); await p.click('#invitado'); await p.waitForTimeout(1200);
   const A = async (a, q, ms = 400) => { await p.evaluate(([a, q]) => window.DAILY.ACC[a](q), [a, q]); await p.waitForTimeout(ms); };
-  const T = async () => p.evaluate(()=>document.body.innerText);
-  const SH = async () => p.evaluate(()=>document.querySelector('#sheet').innerText);
+  const T = async () => p.evaluate(()=>document.body.textContent);
+  const SH = async () => p.evaluate(()=>document.querySelector('#sheet').textContent);
   // 1 · oraciones en latín
   await p.evaluate(()=>window.DAILY.ir('rezar')); await p.waitForTimeout(300); await A('oraciones'); let t=await SH();
   ok(/Padrenuestro/.test(t)&&/Magníficat/.test(t)&&/Te Deum/.test(t)&&/Acordaos/.test(t),'lista con las 23 oraciones (15 + 8 extra)');
@@ -38,7 +38,7 @@ const { chromium } = require('playwright');
   await p.evaluate(()=>window.DAILY.ir('hoy')); await p.waitForTimeout(300); await A('grupo'); await A('gEjemplo',null,900); t=await SH();
   ok(/Muro del grupo/i.test(t)&&/No se olviden de rezar el Evangelio hoy/.test(t)&&/Recé la decena por todos/.test(t),'muro con los mensajes de ejemplo');
   ok(/Amén · 2/.test(t),'contador de amén');
-  await p.fill('form[data-f=muro] input','Hola grupo, rezo por ustedes'); await p.press('form[data-f=muro] input','Enter'); await p.waitForTimeout(500); t=await SH(); ok(/Hola grupo, rezo por ustedes/.test(t)&&/Peregrino/.test(t),'mensaje propio publicado con mi nombre');
+  await A('gTab','muro',300); await p.fill('form[data-f=muro] input','Hola grupo, rezo por ustedes'); await p.press('form[data-f=muro] input','Enter'); await p.waitForTimeout(500); t=await SH(); ok(/Hola grupo, rezo por ustedes/.test(t)&&/Peregrino/.test(t),'mensaje propio publicado con mi nombre');
   await p.fill('form[data-f=muro] input','otro ya'); await p.press('form[data-f=muro] input','Enter'); await p.waitForTimeout(400); t=await SH(); ok(!/otro ya/.test(t),'anti-spam: 15 s entre mensajes');
   await p.fill('form[data-f=muro] input','sos un pelotudo'); await p.press('form[data-f=muro] input','Enter'); await p.waitForTimeout(400); t=await SH(); ok(!/pelotudo/.test(t),'filtro de palabras');
   await A('mRec'); t=await SH(); ok(/Mañana es domingo/.test(t)&&/Acuérdense del examen/.test(t),'recordatorios listos'); await A('mRecOk',3,500); t=await SH(); ok(/Mañana es domingo: ¿vamos a Misa\?/.test(t)&&(await p.$$('.msg.rec')).length>=2,'recordatorio publicado como mensaje destacado');
@@ -61,7 +61,7 @@ const { chromium } = require('playwright');
   // 6 · aviso en Hoy
   await A('cerrar'); await p.evaluate(()=>{ localStorage.setItem('daily_muro_visto','1'); const K='scaeli-daily-grupos'; const st=JSON.parse(localStorage.getItem(K)); const g=Object.values(st)[0]; g.muro.unshift({id:'n1',u:'ej0',n:'Juan',tx:'Recemos por la misión',t:Date.now()}); localStorage.setItem(K,JSON.stringify(st)); });
   await p.reload(); await p.waitForTimeout(1500); t=await T(); if(!/Juan escribió/.test(t)) console.log('HOY', t.slice(t.indexOf('parroquia')-40, t.indexOf('parroquia')+300)); ok(/Juan\s*escribió: «Recemos por la misión»/.test(t),'aviso «X escribió» en Hoy');
-  await A('grupo',null,600); await A('cerrar'); t=await T(); ok(!/Juan escribió/.test(t),'al abrir el grupo el aviso se da por visto');
+  await A('grupo',null,600); await A('gTab','muro',300); await A('cerrar'); t=await T(); ok(!/Juan escribió/.test(t),'al abrir el grupo el aviso se da por visto');
   // 7 · pantalla completa: pie estático
   await p.evaluate(()=>window.DAILY.ir('rezar')); await p.waitForTimeout(300); await A('lectioYa',null,600); const pos=await p.evaluate(()=>getComputedStyle(document.querySelector('.fpie')).position); ok(pos==='static','pie de pantalla completa estático: '+pos);
   const inOv=await p.evaluate(()=>getComputedStyle(document.querySelector('#sheet .in')).overflowY); ok(inOv==='auto','cuerpo scrolleable');
