@@ -6,7 +6,7 @@ const { chromium } = require('playwright');
   await p.goto('http://localhost:8765/index.html'); await p.evaluate(() => localStorage.clear()); await p.reload(); await p.waitForTimeout(900);
   await p.click('#invitado'); await p.waitForTimeout(1100);
   const A = async (a, q, ms = 500) => { await p.evaluate(([a, q]) => window.DAILY.ACC[a](q), [a, q]); await p.waitForTimeout(ms); };
-  const SH = async () => p.evaluate(() => document.querySelector('#sheet').innerText);
+  const SH = async () => p.evaluate(() => document.querySelector('#sheet').textContent);
   const LS = async () => p.evaluate(() => JSON.parse(localStorage.getItem('scaeli-daily-local') || '{}'));
   const dias = async (n) => { await p.evaluate(n => { const K = 'scaeli-daily-local'; const s = JSON.parse(localStorage.getItem(K) || '{}'); const pad = x => String(x).padStart(2, '0'); const iso = d => d.getFullYear() + '-' + pad(d.getMonth() + 1) + '-' + pad(d.getDate());
       const h = new Date(); const lun = new Date(h); lun.setDate(h.getDate() - ((h.getDay() + 6) % 7)); Object.keys(s).filter(k => k.startsWith('daily_days/')).forEach(k => delete s[k]);

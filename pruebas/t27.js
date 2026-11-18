@@ -7,7 +7,7 @@ const { chromium } = require('playwright');
   ok(await p.$('.login .marca img[src*="icon-512"]') !== null, 'ícono nuevo en la entrada');
   await p.click('#invitado'); await p.waitForTimeout(1200);
   const A = async (a, q, ms = 450) => { await p.evaluate(([a, q]) => window.DAILY.ACC[a](q), [a, q]); await p.waitForTimeout(ms); };
-  const SH = async () => p.evaluate(() => document.querySelector('#sheet').innerText);
+  const SH = async () => p.evaluate(() => document.querySelector('#sheet').textContent);
   const LS = async () => p.evaluate(() => JSON.parse(localStorage.getItem('scaeli-daily-local')));
   // avatar → personalización
   await p.click('.hero2 .pjbtn'); await p.waitForTimeout(700); ok(await p.evaluate(() => document.querySelector('#pjsec') && Math.abs(document.querySelector('#pjsec').getBoundingClientRect().top) < 140), 'tocar el avatar lleva a la personalización');

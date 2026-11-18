@@ -5,7 +5,7 @@ const { chromium } = require('playwright');
   p.on('pageerror', e => errs.push('PAGEERROR ' + e.message)); p.on('console', m => { if (m.type() === 'error' && !/Failed to load resource/.test(m.text())) errs.push('CONSOLE ' + m.text()); });
   await p.goto('http://localhost:8765/index.html'); await p.evaluate(() => localStorage.clear()); await p.reload(); await p.waitForTimeout(900); await p.click('#invitado'); await p.waitForTimeout(1100);
   const A = async (a, q, ms = 450) => { await p.evaluate(([a, q]) => window.DAILY.ACC[a](q), [a, q]); await p.waitForTimeout(ms); };
-  const SH = async () => p.evaluate(() => document.querySelector('#sheet').innerText);
+  const SH = async () => p.evaluate(() => document.querySelector('#sheet').textContent);
   const LS = async () => p.evaluate(() => JSON.parse(localStorage.getItem('scaeli-daily-local') || '{}'));
   const iso = await p.evaluate(() => { const pad = n => String(n).padStart(2, '0'), d = new Date(); return d.getFullYear() + '-' + pad(d.getMonth() + 1) + '-' + pad(d.getDate()); });
   const poner = async (k, v) => { await p.evaluate(([k, v]) => { const K = 'scaeli-daily-local'; const s = JSON.parse(localStorage.getItem(K) || '{}'); if (v === null) delete s[k]; else s[k] = v; localStorage.setItem(K, JSON.stringify(s)); }, [k, v]); };

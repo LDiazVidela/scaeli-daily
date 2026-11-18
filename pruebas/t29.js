@@ -5,7 +5,7 @@ const { chromium } = require('playwright');
   p.on('pageerror', e => errs.push('PAGEERROR ' + e.message)); p.on('console', m => { if (m.type() === 'error' && !/Failed to load resource/.test(m.text())) errs.push('CONSOLE ' + m.text()); });
   await p.goto('http://localhost:8765/index.html'); await p.evaluate(() => localStorage.clear()); await p.reload(); await p.waitForTimeout(900); await p.click('#invitado'); await p.waitForTimeout(1100);
   const A = async (a, q, ms = 450) => { await p.evaluate(([a, q]) => window.DAILY.ACC[a](q), [a, q]); await p.waitForTimeout(ms); };
-  const SH = async () => p.evaluate(() => document.querySelector('#sheet').innerText);
+  const SH = async () => p.evaluate(() => document.querySelector('#sheet').textContent);
   const LS = async () => p.evaluate(() => JSON.parse(localStorage.getItem('scaeli-daily-local') || '{}'));
   // Rosario (2.1): señal de la cruz y Credo → Yo confieso o Pésame → misterios → Salve → al final, por el Papa y la Iglesia
   await A('rosario'); let t = await SH(); ok(/Cómo se reza/i.test(t) && /Yo confieso o el Pésame/.test(t) && !/Solo el Credo/.test(t), 'el orden explicado y sin el selector viejo');

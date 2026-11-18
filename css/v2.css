@@ -250,3 +250,34 @@ a.libro{text-decoration:none}
 .evtira button[aria-selected="true"] small{color:inherit;opacity:.75}
 /* 2.4: con una hoja abierta, la pantalla de atrás no se mueve (y al cerrar se vuelve al mismo lugar) */
 body.conhoja{overflow:hidden}
+/* 2.4: el «+» del hábito vacío se ve en modo oscuro (heredaba el color de la tinta sobre el acento) */
+.hck:not(.on){color:var(--ink2)}
+.hck:not(.on) svg.i{width:16px;height:16px;stroke-width:2.2}
+/* «Deshacer» como botón dentro del aviso */
+.toast.con-deshacer{padding:8px 8px 8px 18px;left:16px;right:16px;transform:none;justify-content:space-between;border-radius:18px;max-width:440px;margin:0 auto;line-height:1.3}
+.toast .lnk{text-decoration:none;background:var(--bg);color:var(--ink);border-radius:999px;padding:7px 14px;font-weight:700;font-size:13px;flex:none}
+/* hábitos: la tira de días (hoy y los seis anteriores) y el nombre que lleva a corregir */
+.habtira{margin:2px 0 6px;display:grid;grid-template-columns:repeat(7,1fr);gap:6px;overflow:visible}.habtira button{min-width:0;height:48px;border-radius:14px;padding:0}.habtira button small{font-size:9.5px;letter-spacing:.04em}
+.habnota{margin:0 0 8px;color:var(--oro)}
+.hrow3 button.n{background:none;border:0;padding:0;text-align:left;color:inherit;font:inherit;min-width:0;cursor:pointer}
+/* 2.4 · grupo con pestañas y miembros con aire */
+.gtabs{position:sticky;top:0;z-index:3;margin:12px 0 14px;box-shadow:0 0 0 8px var(--surface)}
+.gtabs button{position:relative;padding:0 4px;font-size:13px}
+.gtabs .pt{position:absolute;top:7px;right:8px;width:7px;height:7px;border-radius:50%;background:var(--accent)}
+.gpan[hidden]{display:none}.gpan>.card+.card,.gpan>.card+*{margin-top:14px}
+.gsub{margin:20px 2px 10px}
+.gmiem{display:flex;flex-direction:column;gap:10px}
+.gmiem .grow,.gmiem .grow.yo{display:block;margin:0;padding:14px;border:1px solid var(--line);border-radius:16px;background:var(--card,transparent)}
+.gmiem .grow.yo{border-color:var(--accent-line);background:var(--accent-dim)}
+.grow .gr1{display:flex;align-items:center;gap:10px}
+.grow .gr1 .n{flex:1;min-width:0}.grow .gr1 .n b{font-size:15px;font-weight:600}.grow .gr1 .rgn{font-size:12px;color:var(--ink2)}
+.grow .gr1 .mhc{font-style:normal;font-size:11px;color:var(--ink2);border:1px solid var(--line2);border-radius:999px;padding:4px 9px;white-space:nowrap}.grow .gr1 .mhc.ok{color:var(--accent);border-color:var(--accent-line)}
+.grow .gmb{width:36px;height:36px;flex:none}
+.grow .gint{margin:10px 0 0;font-size:15px;line-height:1.4;font-weight:400;color:var(--ink)}.grow .gint.muted{color:var(--ink2);font-size:13px}
+.gmiem .grow .acts{display:flex;gap:8px;margin-top:12px}
+.gmiem .grow .acts .gb{flex:1;height:42px;justify-content:center;font-size:13.5px;font-weight:500;color:var(--ink);border-radius:12px}
+.gmiem .grow .acts .gb svg.i{width:16px;height:16px}
+.grow .gmas{display:flex;flex-direction:column;margin-top:10px;border-top:1px solid var(--line)}.grow .gmas[hidden]{display:none}
+.grow .gmas button{display:flex;align-items:center;gap:10px;height:44px;border:0;background:none;color:var(--ink2);font-size:14px;text-align:left;padding:0 2px}.grow .gmas button svg.i{width:16px;height:16px}
+.grow .gal{padding:10px 0 0}
+.gbot{margin-top:20px}
