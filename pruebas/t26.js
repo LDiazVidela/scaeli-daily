@@ -36,14 +36,14 @@ const { chromium } = require('playwright');
   await p.click('.bibli .brow button'); await p.waitForTimeout(400); t=await SH(); ok(/Ya está en tu día/.test(await p.evaluate(()=>document.querySelector('#sheet').innerHTML)),'agregar desde adultos'); await A('cerrar');
   // 4 · grupo de ejemplo: muro
   await p.evaluate(()=>window.DAILY.ir('hoy')); await p.waitForTimeout(300); await A('grupo'); await A('gEjemplo',null,900); t=await SH();
-  ok(/Muro del grupo/i.test(t)&&/No se olviden de rezar el Evangelio hoy/.test(t)&&/Recé la decena por todos/.test(t),'muro con los mensajes de ejemplo');
-  ok(/Amén · 2/.test(t),'contador de amén');
+  ok(await p.$('.muro.chat form[data-f=muro]')!==null&&/No se olviden de rezar el Evangelio hoy/.test(t)&&/Recé la decena por todos/.test(t),'muro con los mensajes de ejemplo');
+  ok(/Amén 2/.test(t),'contador de amén');
   await A('gTab','muro',300); await p.fill('form[data-f=muro] input','Hola grupo, rezo por ustedes'); await p.press('form[data-f=muro] input','Enter'); await p.waitForTimeout(500); t=await SH(); ok(/Hola grupo, rezo por ustedes/.test(t)&&/Peregrino/.test(t),'mensaje propio publicado con mi nombre');
-  await p.fill('form[data-f=muro] input','otro ya'); await p.press('form[data-f=muro] input','Enter'); await p.waitForTimeout(400); t=await SH(); ok(!/otro ya/.test(t),'anti-spam: 15 s entre mensajes');
+  await p.fill('form[data-f=muro] input','otro ya'); await p.press('form[data-f=muro] input','Enter'); await p.waitForTimeout(400); t=await SH(); ok(!/otro ya/.test(t),'anti-spam: un momento entre mensajes');
   await p.fill('form[data-f=muro] input','sos un pelotudo'); await p.press('form[data-f=muro] input','Enter'); await p.waitForTimeout(400); t=await SH(); ok(!/pelotudo/.test(t),'filtro de palabras');
   await A('mRec'); t=await SH(); ok(/Mañana es domingo/.test(t)&&/Acuérdense del examen/.test(t),'recordatorios listos'); await A('mRecOk',3,500); t=await SH(); ok(/Mañana es domingo: ¿vamos a Misa\?/.test(t)&&(await p.$$('.msg.rec')).length>=2,'recordatorio publicado como mensaje destacado');
-  await A('mAmen','e2'); t=await SH(); ok(/Amén · 3/.test(t),'amén suma'); await A('mAmen','e2'); t=await SH(); ok(/Amén · 2/.test(t)&&!/Amén · 3/.test(t),'amén se saca');
-  let st=await p.evaluate(()=>JSON.parse(localStorage.getItem('scaeli-daily-grupos'))); let g=Object.values(st)[0]; ok(g.muro.length===5,'5 mensajes guardados: '+g.muro.length);
+  await A('mAmen','e2'); t=await SH(); ok(/Amén 3/.test(t),'amén suma'); await A('mAmen','e2'); t=await SH(); ok(/Amén 2/.test(t)&&!/Amén 3/.test(t),'amén se saca');
+  let st=await p.evaluate(()=>JSON.parse(localStorage.getItem('scaeli-daily-grupos'))); let g=Object.values(st)[0]; ok(g.muro.filter(x=>!x.k).length===5,'5 mensajes guardados: '+g.muro.length);
   await A('mBorrar','e3'); t=await SH(); ok(!/Buen día grupo, hoy ofrezco/.test(t),'creador borra un mensaje ajeno');
   // reportar: lo oculto para mí
   await p.evaluate(()=>{ const K='scaeli-daily-grupos'; const st=JSON.parse(localStorage.getItem(K)); const g=Object.values(st)[0]; g.muro.push({id:'x1',u:'ej1',n:'Clari',tx:'mensaje feo',t:Date.now()-5000}); localStorage.setItem(K,JSON.stringify(st)); });
@@ -51,7 +51,7 @@ const { chromium } = require('playwright');
   await A('mReportar','x1'); t=await SH(); ok(!/mensaje feo/.test(t),'reportado se oculta');
   // límite 100 (local)
   await p.evaluate(()=>{ const K='scaeli-daily-grupos'; const st=JSON.parse(localStorage.getItem(K)); const g=Object.values(st)[0]; for(let i=0;i<120;i++) g.muro.push({id:'z'+i,u:'ej2',n:'Mateo',tx:'msg '+i,t:Date.now()-1e6-i}); localStorage.setItem(K,JSON.stringify(st)); });
-  await p.reload(); await p.waitForTimeout(1500); await A('grupo',null,800); t=await SH(); ok(/Ver más/.test(t),'botón Ver más'); await A('mMas'); t=await SH(); ok((t.match(/Amén/g)||[]).length>=30,'ver más muestra más');
+  await p.reload(); await p.waitForTimeout(1500); await A('grupo',null,800); t=await SH(); ok(/Ver mensajes anteriores/.test(t)&&(await p.$$('.msg')).length===40,'botón de mensajes anteriores'); await A('mMas'); ok((await p.$$('.msg')).length>=80,'ver más muestra más');
   // 5 · portada
   ok(await p.$('.gport')!==null,'botón de portada para el creador');
   await p.setInputFiles('#gPortada',{name:'f.png',mimeType:'image/png',buffer:require('fs').readFileSync(require('path').join(__dirname,'..')+'/assets/ilus/daily_rosario.png')}); await p.waitForTimeout(900);

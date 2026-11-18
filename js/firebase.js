@@ -175,7 +175,9 @@ export function gruposBackend(uid){
     echar(gid,u){ return F.deleteDoc(m(gid,u)); },
     setMeta(gid,patch){ return F.updateDoc(g(gid),patch); },
     /* muro del grupo (1.9): grupos/{gid}/mensajes/{id} = {u, n, tx, t, tipo?, a:{uid:1}, rep:{uid:1}} · últimos 100 */
-    watchMuro(gid,cb){ const q=F.query(F.collection(db,"grupos/"+gid+"/mensajes"),F.orderBy("t","desc"),F.limit(100)); return F.onSnapshot(q,s=>cb(s.docs.map(d=>({id:d.id,...d.data()}))),()=>cb([])); },
+    watchMuro(gid,cb){ const q=F.query(F.collection(db,"grupos/"+gid+"/mensajes"),F.orderBy("t","desc"),F.limit(200)); return F.onSnapshot(q,s=>cb(s.docs.map(d=>({id:d.id,...d.data()}))),()=>cb([])); },
+    /* 2.5: encuentros (k:"enc") y cantos del grupo (k:"canto") son documentos de la misma colección, con su consulta aparte para que el chat no los tape */
+    watchExtra(gid,cb){ const q=F.query(F.collection(db,"grupos/"+gid+"/mensajes"),F.where("k","in",["enc","canto"])); return F.onSnapshot(q,s=>cb(s.docs.map(d=>({id:d.id,...d.data()}))),()=>cb([])); },
     escribir(gid,msg){ return F.addDoc(F.collection(db,"grupos/"+gid+"/mensajes"),{...msg,u:uid,t:Date.now()}); },
     borrarMsg(gid,id){ return F.deleteDoc(F.doc(db,"grupos/"+gid+"/mensajes/"+id)); },
     amenMsg(gid,id,on){ return F.updateDoc(F.doc(db,"grupos/"+gid+"/mensajes/"+id),{["a."+uid]:on?1:F.deleteField()}); },
@@ -199,8 +201,9 @@ export function gruposLocal(uid){ const K="scaeli-daily-grupos"; let st={}; try{
     async echar(gid,u){ const G=st[gid]; if(G){ delete G.m[u]; save(); emit(gid); } },
     async setMeta(gid,patch){ const G=st[gid]; if(G){ Object.assign(G.meta,patch); save(); emit(gid); } },
     _sembrar(gid,miembros){ if(!st[gid]) return; Object.assign(st[gid].m,miembros); save(); emit(gid); },
+    watchExtra(gid,cb){ return this.watchMuro(gid,L=>cb(L.filter(x=>x.k==="enc"||x.k==="canto"))); },
     watchMuro(gid,cb){ const s={gid,cb,muro:1}; msubs.push(s); setTimeout(()=>emitMuro(gid),0); return ()=>{ const i=msubs.indexOf(s); if(i>=0) msubs.splice(i,1); }; },
-    async escribir(gid,msg){ const G=st[gid]; if(!G) return; G.muro=G.muro||[]; G.muro.unshift({id:"m"+Date.now().toString(36)+Math.random().toString(36).slice(2,6),...JSON.parse(JSON.stringify(msg)),u:uid,t:Date.now()}); G.muro=G.muro.slice(0,100); save(); emitMuro(gid); },
+    async escribir(gid,msg){ const G=st[gid]; if(!G) return; G.muro=G.muro||[]; G.muro.unshift({id:"m"+Date.now().toString(36)+Math.random().toString(36).slice(2,6),...JSON.parse(JSON.stringify(msg)),u:uid,t:Date.now()}); let nn=0; G.muro=G.muro.filter(x=>x.k||++nn<=200); save(); emitMuro(gid); },
     async borrarMsg(gid,id){ const G=st[gid]; if(!G||!G.muro) return; G.muro=G.muro.filter(x=>x.id!==id); save(); emitMuro(gid); },
     async amenMsg(gid,id,on){ const G=st[gid], x=G&&(G.muro||[]).find(y=>y.id===id); if(!x) return; x.a=x.a||{}; if(on) x.a[uid]=1; else delete x.a[uid]; save(); emitMuro(gid); },
     async setRanking(gid,d){ let R={}; try{ R=JSON.parse(localStorage.getItem("scaeli-daily-ranking")||"{}"); }catch(e){} R[gid]=JSON.parse(JSON.stringify(d)); try{ localStorage.setItem("scaeli-daily-ranking",JSON.stringify(R)); }catch(e){} rsubs.forEach(s=>s.cb(rlist(s.sem))); },

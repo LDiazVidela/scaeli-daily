@@ -70,7 +70,7 @@ const { chromium } = require('playwright'); const fs = require('fs'); const path
   ok(C.CANTOS.every(x => (x.l.match(/\[([^\]]+)\]/g) || []).every(c => /^\[[A-G][#b]?(m|7|m7|maj7|sus4|dim)?(\/[A-G][#b]?)?\]$/.test(c))), 'todos los acordes están bien escritos');
   ok(C.CANTOS.filter(x => /\[/.test(x.l)).every(x => x.ton), 'los cantos con acordes dicen su tono');
   await p.evaluate(() => window.DAILY.ir('rezar')); await p.waitForTimeout(500); ok(await p.$('.cov[data-a="cancionero"]'), 'portada del Cancionero en Rezar');
-  await A('cancionero'); await A('cancCat', ''); ok((await p.$$('.cantos .row')).length === C.CANTOS.length, 'lista completa');
+  await A('cancionero'); await A('cancCat', ''); ok((await p.$$('.cantos .row')).length >= C.CANTOS.length, 'lista completa');
   await p.fill('#cancQ', 'estrella de paz'); await p.waitForTimeout(500); ok((await p.$$('.cantos .row')).length === 1, 'busca por la letra');
   await A('cantoAbrir', 'noche-de-paz'); ok(!(await p.$('.cletra .cs')) && /Noche de paz, noche de amor/.test(await SH()) && await p.$('.plusrow[data-a="plus"][data-p="cancionero"]'), 'sin Scaeli+: la letra completa y la invitación a los acordes');
   await A('cantoNuevo'); ok(await p.evaluate(() => window.DAILY.get().sheet.view === 'plus'), 'cargar cantos propios es de Scaeli+');

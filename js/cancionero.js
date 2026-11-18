@@ -26,11 +26,12 @@ const leer = (k, d) => { try { return JSON.parse(localStorage.getItem(k) || "nul
 const guardar = (k, v) => { try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) {} };
 export const cantosMios = () => leer(K_MIOS, []).filter(x => x && x.id && x.t);
 const pref = () => ({ lat: 1, ac: 1, tam: 0, ...leer(K_PREF, {}) });
-const todos = () => [...cantosMios().map(x => ({ ...x, mio: 1 })), ...CANTOS];
 const catDeTiempo = n => ({ Adviento: "adviento", Navidad: "navidad", Cuaresma: "cuaresma", Triduo: "cuaresma", Pascua: "pascua", "Pentecostés": "espiritu" }[n] || "");
 
 export function cancionero(api) {
-  const { esc, ic, shTop, esPlus, hoja, openSheet, renderSheet, renderSheetQuieto, toast, confirmar, tiempoLit } = api;
+  const { esc, ic, shTop, esPlus, hoja, openSheet, renderSheet, renderSheetQuieto, toast, confirmar, tiempoLit } = api, GR = api.grupo || { hay: () => false, cantos: () => [] };
+  /* 2.5: los cantos del grupo (los comparte un miembro y los ven todos) van junto a los propios y los de la app */
+  const todos = () => [...cantosMios().map(x => ({ ...x, mio: 1 })), ...(GR.hay() ? GR.cantos() : []), ...CANTOS];
   /* la letra con los acordes arriba de su sílaba */
   function letraHTML(l, st, P, conAc) {
     return String(l).split(/\n\s*\n/).map(est => {
@@ -44,18 +45,19 @@ export function cancionero(api) {
       }).join("") + '</div>';
     }).join("");
   }
-  const fila = x => '<button class="row canto" data-a="cantoAbrir" data-p="' + esc(x.id) + '"><span class="n"><b>' + esc(x.t) + '</b><small>' + esc(x.a || (x.mio ? "Mi canto" : "")) + '</small></span>' + (tieneAcordes(x.l) ? '<span class="cton">' + ic("music") + '</span>' : (x.lat ? '<span class="cton txt">Latín</span>' : '')) + ic("right") + '</button>';
+  const fila = x => '<button class="row canto" data-a="cantoAbrir" data-p="' + esc(x.id) + '"><span class="n"><b>' + esc(x.t) + '</b><small>' + esc(x.grp ? (x.a ? x.a + " · " : "") + "lo compartió " + x.por : x.a || (x.mio ? "Mi canto" : "")) + '</small></span>' + (tieneAcordes(x.l) ? '<span class="cton">' + ic("music") + '</span>' : (x.lat ? '<span class="cton txt">Latín</span>' : '')) + ic("right") + '</button>';
 
   function shCancionero() {
     const s = hoja(), T = todos(), sug = catDeTiempo(tiempoLit().n); if (s.cat === undefined) s.cat = sug;
     const q = sinTilde(s.q || "").trim(), cat = q ? "" : s.cat;
-    const L = T.filter(x => q ? sinTilde(x.t + " " + x.l.replace(/\[[^\]]*\]/g, "")).includes(q) : cat === "mios" ? x.mio : !cat || (x.cat || []).includes(cat)).sort((a, b) => (b.mio || 0) - (a.mio || 0) || a.t.localeCompare(b.t, "es"));
+    const L = T.filter(x => q ? sinTilde(x.t + " " + x.l.replace(/\[[^\]]*\]/g, "")).includes(q) : cat === "mios" ? x.mio : cat === "grupo" ? x.grp : !cat || (x.cat || []).includes(cat)).sort((a, b) => (b.mio || 0) - (a.mio || 0) || a.t.localeCompare(b.t, "es"));
     const chip = (k, t) => '<button data-a="cancCat" data-p="' + k + '" aria-pressed="' + (cat === k) + '">' + t + '</button>';
     return shTop("Cancionero", "Cantos para la Misa y la oración, con acordes") + '<div class="scroll"><div class="sbanner"><img src="assets/ilus/daily_cancionero.png" alt=""><span class="g"></span></div>' +
       '<input type="search" id="cancQ" placeholder="Buscar por título o por letra…" value="' + esc(s.q || "") + '" style="height:46px;margin-bottom:10px">' +
-      '<div class="chips bfil canc">' + chip("", "Todos") + CANTOS_CAT.map(c => chip(c[0], c[1] + (c[0] === sug ? " · ahora" : ""))).join("") + chip("mios", "Mis cantos") + '</div>' +
-      (L.length ? '<div class="list libcaps cantos">' + L.map(fila).join("") + '</div>' : '<p class="empty">' + (cat === "mios" ? "Todavía no cargaste ningún canto. Sumá los que cantan en tu parroquia o en tu grupo, con sus acordes." : "No hay cantos con esa palabra.") + '</p>') +
+      '<div class="chips bfil canc">' + chip("", "Todos") + CANTOS_CAT.map(c => chip(c[0], c[1] + (c[0] === sug ? " · ahora" : ""))).join("") + (GR.hay() ? chip("grupo", "Del grupo") : "") + chip("mios", "Mis cantos") + '</div>' +
+      (L.length ? '<div class="list libcaps cantos">' + L.map(fila).join("") + '</div>' :  '<p class="empty">' + (cat === "grupo" ? "Tu grupo todavía no tiene cantos. Cargá uno en «Mis cantos» y tocá «Compartir con mi grupo»: lo van a ver todos." : cat === "mios" ? "Todavía no cargaste ningún canto. Sumá los que cantan en tu parroquia o en tu grupo, con sus acordes." : "No hay cantos con esa palabra.") + '</p>') +
       '<button class="plusrow" data-a="cantoNuevo"><span class="n"><b>Agregar un canto</b><small>Pegá la letra y poné los acordes entre corchetes: [Do] [Lam] [Sol7]</small></span>' + (esPlus() ? ic("plus") : '<span class="plus-mini">' + ic("lock") + ' Scaeli+</span>') + '</button>' +
+      (GR.hay() ? '<p class="hint" style="margin-top:14px">Lo que cargás en «Mis cantos» lo podés compartir con tu grupo: lo ven todos los miembros, con acordes quien tiene Scaeli+.</p>' : '') +
       '<p class="hint" style="margin-top:14px">Los cantos que trae la app son tradicionales o de dominio público. Los de autores actuales tienen derechos: por eso no vienen cargados, pero podés sumar los tuyos en «Mis cantos».</p>' +
       '</div><button class="primary ink" data-a="cerrar">Volver</button>';
   }
@@ -63,12 +65,15 @@ export function cancionero(api) {
     const s = hoja(), x = todos().find(c => c.id === s.p); if (!x) return shTop("Canto") + '<p class="hint">No está.</p><button class="primary ink" data-a="cancionero">Cancionero</button>';
     const P = pref(), plus = esPlus(), hayAc = tieneAcordes(x.l), conAc = hayAc && plus && P.ac, st = s.st || 0;
     const ton = x.ton ? acorde(x.ton, st, P.lat) : "";
-    return shTop(esc(x.t), esc(x.a || (x.mio ? "Mi canto" : ""))) + '<div class="scroll">' +
+    const enGrupo = x.mio && GR.hay() && GR.cantos().some(c => c.t === x.t && c.u === GR.yo());
+    return shTop(esc(x.t), esc(x.grp ? "Canto del grupo · lo compartió " + x.por : x.a || (x.mio ? "Mi canto" : ""))) + '<div class="scroll">' +
       (hayAc && plus ? '<div class="cbar"><div class="ctono"><button class="iconbtn" data-a="cantoTono" data-p="-1" aria-label="Bajar medio tono">' + ic("minus") + '</button><span><small>Tono</small><b>' + (ton ? esc(ton) : (st > 0 ? "+" : "") + st) + '</b></span><button class="iconbtn" data-a="cantoTono" data-p="1" aria-label="Subir medio tono">' + ic("plus") + '</button></div>' +
         '<div class="seg cseg"><button data-a="cantoPref" data-p="ac" aria-pressed="' + !!P.ac + '">Acordes</button><button data-a="cantoPref" data-p="lat" aria-pressed="' + !!P.lat + '">' + (P.lat ? "Do Re Mi" : "C D E") + '</button><button data-a="cantoPref" data-p="tam" aria-pressed="' + !!P.tam + '">Letra grande</button></div></div>' : '') +
       (hayAc && !plus ? '<button class="plusrow" data-a="plus" data-p="cancionero"><span class="n"><b>Ver los acordes y cambiar el tono</b><small>Con Scaeli+: acordes sobre la letra, en Do Re Mi o cifrado americano, y transporte a tu tono.</small></span><span class="plus-mini">' + ic("lock") + ' Scaeli+</span></button><div style="height:14px"></div>' : '') +
       '<div class="cletra' + (P.tam ? " grande" : "") + (x.lat ? " latin" : "") + '">' + letraHTML(x.l, st, P, conAc) + '</div>' +
       (!hayAc && x.lat && !x.mio ? '<p class="hint" style="margin-top:14px">Canto gregoriano: se canta sin acompañamiento.</p>' : '') +
+      (x.mio && GR.hay() ? '<button class="primary cshare" data-a="cantoCompartir" data-p="' + esc(x.id) + '"' + (enGrupo ? " disabled" : "") + ' style="margin-top:16px">' + ic(enGrupo ? "check" : "send") + (enGrupo ? " Ya está en «" + esc(GR.nombre()) + "»" : " Compartir con «" + esc(GR.nombre()) + "»") + '</button>' : '') +
+      (x.grp && (x.u === GR.yo() || GR.creador()) ? '<button class="ghost g peligro" data-a="cantoQuitar" data-p="' + esc(x.mid) + '" style="margin-top:16px;justify-content:center">' + ic("trash") + ' Quitar del grupo</button>' : '') +
       (x.mio ? '<div class="grid2" style="margin-top:16px"><button class="ghost g" data-a="cantoEditar" data-p="' + esc(x.id) + '">' + ic("pen") + ' Editar</button><button class="ghost g peligro" data-a="cantoBorrar" data-p="' + esc(x.id) + '">' + ic("trash") + ' Borrar</button></div>' : '') +
       '</div><button class="ghost g" data-a="cancionero" style="justify-content:center;height:48px">' + ic("left") + ' Cancionero</button>';
   }
@@ -95,6 +100,9 @@ export function cancionero(api) {
     cantoPref(p) { const P = pref(); P[p] = P[p] ? 0 : 1; guardar(K_PREF, P); renderSheetQuieto(); },
     cantoNuevo() { if (!esPlus()) { openSheet({ view: "plus", desde: "cancionero" }); return; } openSheet({ view: "cantoEd" }); },
     cantoEditar(p) { if (!esPlus()) { openSheet({ view: "plus", desde: "cancionero" }); return; } openSheet({ view: "cantoEd", p }); },
+    async cantoCompartir(p) { const x = cantosMios().find(c => c.id === p); if (!x || !GR.hay()) return; if (!esPlus()) { openSheet({ view: "plus", desde: "cancionero" }); return; }
+      toast(await GR.compartir(x) ? "Compartido con «" + GR.nombre() + "»" : "No se pudo compartir"); renderSheetQuieto(); },
+    async cantoQuitar(p) { if (!await confirmar("¿Quitar este canto del grupo?", "Deja de verse para todos. Quien lo cargó lo conserva en «Mis cantos».", "Quitar")) return; toast(await GR.quitar(p) ? "Canto quitado del grupo" : "No se pudo quitar"); openSheet({ view: "cancionero", cat: "grupo" }); },
     async cantoBorrar(p) { if (!await confirmar("¿Borrar este canto?", "Se borra de este dispositivo.", "Borrar")) return; guardar(K_MIOS, cantosMios().filter(c => c.id !== p)); toast("Canto borrado"); openSheet({ view: "cancionero", cat: "mios" }); }
   };
   return { shCancionero, shCanto, shCantoEd, guardarForm, ACC, letraHTML };
