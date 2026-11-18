@@ -17,7 +17,7 @@ const { chromium } = require('playwright');
   await p.goto('http://localhost:8765/index.html'); await p.evaluate(()=>localStorage.clear()); await p.reload(); await p.waitForTimeout(1500); await p.click('#invitado'); await p.waitForTimeout(1800);
   const A = async (a, q, ms = 500) => { await p.evaluate(([a, q]) => window.DAILY.ACC[a](q), [a, q]); await p.waitForTimeout(ms); };
   let L=await p.evaluate(()=>window.__rc.slice()); ok(L.some(x=>x==='configure:goog_test:'),'configure sin id compartido '+L);
-  await p.click('#nav button[data-view="mas"]'); await p.waitForTimeout(400); const tema=await p.evaluate(()=>document.documentElement.getAttribute('data-theme')); if(tema!=='light') await A('tema');
+  await p.evaluate(()=>window.DAILY.ir('mas')); await p.waitForTimeout(400); const tema=await p.evaluate(()=>document.documentElement.getAttribute('data-theme')); if(tema!=='light') await A('tema');
   await A('plus',null,900); const t=await p.textContent('#sheet'); ok(t.includes('ARS 21.999,00')&&t.includes('ARS 3.299,00'),'precios de la tienda'); ok(!t.includes('Código de prueba'),'sin código en nativo'); ok(t.includes('Restaurar compras'),'restaurar'); ok(t.includes('Ahorrás 49%'),'ahorro calculado');
   await p.screenshot({path:'n_pay.png'});
   await p.evaluate(()=>{ const s=document.querySelector('#sheet .scroll'); s.scrollTop=9999; }); await p.waitForTimeout(200); await p.screenshot({path:'n_pay2.png'});

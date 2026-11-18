@@ -19,7 +19,7 @@ const { chromium } = require('playwright');
   await A('novenas'); const nid = await p.$eval('#sheetIn [data-a="novena"]', e => e.dataset.p); await A('novena', nid); const nb=await p.$('#sheetIn [data-a="novOk"]'); if(nb){ await A('novOk', await nb.evaluate(e=>e.dataset.p),400); ok((await p.evaluate(()=>window.DAILY.get().novenas)).length>0,'novena'); }
   await A('examen'); for(let i=0;i<4;i++) await A('exPaso','1'); await A('exOk'); ok((await p.evaluate(()=>window.DAILY.get().days))[k].x,'examen');
   await A('confesion'); await A('confNinos','1'); await A('misa'); await A('misaOk');
-  for (const v of ['hoy','rezar','dia','yo','mas']) { await p.click(`#nav button[data-view="${v}"]`); await p.waitForTimeout(300); }
+  for (const v of ['hoy','rezar','grupo','dia','yo']) { await p.click(`#nav button[data-view="${v}"]`); await p.waitForTimeout(300); }
   // personaje: todas las combinaciones sin errores
   await p.click('#nav button[data-view="yo"]');
   for (const sx of ['m','f']) { await A('pjSet','sx|'+sx); const pr=sx==='m'?['base','remera:azul','buzo:bordo','camisa:negro','sotana','clergyman','seminarista']:['base','remera:blanco','buzo:azul','pollera:bordo','consagrada','caridad','dominica','carmelita']; const pe=sx==='m'?['base','corto','largo']:['base','suelto','corto'];
@@ -38,7 +38,7 @@ const { chromium } = require('playwright');
   console.log('S4'); ok((await p.textContent('#app')).includes('18:30'),'tarea con hora');
   console.log('S5'); await A('calMes','1'); console.log('S6'); await A('calMes','-1'); console.log('S7'); await A('calDia',k); console.log('S8'); ok((await p.textContent('#app')).includes('Llamar'),'agenda del día');
   // exportar e importar
-  await p.click('#nav button[data-view="mas"]');
+  await p.evaluate(()=>window.DAILY.ir('mas'));
   console.log('S9'); const [dl] = await Promise.all([p.waitForEvent('download', { timeout: 5000 }).catch(() => null), A('exportar')]); console.log('S10'); ok(dl,'export');
   console.log(errs.join('\n') || 'TODO OK'); await b.close();
 })().catch(e=>{console.log('EXC',e.message);process.exit(1)});

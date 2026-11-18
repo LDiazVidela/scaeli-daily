@@ -1,6 +1,7 @@
 // Scaeli Daily · rezar todos los días. Hermana de Scaeli Fit (misma base, misma cuenta) y del juego Scaeli.
 import { gruposBackend, gruposLocal, plusBackend } from "./firebase.js";
 import { login, logout, watchAuth, finishRedirect, userBackend, localBackend, calendarioToken, borrarCuenta } from "./firebase.js";
+import { pushActivar, pushDesactivar } from "./firebase.js";
 import { esNativo, plataforma, pedirPermisoAvisos, programarAvisosNativos, comprasDisponibles, comprasDetalle, comprasIniciar, comprasEstado, comprasPlanes, comprar, restaurarCompras, donacionesProductos, donar } from "./nativo.js";
 import { VIRTUDES, PISTAS_VIRTUD, CAMINOS } from "../data/plus.js";
 import { ROS_MED, LECTIO, PIE_REZAR } from "../data/citas.js";   // 2.1: los textos bíblicos, de la Biblia Platense
@@ -187,7 +188,8 @@ function irA(v,deAtras){ if(typing()&&document.activeElement.blur) document.acti
 let htmlApp=null;
 function renderNow(){ if(!ready){ htmlApp=null; renderLogin(); return; }
   document.querySelectorAll(".nav button").forEach(b=>{ if(b.dataset.view===view) b.setAttribute("aria-current","page"); else b.removeAttribute("aria-current"); });
-  const R={hoy:renderHoy,rezar:renderRezar,dia:renderDia,yo:renderYo,mas:renderMas}[view]||renderHoy;
+  document.querySelectorAll('.nav button[data-view="yo"]').forEach(b=>{ if(view==="mas") b.setAttribute("aria-current","page"); });   /* 2.6: «Más» vive dentro de Yo */
+  const R={hoy:renderHoy,rezar:renderRezar,grupo:renderGrupo,dia:renderDia,yo:renderYo,mas:renderMas}[view]||renderHoy;
   const h=R(); if(h!==htmlApp){ htmlApp=h; $("#app").innerHTML=h; pintarPersonajes(); } if(sheet) renderSheetQuieto(); }
 /* ── 2.4: navegación. El botón «atrás» del teléfono cierra la hoja abierta o vuelve a Hoy (antes salía de la app); al cerrar una
    hoja se vuelve al mismo lugar de la pantalla (antes subía al principio); y si la app se recarga, abre en la pestaña y el lugar
@@ -446,7 +448,8 @@ function renderYo(){ const raw=profile||{}, P=PJ.normal(raw), nom=raw.nombre||(u
   const OP=PJ.opciones(P);
   const ropa=f=>'<div class="chips">'+OP.prendas.filter(f).map(x=>'<button data-a="pjSet" data-p="prenda|'+(PJ.CON_COLOR.includes(x[0])?x[0]+":"+(P.tipo===x[0]?P.color:"gris"):x[0])+'" aria-pressed="'+(P.tipo===x[0])+'">'+esc(x[1])+'</button>').join("")+'</div>';
   const sw=(campo,L,val)=>'<div class="sw">'+L.map((c,i)=>'<button data-a="pjSet" data-p="'+campo+'|'+i+'" aria-pressed="'+(val===i)+'" aria-label="'+esc(c[0])+'" title="'+esc(c[0])+'"'+(c[1]?' style="background:'+c[1]+'"':' class="orig"')+'></button>').join("")+'</div>';
-  return cab("Tu personaje",esc(nom),rachaChip())+
+  return cab("Tu personaje",esc(nom),rachaChip()+'<button class="iconbtn irmas" data-a="irMas" aria-label="Ajustes y más">'+ic("gear")+'</button>')+
+   '<button class="row yomas" data-a="irMas"><span class="gi">'+ic("gear")+'</span><span class="n"><b>Ajustes y más</b><small>Recordatorios, avisos, aspecto, Scaeli+, tu cuenta y créditos</small></span>'+ic("right")+'</button>'+
    '<div class="card big'+(fondoActual()?' confondo':'')+'" id="pjsec">'+(fondoActual()?'<img class="bg" src="'+ilu(fondoActual())+'" alt=""><span class="sh"></span>':'')+personajeHTML("vivo","south",256)+'</div>'+
    '<details class="card opt fondos-d"'+(sheet&&sheet.view==="x"?"":"")+'><summary><span class="eyebrow">Fondo</span><b>'+esc((FONDOS.find(x=>x[0]===fondoActual())||["","Mañana"])[1])+'</b><span class="muted">'+ic("down")+'</span></summary><p class="hint" style="margin:8px 0 10px">Se desbloquean con tu nivel y tus logros. El elegido va también al inicio de Hoy.</p>'+fondosHTML()+'</details>'+
    '<div class="card opt">'+
@@ -473,13 +476,24 @@ function renderYo(){ const raw=profile||{}, P=PJ.normal(raw), nom=raw.nombre||(u
      '<button class="plusrow" data-a="anio"><span class="n"><b>Tu año con Dios</b><small>'+(esPlus()?"Tu año en historias, para ver y compartir":"Con Scaeli+")+'</small></span>'+(esPlus()?ic("right"):'<span class="plus-mini">'+ic("lock")+' Scaeli+</span>')+'</button></div>'+
    '<div class="card"><div class="eyebrow">Intenciones</div><p class="hint" style="margin:6px 0 10px">Por quién rezás estos días. Aparecen en el Rosario y en las Horas.</p><div class="chips">'+intents.map((t,i)=>'<button class="on" data-a="intDel" data-p="'+i+'">'+esc(t)+' ✕</button>').join("")+'</div><form data-f="int" style="margin-top:10px"><div class="grid2" style="grid-template-columns:1fr auto"><input type="text" name="t" placeholder="Por mi familia…" maxlength="40" required><button class="iconbtn acc" type="submit" aria-label="Agregar">'+ic("plus")+'</button></div></form></div>'; }
 
+/* 2.6 · Avisos de Scaeli (push): los activa cada uno acá; los manda Lorenzo desde Firebase → Messaging. Solo web por ahora
+   (en la app nativa hace falta el plugin de push de Capacitor y google-services.json). En iPhone solo con la app instalada. */
+const pushPosible=()=>!esNativo()&&typeof Notification!=="undefined"&&"serviceWorker" in navigator&&"PushManager" in window||(!esNativo()&&pushFaltaInstalar());
+const pushFaltaInstalar=()=>/iPhone|iPad|iPod/.test(navigator.userAgent)&&!(window.matchMedia&&matchMedia("(display-mode: standalone)").matches)&&!navigator.standalone;
+const pushOn=()=>lsGet("daily_push")==="1"&&typeof Notification!=="undefined"&&Notification.permission==="granted";
+const pushLlega=(n)=>{ if(n&&(n.title||n.body)) toast((n.title?n.title+(n.body?": ":""):"")+(n.body||"")); };
+async function pushEncender(callado){ const r=await pushActivar(pushLlega);
+  if(r.ok){ lsSet("daily_push","1"); try{ await backend.setDoc("daily_settings/push",{on:true,t:r.token,f:hoy(),ua:navigator.userAgent.slice(0,120)}); }catch(e){} if(!callado) toast("Avisos de Scaeli activados"); }
+  else if(!callado) toast(r.err==="bloqueado"?"Los avisos están bloqueados para Scaeli: permitilos en los ajustes del navegador":r.err==="nosoporta"?"Este navegador no permite avisos":r.err==="permiso"?"Sin tu permiso no podemos avisarte":"No se pudieron activar los avisos. Probá de nuevo con conexión");
+  render(); return !!r.ok; }
 const swt=(a,on,lab)=>'<button class="swt" role="switch" aria-checked="'+!!on+'" aria-label="'+esc(lab)+'" data-a="'+a+'"></button>';
 function renderMas(){ const claro=document.documentElement.getAttribute("data-theme")==="light";
-  return cab("Más","Ajustes")+
+  return cab("Más","Ajustes",'<button class="iconbtn" data-a="irYo" aria-label="Volver a Yo">'+ic("left")+'</button>')+
    '<div class="card"><div class="eyebrow">Recordatorios</div><p class="hint" style="margin:6px 0 10px">'+(esNativo()?'Avisos del teléfono, aunque la app esté cerrada (también las tareas con hora).':'Avisos mientras la app está abierta o instalada'+("Notification" in window?'':' (este navegador no los permite)')+'.')+'</p>'+
    '<div class="grid2"><label class="f">Mañana<input type="time" data-rec="m" value="'+esc(recordatorios.m)+'"></label><label class="f">Noche<input type="time" data-rec="n" value="'+esc(recordatorios.n)+'"></label></div>'+
    '<div class="list recl"><div class="row"><div class="n"><b>Avisos</b><small>'+(recordatorios.on?"Activados":"Desactivados")+'</small></div>'+swt("recOn",recordatorios.on,"Avisos")+'</div>'+
-   '<div class="row"><div class="n"><b>Ángelus</b><small>Un aviso más, a las 12:00</small></div>'+swt("recAng",recordatorios.ang,"Aviso del Ángelus")+'</div></div></div>'+
+   '<div class="row"><div class="n"><b>Ángelus</b><small>Un aviso más, a las 12:00</small></div>'+swt("recAng",recordatorios.ang,"Aviso del Ángelus")+'</div>'+
+   (pushPosible()?'<div class="row"><div class="n"><b>Avisos de Scaeli</b><small>'+(pushOn()?"Activados en este dispositivo":pushFaltaInstalar()?"En iPhone, primero agregá Scaeli a la pantalla de inicio":"De vez en cuando, un recordatorio para rezar o una novedad. Llegan aunque la app esté cerrada.")+'</small></div>'+swt("pushOn",pushOn(),"Avisos de Scaeli")+'</div>':'')+'</div></div>'+
    '<button class="card plusmas" data-a="plus"><span class="plus-tag">Scaeli<b>+</b></span><span class="n"><b>'+(esPlus()?"Scaeli+ activo":"Scaeli+")+'</b><small>'+(esPlus()?"Caminos de oración, audio, grupos y diario sin límites":"Caminos de oración, audio, grupos y diario sin límites · desde USD 1,67 por mes")+'</small></span>'+ic("right")+'</button>'+
    '<div class="card list"><div class="row"><div class="n"><b>Ayudar a Scaeli</b><small>Una donación para sostener el proyecto</small></div><button class="ghost g" data-a="donarVer">'+ic("heart")+' Donar</button></div></div>'+
    '<div class="card list"><div class="row"><div class="n"><b>Modo claro</b><small>Para leer de día</small></div>'+swt("tema",claro,"Modo claro")+'</div>'+
@@ -634,7 +648,8 @@ const gPortada=()=>grupo.meta&&grupo.meta.portada?grupo.meta.portada:ilu("grupo"
 const hace=t=>{ const m=Math.round((Date.now()-t)/60000); return m<1?"ahora":m<60?"hace "+m+" min":m<1440?"hace "+Math.round(m/60)+" h":m<2880?"ayer":"hace "+Math.round(m/1440)+" días"; };
 const GRUPO_TOPE=12;
 /* 2.2: con Scaeli+ podés estar en hasta 3 grupos. daily_settings/grupo {gid: el que ves, otros:[{gid,n}]}; tu ficha se publica en todos */
-const GRUPOS_PLUS=3; let gOtros=[], gOtrosSync={};
+const GRUPOS_PLUS=10, GRUPOS_GRATIS=2; let gOtros=[], gOtrosSync={};   /* 2.6: gratis 2 grupos a la vez (antes 1); con Scaeli+ hasta 10 (antes 3) */
+const gruposTope=()=>esPlus()?GRUPOS_PLUS:GRUPOS_GRATIS;
 const misGrupos=()=>(grupo.gid?1:0)+gOtros.length;
 async function grupoEntrar(gid,n){ const otros=grupo.gid&&grupo.gid!==gid&&grupo.meta?[{gid:grupo.gid,n:grupo.meta.n||""},...gOtros]:gOtros.slice();
   await backend.setDoc("daily_settings/grupo",{gid,otros:otros.filter(x=>x.gid!==gid).slice(0,GRUPOS_PLUS-1)}); }
@@ -672,6 +687,27 @@ function insignias(){ const out=[]; if(!grupo.L) return out; const u=yo(); for(l
 const INSIG={oro:["Vela de oro","Primero del grupo en una semana"],plata:["Vela de plata","Segundo del grupo en una semana"],bronce:["Vela de bronce","Tercero del grupo en una semana"],equipo:["Meta del grupo","El grupo cumplió el desafío de la semana"]};
 const insigniaSVG=k=>k==="equipo"?'<span class="ins eq">'+ic("heart")+'</span>':'<span class="ins '+k+'">'+VELA_SVG+'</span>';
 function avatarHTML(av,tam){ return '<canvas class="pj" data-pj="south" data-pjp=\''+esc(JSON.stringify(av||{}))+'\' data-tam="'+(tam||56)+'" width="128" height="128" aria-hidden="true"></canvas>'; }
+/* 2.6 · la pantalla Grupo (pestaña propia en la barra de abajo, donde estaba «Más»): el grupo a la vista, con accesos a cada parte.
+   Cada fila abre la hoja del grupo en su pestaña (`grupoEn`); sin grupo, invita a crear uno o sumarse. */
+function renderGrupo(){ const G=grupo.meta, u=yo(), local=backend&&backend.mode==="local";
+  if(!grupo.gid||!G) return cab("Grupo","Rezar con otros")+'<div class="card gvacio"><div class="sbanner"><img src="'+ilu("grupo")+'" alt=""><span class="g"></span></div><h3>Un grupo para perseverar</h3><p class="hint">Con tus amigos, tu curso, el grupo de la parroquia o tu familia: rezan unos por otros, se animan con un desafío por semana, chatean, arman los encuentros y comparten los cantos.</p>'+
+    '<button class="primary" data-a="grupo">'+ic("plus")+' Crear un grupo o sumarme</button>'+(local?'<p class="hint" style="margin-top:10px;text-align:center">Para armar un grupo de verdad, entrá con Google. Sin cuenta podés ver uno de ejemplo.</p>':'')+'</div>';
+  const R=grupo.L||[], M=muro.filter(m=>!muroOculto(m)), ult=M[0], nuevos=M.filter(m=>m.u!==u&&m.t>muroVisto()).length, ENC=encuentros(), creador=G.creador===u;
+  const ints=R.filter(x=>x.int&&x.uid!==u&&!((profile&&profile.bloq)||[]).includes(x.uid)).length, nC=gExtra.filter(m=>m.k==="canto").length, rk=rankMio(), E=desafioEstado(semanaDe());
+  const fila=(a,p,icono,t,s,extra)=>'<button class="row gfila" data-a="'+a+'"'+(p?' data-p="'+p+'"':'')+'><span class="gi">'+ic(icono)+'</span><span class="n"><b>'+t+'</b><small>'+s+'</small></span>'+(extra||'')+ic("right")+'</button>';
+  const cambia=gOtros.length?'<div class="seg gsw'+(gOtros.length>2?" muchos":"")+'">'+[{gid:grupo.gid,n:G.n},...gOtros].map(x=>'<button data-a="gCambiar" data-p="'+esc(x.gid)+'" aria-pressed="'+(x.gid===grupo.gid)+'">'+esc(x.n||x.gid)+'</button>').join("")+'</div>':'';
+  return cab("Grupo",gOtros.length?"Tus grupos":"Tu grupo",'<button class="iconbtn" data-a="gInvitar" aria-label="Invitar amigos">'+ic("plus")+'</button>')+cambia+
+   '<button class="sbanner gban gpage" data-a="grupoEn" data-p="hoy"><img class="'+(G.portada?"foto":"")+'" src="'+gPortada()+'" alt=""><span class="g"></span><span class="gt"><b>'+esc(G.n)+'</b><small>'+R.length+(R.length===1?" miembro":" miembros")+(rk?' · '+rk.pos+'.º de '+rk.L.length+' grupos':'')+'</small></span></button>'+
+   (ENC.length?'<div class="card genc"><div class="hd"><div class="eyebrow">Próximo encuentro</div>'+(ENC.length>1?'<button class="lnk" data-a="grupoEn" data-p="ranking">Ver los '+ENC.length+'</button>':'')+'</div>'+encHTML(ENC[0],u,creador)+'</div>':'')+
+   '<div class="list gmenu">'+
+    fila("grupoEn","muro","chat","Chat",ult?'<b>'+esc(ult.u===u?"Vos":ult.n||"")+':</b> '+esc((ult.tl||ult.tx||"").slice(0,60)):'Todavía no escribió nadie: saludá al grupo',nuevos?'<em class="gnv">'+(nuevos>9?"9+":nuevos)+'</em>':'')+
+    fila("grupoEn","miembros","heart","Intenciones",ints?ints+(ints===1?' intención para rezar':' intenciones para rezar')+' esta semana':'Dejá tu intención y rezá por las de los demás')+
+    fila("grupoEn","hoy","flame","Desafío y misiones",'Desafío de la semana: '+(E.ok?'¡cumplido!':E.tot+' de '+E.meta))+
+    fila("encNuevoOVer",null,"hour","Encuentros",ENC.length?ENC.length+(ENC.length===1?' encuentro propuesto':' encuentros propuestos'):'Proponé el próximo: Misa, reunión, salida')+
+    fila("gCantos",null,"music","Cantos del grupo",nC?nC+(nC===1?' canto compartido':' cantos compartidos'):'El cancionero que arman entre todos')+
+    fila("grupoEn","ranking","star","Ranking de grupos",rk?'Tu grupo va '+rk.pos+'.º de '+rk.L.length:'Cómo viene tu grupo esta semana')+
+   '</div>'+
+   '<button class="primary" data-a="gInvitar" style="margin-top:16px">'+ic("plus")+' Invitar amigos</button>'; }
 function grupoCardHTML(){ if(backend&&backend.mode==="local"&&!grupo.gid) return '<button class="card grupoc" data-a="grupo"><span class="n"><span class="eyebrow">Grupo de perseverancia</span><b>Rezá con tus amigos</b><small>Un desafío por semana, intenciones y ranking de grupos. Para armar uno, entrá con Google.</small></span>'+ic("right")+'</button>';
   if(!grupo.gid||grupo.meta===false) return '<button class="card grupoc" data-a="grupo"><span class="n"><span class="eyebrow">Grupo de perseverancia</span><b>Rezá con tus amigos</b><small>Invitá a tus amigos: un desafío por semana, intenciones por las que rezar y ranking de grupos.</small></span>'+ic("right")+'</button>';
   if(!grupo.meta) return '<button class="card grupoc" data-a="grupo"><span class="n"><span class="eyebrow">Grupo de perseverancia</span><b>Cargando tu grupo…</b></span>'+ic("right")+'</button>';
@@ -687,7 +723,7 @@ const muroOculto=m=>{ const r=m.rep||{}; return !!r[yo()]||Object.keys(r).length
 function shGrupo(){ const local=backend&&backend.mode==="local";
   const otro=!!(sheet.nuevo&&grupo.gid&&grupo.meta);   // 2.2: sumarse a otro grupo sin dejar el que tenés (Scaeli+)
   if(otro&&!esPlus()) return shPlusPaywall("grupos");
-  if(otro&&misGrupos()>=GRUPOS_PLUS) return shTop("Otro grupo","Hasta "+GRUPOS_PLUS+" grupos a la vez")+'<div class="scroll"><p class="texto chico">Ya estás en '+GRUPOS_PLUS+' grupos. Para sumarte a otro, salí primero de alguno.</p></div><button class="primary ink" data-a="grupo">Volver</button>';
+  if(otro&&misGrupos()>=gruposTope()) return shTop("Otro grupo","Hasta "+gruposTope()+" grupos a la vez")+'<div class="scroll"><p class="texto chico">Ya estás en '+misGrupos()+' grupos. Para sumarte a otro, salí primero de alguno.</p></div><button class="primary ink" data-a="grupo">Volver</button>';
   if(!grupo.gid||grupo.meta===false||otro){ const m=sheet.m||"";
     return shTop(otro?"Otro grupo":"Grupo de perseverancia",otro?"Seguís también en «"+esc(grupo.meta.n)+"»":"Rezar es más fácil acompañado")+'<div class="scroll"><div class="sbanner"><img src="'+ilu("grupo")+'" alt=""><span class="g"></span></div>'+
      (grupo.meta===false?'<p class="hint">Ese grupo ya no existe.</p>':'')+
@@ -734,7 +770,7 @@ function shGrupo(){ const local=backend&&backend.mode==="local";
    rankGruposHTML()+
    (I.length?'<div class="card"><div class="eyebrow" style="margin-bottom:8px">Tus insignias</div><div class="insrow">'+I.map(x=>'<span class="insc">'+insigniaSVG(x.k)+'<b>'+esc(INSIG[x.k][0])+'</b><small>'+esc(fLarga(x.lun).replace(/^\w+ /,""))+'</small></span>').join("")+'</div></div>':'<p class="hint">Cuando el grupo cumple el desafío de la semana, todos se llevan la insignia del equipo. Lo que ganás acá va a quedar en tu cuenta para el juego Scaeli.</p>')+
    '<div class="gbot"><button class="primary" data-a="gInvitar">'+ic("plus")+' Invitar amigos</button><button class="ghost g" data-a="gSalir">'+ic("out")+' Salir del grupo</button></div>'+
-   (local?'':'<button class="plusrow gotro" data-a="gOtro"><span class="n"><b>Sumarme a otro grupo</b><small>'+(esPlus()?'Hasta '+GRUPOS_PLUS+' grupos a la vez: la parroquia, el colegio, la familia… Seguís en este.':'Con Scaeli+, hasta '+GRUPOS_PLUS+' grupos a la vez: la parroquia, el colegio, la familia…')+'</small></span>'+(esPlus()?ic("plus"):'<span class="plus-mini">'+ic("lock")+' Scaeli+</span>')+'</button>')+
+   (local?'':'<button class="plusrow gotro" data-a="gOtro"><span class="n"><b>Sumarme a otro grupo</b><small>'+(esPlus()?'Hasta '+GRUPOS_PLUS+' grupos a la vez: la parroquia, el colegio, la familia… Seguís en este.':'Podés estar en '+GRUPOS_GRATIS+' grupos a la vez; con Scaeli+, hasta '+GRUPOS_PLUS+': la parroquia, el colegio, la familia…')+'</small></span>'+(esPlus()||misGrupos()<GRUPOS_GRATIS?ic("plus"):'<span class="plus-mini">'+ic("lock")+' Scaeli+</span>')+'</button>')+
    '<p class="hint" style="text-align:center;margin-top:10px">Código: <b style="letter-spacing:.2em">'+G.id+'</b>'+(creador&&G.portada?' · <button class="lnk" data-a="gPortadaQuitar">Quitar la portada</button>':'')+'</p>')+
    '</div><button class="primary ink" data-a="cerrar">Volver</button>'; }
 
@@ -1300,7 +1336,7 @@ function confirmar(tit,txt,ok,no){ return new Promise(res=>{ const el=document.c
 function shPlusPaywall(desde){ const nat=esNativo(), P=sheet.planes, eq=delEquipo()||plusPrueba(), activo=esPlus();
   if(nat&&comprasDisponibles()&&!P&&!sheet.cargandoP){ sheet.cargandoP=1; comprasPlanes().then(x=>{ if(sheet){ sheet.planes=x||{}; renderSheet(); } }); }
   const precio=(p,def)=>p&&p.product&&p.product.priceString?p.product.priceString:def;
-  const ben=[["Caminos largos de oración","La Consagración a María en 33 días, los Ejercicios de San Ignacio en 30, un retiro de 7 días y San Marcos entero en 16. Y los del tiempo litúrgico: Adviento, Navidad, Cuaresma y Pascua."],["Rezar con audio","El Rosario guiado con voz, que pasa solo las cuentas, y música para rezar: órgano suave, noche o silencio con campana."],["Grupos y diario sin límites","Hasta 3 grupos de perseverancia a la vez y todo tu diario, con buscador y para guardar en PDF."],["Cancionero con acordes","Los acordes sobre la letra, en Do Re Mi o cifrado americano, el cambio de tono y tus propios cantos."],["Formación de cada día","Una pregunta del Catecismo por día, con su respuesta, para ir formándote de a poco."],["Tu progreso y tus virtudes","Tus hábitos y tu oración semana a semana, y el esquema de las virtudes que más trabajás y las que te faltan."],["Incluye Scaeli Fit","Una sola suscripción para las dos apps: ayuno con planes, rutinas por objetivo, escaneo de comidas por foto e informes."],["Tu año con Dios","Tu año en historias: días con Dios, rachas, Rosarios, Evangelios, novenas y tu nivel, con una imagen para compartir."],["Sostenés Scaeli","Un proyecto para acercar a los jóvenes a Dios, sin publicidad."]];
+  const ben=[["Caminos largos de oración","La Consagración a María en 33 días, los Ejercicios de San Ignacio en 30, un retiro de 7 días y San Marcos entero en 16. Y los del tiempo litúrgico: Adviento, Navidad, Cuaresma y Pascua."],["Rezar con audio","El Rosario guiado con voz, que pasa solo las cuentas, y música para rezar: órgano suave, noche o silencio con campana."],["Grupos y diario sin límites","Hasta 10 grupos de perseverancia a la vez (gratis, 2) y todo tu diario, con buscador y para guardar en PDF."],["Cancionero con acordes","Los acordes sobre la letra, en Do Re Mi o cifrado americano, el cambio de tono y tus propios cantos."],["Formación de cada día","Una pregunta del Catecismo por día, con su respuesta, para ir formándote de a poco."],["Tu progreso y tus virtudes","Tus hábitos y tu oración semana a semana, y el esquema de las virtudes que más trabajás y las que te faltan."],["Incluye Scaeli Fit","Una sola suscripción para las dos apps: ayuno con planes, rutinas por objetivo, escaneo de comidas por foto e informes."],["Tu año con Dios","Tu año en historias: días con Dios, rachas, Rosarios, Evangelios, novenas y tu nivel, con una imagen para compartir."],["Sostenés Scaeli","Un proyecto para acercar a los jóvenes a Dios, sin publicidad."]];
   const anual=P&&P.anual, mensual=P&&P.mensual, pa=anual&&anual.product&&anual.product.price, pm=mensual&&mensual.product&&mensual.product.price;
   const ahorro=pa&&pm?Math.round((1-pa/(pm*12))*100):44;
   return shTop("Scaeli+",activo?"Lo tenés activo":"Para crecer en lo que ya rezás")+'<div class="scroll"><div class="plus-hero"><span class="plus-tag">Scaeli<b>+</b></span><p>La oración es gratis siempre. Scaeli+ te ayuda a ver tu camino y a sostenerlo.</p></div>'+
@@ -1767,7 +1803,7 @@ function startSession(u,local){ user=u; unsubs.forEach(f=>{try{f()}catch(e){}});
   w(()=>backend.watchDoc("daily_settings/grupo",v=>{ const gid=v&&v.gid||null; gOtros=((v&&v.otros)||[]).filter(x=>x&&x.gid&&x.gid!==gid).slice(0,GRUPOS_PLUS-1); if(gid!==grupo.gid) grupoAbrir(gid); else { render(); if(sheet&&sheet.view==="grupo") renderSheetQuieto(); } }));
   w(()=>backend.watchDoc("daily_settings/retiros",v=>{ retiros=v||{}; if(view==="hoy"||view==="rezar") render(); if(sheet&&(sheet.view==="retiro"||sheet.view==="retiros")) renderSheetQuieto(); }));
   w(()=>backend.watchDoc("daily_settings/rutina",v=>{ rutina={diarias:(v&&v.diarias)||[],habitos:(v&&v.habitos)||[]}; if(view==="dia"||view==="hoy") render(); if(sheet&&sheet.view==="progreso") renderSheetQuieto(); grupoSync(); }));
-  ready=true; render(); volverAlLugar(); cargarEvangelio(); plusRefrescar().catch(()=>{});
+  ready=true; render(); volverAlLugar(); cargarEvangelio(); plusRefrescar().catch(()=>{}); if(pushOn()&&!navigator.webdriver) setTimeout(()=>pushEncender(true).catch(()=>{}),4000);
   const inv=lsGet("daily_grupo_inv"); if(inv){ if(local) setTimeout(()=>openSheet({view:"grupo"}),300); else setTimeout(()=>openSheet({view:"grupo",m:"codigo",inv,nuevo:1}),300); } }
 function endSession(){ nivelAntes=null; retiros={}; gOtros=[]; rosVoz=false; rosVozK=""; callar(); musicaStop(); plusBE=null; plusDoc=null; grupoCerrar(); grupoBE=null; user=null; backend=null; ready=false; unsubs.forEach(f=>{try{f()}catch(e){}}); unsubs=[]; days={}; entrenos={}; diasOk=0; profile=null; intents=[]; rosario=null; novenas=[]; propositos=[]; rutina={diarias:[],habitos:[]}; sheet=null; $("#scrim").hidden=true; $("#sheet").hidden=true; renderLogin(); }
 
@@ -1855,6 +1891,11 @@ const ACC={ ...CANC.ACC,
   async camOk(p){ const d=dayOf(p), c={...(d.cam||{})}, k=sheet.p||"adviento"; c[k]=c[k]?0:1; await setDay(p,{cam:c,t:Date.now()}); renderSheetQuieto(); },
   async camCita(p){ const m=String(p).match(/^((?:[123] )?\S+) (\d+),(\d+)/); if(!m) return; try{ await bibIndice(); }catch(e){ toast("No se pudo abrir la Biblia."); return; } const r=bibReferencia(m[1]+" "+m[2]+","+m[3]); if(!r) return; openSheet({view:"biblia",m:"libros"}); bibAbrir(r.b,r.c,r.v); },
   grupo(){ openSheet({view:"grupo"}); },
+  grupoEn(p){ if(!enGrupo()){ openSheet({view:"grupo"}); return; } openSheet({view:"grupo",gt:p}); if(p==="muro"){ lsSet("daily_muro_visto",Date.now()); setTimeout(chatAbajo,60); render(); } },
+  encNuevoOVer(){ if(!enGrupo()) return; if(encuentros().length) openSheet({view:"grupo",gt:"ranking"}); else openSheet({view:"encuentro"}); },
+  irMas(){ irA("mas"); }, irYo(){ irA("yo"); },
+  async pushOn(){ if(pushOn()){ lsSet("daily_push",null); try{ await pushDesactivar(); await backend.setDoc("daily_settings/push",{on:false,t:null,f:hoy()}); }catch(e){} toast("Avisos de Scaeli desactivados"); render(); return; }
+    if(pushFaltaInstalar()){ toast("En iPhone: tocá Compartir y «Agregar a inicio»; después activalos desde la app instalada"); return; } await pushEncender(false); },
   async gEjemplo(){ if(!grupoBE||grupoBE.mode!=="local") return; const gid=await grupoBE.crear("Los de la parroquia",miFicha()); const lun=semanaDe(), ant=addDays(lun,-7), ej={};
     [["Juan",{sx:"m",prenda:"remera:azul",peinado:"corto"},[64,120]],["Clari",{sx:"f",prenda:"buzo:bordo",peinado:"suelto"},[92,70]],["Mateo",{sx:"m",prenda:"camisa:blanco",peinado:"base"},[31,150]],["Sofi",{sx:"f",prenda:"pollera:negro",peinado:"corto"},[77,40]]].forEach((x,i)=>{ const u="ej"+i; ej[u]={n:x[0],av:x[1],int:["Por mi abuela, que está enferma","Por los exámenes","Por mi hermano","Por la misión de verano"][i],s:{[lun]:{r:i+1,e:3-(i%2),d:4,x:2,o:1,p:x[2][0]},[ant]:{r:4,e:5,d:6,x:3,o:2,p:x[2][1]}},rece:{local:{n:1,t:Date.now()}},al:i===1?{local:[1,Date.now()]}:{},act:[["r"+i,"r","",Date.now()-(i*55+20)*60000],["e"+i,i%2?"e":"pal","",Date.now()-(i*80+90)*60000]].slice(0,i===3?1:2),am:{},cs:Object.fromEntries(CARTAS.filter((c,j)=>(j*7+i*3)%11===0).map((c,j)=>[c.id,Math.round(Date.now()/1000)-86400*(10-j%9)-i*3600])),t:Date.now()}; });
     Object.values(ej).forEach((x,i)=>{ x.rg=[310,170,90,240][i]; }); grupoBE._sembrar(gid,ej);
@@ -1891,7 +1932,7 @@ const ACC={ ...CANC.ACC,
   async gUnirme(p){ const gid=String(p||"").toUpperCase().trim(); if(!gid) return; let G=null; try{ G=await grupoBE.leer(gid); }catch(e){} if(!G){ sheet.err="No encontramos un grupo con ese código."; sheet.m="codigo"; renderSheet(); return; }
     if(G.tipo){ sheet.err="Ese código es de un grupo de Scaeli Fit."; sheet.m="codigo"; renderSheet(); return; }
     if(gid===grupo.gid||gOtros.some(x=>x.gid===gid)){ lsSet("daily_grupo_inv",null); if(gid!==grupo.gid) await ACC.gCambiar(gid); toast("Ya estás en «"+G.n+"»"); openSheet({view:"grupo"}); return; }
-    if(grupo.gid&&grupo.meta&&!esPlus()){ lsSet("daily_grupo_inv",null); openSheet({view:"plus",desde:"grupos"}); toast("Para estar en más de un grupo, Scaeli+"); return; }
+    if(grupo.gid&&grupo.meta&&!esPlus()&&misGrupos()>=GRUPOS_GRATIS){ lsSet("daily_grupo_inv",null); openSheet({view:"plus",desde:"grupos"}); toast("Para estar en más de "+GRUPOS_GRATIS+" grupos, Scaeli+"); return; }
     if(misGrupos()>=GRUPOS_PLUS){ toast("Ya estás en "+GRUPOS_PLUS+" grupos: salí de uno primero"); return; }
     try{ await grupoBE.setMiembro(gid,miFicha()); }catch(e){ sheet.err="No se pudo entrar. Revisá la conexión."; sheet.m="codigo"; renderSheet(); return; } await grupoEntrar(gid,G.n); lsSet("daily_grupo_inv",null); toast("¡Bienvenido a "+G.n+"!"); openSheet({view:"grupo"}); },
   anio(){ openSheet({view:"anio",i:0,full:1}); }, anioIr(p){ if(!sheet||sheet.view!=="anio") return; const n=(sheet.i||0)+(+p); if(n<0) return; if(sheet.S&&n>=sheet.S.length){ closeSheet(); return; } sheet.i=n; renderSheet(); },
@@ -1998,7 +2039,7 @@ document.addEventListener("submit",e=>{ const f=e.target; if(!f.dataset.f) retur
   if(f.dataset.f==="plusCodigo"){ const c=String((f.querySelector("input")||{}).value||"").trim().toUpperCase(); if(esNativo()){ toast("Los códigos se canjean desde la web."); return; }
     if(!plusBE){ toast("Para canjear un código, entrá con tu cuenta."); return; } (async()=>{ const r=await plusBE.canjear(c); if(r.ok){ lsSet("daily_plus_como_gratis",null); toast("Scaeli+ activado"+(r.doc.until?" hasta el "+fLarga(r.doc.until).replace(/^\w+ /,""):"")+". Vale también en Scaeli Fit."); } else toast(r.msg); renderSheet(); render(); })(); return; }
   if(f.dataset.f==="grupoCrear"){ const n=String((f.querySelector("input")||{}).value||"").trim().slice(0,40); if(!n) return; if(!limpio(n)){ toast("Elegí otro nombre"); return; }
-    if(grupo.gid&&grupo.meta&&!esPlus()){ openSheet({view:"plus",desde:"grupos"}); return; } if(misGrupos()>=GRUPOS_PLUS&&grupo.gid){ toast("Ya estás en "+GRUPOS_PLUS+" grupos: salí de uno primero"); return; }
+    if(grupo.gid&&grupo.meta&&!esPlus()&&misGrupos()>=GRUPOS_GRATIS){ openSheet({view:"plus",desde:"grupos"}); return; } if(misGrupos()>=GRUPOS_PLUS&&grupo.gid){ toast("Ya estás en "+GRUPOS_PLUS+" grupos: salí de uno primero"); return; }
     (async()=>{ try{ const gid=await grupoBE.crear(n,miFicha()); await grupoEntrar(gid,n); toast("Grupo creado · código "+gid); openSheet({view:"grupo"}); }catch(e){ toast("No se pudo crear el grupo."); } })(); return; }
   if(f.dataset.f==="grupoUnirse"){ const c=String((f.querySelector("input")||{}).value||"").toUpperCase().replace(/[^A-Z0-9]/g,""); if(document.activeElement&&document.activeElement.blur) document.activeElement.blur(); ACC.gUnirme(c); return; }
   if(f.dataset.f==="grupoInt"){ const t=String((f.querySelector("input")||{}).value||"").trim().slice(0,80); if(t&&!limpio(t)){ toast("Elegí otras palabras"); return; } if(document.activeElement&&document.activeElement.blur) document.activeElement.blur(); grupoBE.setMiembro(grupo.gid,{int:t}).then(()=>toast(t?"Intención guardada":"Intención borrada")).catch(()=>toast("No se pudo guardar")); return; }

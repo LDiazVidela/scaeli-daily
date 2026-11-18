@@ -26,6 +26,18 @@ async function medir(){
   if(analytics||!app||navigator.webdriver) return;
   for(const base of [SDK_LOCAL,SDK_CDN]){ try{ const A=await import(base+"firebase-analytics.js"); if(!(await A.isSupported())) return; analytics=A.getAnalytics(app); medirEv=A.logEvent; return; }catch(e){} } }
 let medirEv=null;
+/* 2.6 · Avisos de Scaeli (push web, Firebase Cloud Messaging): solo para quien los activa en Más. Los manda Lorenzo desde
+   la consola de Firebase → Messaging → campaña de notificaciones. La clave pública (VAPID) es la del proyecto scaeli.
+   El service worker (sw.js) muestra el aviso cuando la app está cerrada; con la app abierta lo muestra `alLlegar`. */
+const PUSH_VAPID="BC0GvJNzvoHf7kMgBGH5Bs__u_JxmPormWw3vlhjeiOcvhFpSywqiNsYJ3pYp6VmSy3Mp1zn-U9r1_In-P_vEo0";
+let PM=null;
+async function pushSDK(){ if(PM) return PM; if(!(await conectar())) return null; for(const base of [SDK_LOCAL,SDK_CDN]){ try{ const M=await import(base+"firebase-messaging.js"); if(!(await M.isSupported())) return null; PM=M; return M; }catch(e){} } return null; }
+export async function pushSoportado(){ try{ return !!(typeof Notification!=="undefined"&&navigator.serviceWorker&&await pushSDK()); }catch(e){ return false; } }
+export async function pushActivar(alLlegar){ const M=await pushSDK(); if(!M) return {err:"nosoporta"};
+  let perm="default"; try{ perm=await Notification.requestPermission(); }catch(e){} if(perm!=="granted") return {err:perm==="denied"?"bloqueado":"permiso"};
+  try{ const reg=await navigator.serviceWorker.ready, msg=M.getMessaging(app); const token=await M.getToken(msg,{vapidKey:PUSH_VAPID,serviceWorkerRegistration:reg}); if(!token) return {err:"token"};
+    if(alLlegar) M.onMessage(msg,p=>{ try{ alLlegar((p&&p.notification)||{}, p&&p.data); }catch(e){} }); return {ok:true,token}; }catch(e){ return {err:"token",det:String(e&&e.message||e)}; } }
+export async function pushDesactivar(){ const M=await pushSDK(); if(!M) return false; try{ return await M.deleteToken(M.getMessaging(app)); }catch(e){ return false; } }
 export function evento(nombre, datos){ try{ if(analytics&&medirEv) medirEv(analytics,nombre,datos||{}); }catch(e){} }
 
 let app=null, auth=null, db=null, provider=null;

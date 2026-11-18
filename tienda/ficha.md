@@ -62,7 +62,7 @@ SCAELI+ (OPCIONAL)
 La oración de todos los días es gratis siempre. Con Scaeli+ sumás:
 • Caminos largos de oración: la Consagración a María en 33 días, los Ejercicios de San Ignacio en 30, un retiro de 7 días y San Marcos entero en 16. Y los de Adviento, Navidad, Cuaresma y Pascua.
 • Rezar con audio: el Rosario guiado con voz, que pasa solo las cuentas, y música para rezar (órgano, noche o silencio con campana).
-• Hasta 3 grupos a la vez y todo tu diario, con buscador y en PDF.
+• Hasta 10 grupos a la vez y todo tu diario, con buscador y en PDF.
 • Tu progreso y tus virtudes, y tu año con Dios en historias.
 Scaeli+ cuesta USD 2,99 por mes o USD 19,99 por año (o su equivalente en tu moneda) y se renueva sola hasta que la canceles desde tu cuenta de la tienda. También podés ayudar al proyecto con una donación.
 
@@ -73,7 +73,7 @@ TUS DATOS SON TUYOS
 Scaeli Daily es parte de Scaeli, junto con Scaeli Fit y el juego Scaeli. Tu fe, a otro nivel.
 
 ## Novedades de esta versión (500)
-Primera versión en las tiendas: la Biblia completa (Biblia Platense), el Rosario completo, 30 novenas, Lectio y Examen en pantalla completa, la guía de la Misa, la Liturgia de las Horas y grupos de perseverancia. Nuevo en Scaeli+: caminos largos de oración (Consagración a María, Ejercicios de San Ignacio, retiro de 7 días y San Marcos), el Rosario guiado con voz, música para rezar, hasta 3 grupos y el diario completo en PDF.
+Primera versión en las tiendas: la Biblia completa (Biblia Platense), el Rosario completo, 30 novenas, Lectio y Examen en pantalla completa, la guía de la Misa, la Liturgia de las Horas y grupos de perseverancia. Nuevo en Scaeli+: caminos largos de oración (Consagración a María, Ejercicios de San Ignacio, retiro de 7 días y San Marcos), el Rosario guiado con voz, música para rezar, hasta 10 grupos y el diario completo en PDF.
 
 ## Material gráfico (en esta carpeta)
 - `grafico-destacado.png` · 1024×500 (Google Play)

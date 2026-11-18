@@ -7,7 +7,7 @@ const { chromium } = require('playwright');
   { const listo=/const APPLE_LISTO=true/.test(require('fs').readFileSync(__dirname+'/../js/app.js','utf8')); ok(!!(await p.$('#loginApple'))===listo,'boton apple solo si Apple está activado en Firebase'); } ok((await p.textContent('#app')).includes('Política de privacidad'),'link privacidad');
   await p.click('#invitado'); await p.waitForTimeout(1500);
   const A = async (a, q, ms = 300) => { await p.evaluate(([a, q]) => window.DAILY.ACC[a](q), [a, q]); await p.waitForTimeout(ms); };
-  await A('horaOk','m'); await p.click('#nav button[data-view="mas"]'); await p.waitForTimeout(400);
+  await A('horaOk','m'); await p.evaluate(()=>window.DAILY.ir('mas')); await p.waitForTimeout(400);
   ok((await p.textContent('#app')).includes('Borrar mis datos'),'borrar en más');
   await A('borrar','datos'); ok((await p.textContent('#sheetIn')).includes('No se puede deshacer'),'confirmación');
   await A('borrarOk',undefined,800); ok(await p.$('#invitado'),'vuelve al login');
