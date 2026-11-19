@@ -89,13 +89,42 @@ const limpiarV = v => String(v).replace(/^[A-ZÁÉÍÓÚ]{2,6}\.\s+/, "").trim()
 // en los salmos, el primer versículo de la Platense trae el epígrafe («Cántico gradual.», «Salmo de David.»): no se lee en la Misa
 const sinEpigrafe = v => { const ls = v.split("\n"); return ls.length > 1 && ls[0].length < 70 && /\.$/.test(ls[0]) ? ls.slice(1).join("\n") : v; };
 
-export async function textoDe(cita) {
+// 2.8 · Torres Amat (biblia-ta/, herramientas/torres_amat.py). La cita se resuelve con la numeración de la Platense (arriba) y cada
+// versículo se pasa al de Torres Amat con biblia-ta/mapa.json (solo difieren algunos cortes). Si falta el pasaje (Est 11-16, Dn 13-14), null.
+const BIB_TA = new URL("../biblia-ta/", import.meta.url); const cacheTA = {}; let MAPA = null;
+const libroTA = async id => cacheTA[id] || (cacheTA[id] = JSON.parse(await readFile(new URL(id + ".json", BIB_TA), "utf8")));
+// en Torres Amat el epígrafe del salmo va pegado al versículo 1 («Salmo de David. El Señor es mi pastor…»): no se lee en la Misa
+const sinEpigrafeTA = v => { const m = v.match(/^((?:Salmo|Cántico|Himno|Oración|Alabanza|Instrucción|Inteligencia|Para el fin|Al fin|Título|Inscripción|En memoria|Testimonio)[^.]{0,90}\.)\s+(?=\S)/); return m ? v.slice(m[0].length) : v; };
+async function textoTA(id, T, L) {
+  let A; try { A = await libroTA(id); MAPA = MAPA || JSON.parse(await readFile(new URL("mapa.json", BIB_TA), "utf8")); } catch { return null; }
+  const M = MAPA[id] || {}, bloques = []; let pc = 0, pb = 0; const visto = new Set();
+  for (let [c, a, b] of T) {
+    if (c === pc && a <= pb) a = pb + 1;
+    if (a > b) continue;
+    pc = c; pb = b;
+    const ch = L.c[c - 1]; if (!ch || a > ch.length) return null;
+    const vs = [];
+    for (let v = a; v <= Math.min(b, ch.length); v++) for (const [tc, tv] of (M[c + "," + v] || [[c, v]])) {
+      const k = tc + "," + tv; if (visto.has(k)) continue; visto.add(k);
+      let t = A.c[tc - 1] && A.c[tc - 1][tv - 1]; if (!t) return null;
+      if (id === "Ps" && tv === 1) t = sinEpigrafeTA(t);
+      if (t) vs.push(t);
+    }
+    if (!vs.length) return null;
+    bloques.push(id === "Ps" ? vs.join("\n") : vs.join(" "));
+  }
+  const may = t => t.replace(/^([“«¡¿(—\s]*)(\p{Ll})/u, (x, a, b) => a + b.toUpperCase());
+  return bloques.length ? { libro: id, nombre: L.n, texto: bloques.map(may).join("\n\n") } : null;
+}
+
+export async function textoDe(cita, trad) {
   const s = String(cita || "").replace(/_/g, " ").replace(/\.$/, "").trim();
   const m = s.match(/^((?:[123] )?[A-ZÁÉÍÓÚ][a-záéíóú]{0,3})\s+(.+)$/);
   if (!m || !LIB[m[1]]) return null;
   const id = LIB[m[1]], T = tramos(id, m[2]);
   if (!T) return null;
   let L; try { L = await libro(id); } catch { return null; }
+  if (trad === "ta") return textoTA(id, T, L);
   const bloques = []; let pc = 0, pb = 0;
   for (let [c, a, b] of T) {
     // «2-3ab.3cd-4»: el versículo partido en dos estrofas se lee una sola vez
@@ -106,7 +135,7 @@ export async function textoDe(cita) {
     const vs = ch.slice(a - 1, Math.min(b, ch.length)).map((v, i) => { let t = limpiarV(v); if (id === "Ps" && a + i === 1) t = sinEpigrafe(t); return t; }).filter(Boolean);
     if (!vs.length) return null;
     const verso = vs.some(v => v.includes("\n"));
-    bloques.push(verso ? vs.join("\n") : vs.join(" "));
+    bloques.push(verso ? vs.join("\n") : vs.map((v, i) => i && /[.!?]["”»]?$/.test(vs[i - 1]) ? v.replace(/^(\p{Ll})/u, x => x.toUpperCase()) : v).join(" "));
   }
   const may = t => t.replace(/^([“«¡¿(—\s]*)(\p{Ll})/u, (x, a, b) => a + b.toUpperCase());
   if (!bloques.length) return null;

@@ -23,7 +23,7 @@ import * as PJ from "./personaje.js";
 import { RETIROS } from "../data/retiros.js";   // 2.2: caminos largos de oración (Scaeli+)
 import { MUSICAS, musicaPlay, musicaStop, musicaEstado, musicaAlCambiar, campana, vozDisponible, decir, callar } from "./audio.js";
 
-export const VERSION="2.7";
+export const VERSION="2.8";
 const LOGO_GOOGLE='<svg class="logo-g" viewBox="0 0 48 48" aria-hidden="true"><path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/><path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/><path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/><path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/></svg>';
 const LOGO_APPLE='<svg class="logo-a" viewBox="0 0 814 1000" aria-hidden="true"><path fill="currentColor" d="M788.1 340.9c-5.8 4.5-108.2 62.2-108.2 190.5 0 148.4 130.3 200.9 134.2 202.2-.6 3.2-20.7 71.9-68.7 141.9-42.8 61.6-87.5 123.1-155.5 123.1s-85.5-39.5-164-39.5c-76.5 0-103.7 40.8-165.9 40.8s-105.6-57-155.5-127C46.7 790.7 0 663 0 541.8c0-194.4 126.4-297.5 250.8-297.5 66.1 0 121.2 43.4 162.7 43.4 39.5 0 101.1-46 176.3-46 28.5 0 130.9 2.6 198.3 99.2zm-234-181.5c31.1-36.9 53.1-88.1 53.1-139.3 0-7.1-.6-14.3-1.9-20.1-50.6 1.9-110.8 33.7-147.1 75.8-28.5 32.4-55.1 83.6-55.1 135.5 0 7.8 1.3 15.6 1.9 18.1 3.2.6 8.4 1.3 13.6 1.3 45.4 0 102.5-30.4 135.5-71.3z"/></svg>';
 /* la dirección publicada: la app de las tiendas lee de acá los Evangelios del día (los genera la GitHub Action cada noche) */
@@ -116,9 +116,21 @@ function semanaHTML(){ const d=parse(hoy()); const lun=addDays(hoy(),-((d.getDay
     o+='<div class="d"><i class="'+(full?"on":half?"half":"")+(s===hoy()?" hoy":"")+'">'+(full?"✓":half?"·":fut?"":"")+'</i>'+DOWS[(i+1)%7]+'</div>'; }
   return o+'</div>'; }
 
+/* 2.8 · dos traducciones de la Biblia: Torres Amat (1823, de la Vulgata; por defecto) y la Platense (Straubinger, 1948).
+   Se elige en la Biblia o al pie de las lecturas y queda en el dispositivo (daily_trad). Cada lectura del día trae las dos:
+   «texto» (Platense) y «ta» (Torres Amat, herramientas/torres_amat.py); si a un pasaje le falta la de Torres Amat, se lee la Platense. */
+const TRADS={ta:["Torres Amat","Biblia de Torres Amat (1823)"],pl:["Platense","Biblia Platense (Mons. Juan Straubinger)"]};
+function trad(){ try{ return localStorage.getItem("daily_trad")==="pl"?"pl":"ta"; }catch(e){ return "ta"; } }
+function evTrad(j){ if(!j||typeof j!=="object") return j; const t=trad();
+  for(const k of ["primera","salmo","segunda","evangelio"]){ const x=j[k]; if(!x||!x.texto) continue; if(x.pl===undefined) x.pl=x.texto;
+    const ta=t==="ta"&&x.ta; x.texto=ta?x.ta:x.pl; x.tr=ta?"ta":"pl"; }
+  return j; }
+const tradSeg=()=>'<div class="seg trseg" role="group" aria-label="Traducción">'+Object.keys(TRADS).map(k=>'<button data-a="tradSet" data-p="'+k+'" aria-pressed="'+(k===trad())+'">'+TRADS[k][0]+'</button>').join("")+'</div>';
+function tradPie(j){ const t=trad(), mezcla=j&&t==="ta"&&["primera","salmo","segunda","evangelio"].some(k=>j[k]&&j[k].texto&&j[k].tr==="pl");
+  return '<p class="novsrc">Texto: '+TRADS[t][1]+(mezcla?' (lo que no trae, de la Biblia Platense)':'')+'</p>'+tradSeg(); }
 /* ── el Evangelio del día: un archivo por día que GitHub deja listo en evangelio/ (herramientas/evangelio.mjs) ── */
 async function cargarEvangelio(){ const f=hoy(); if(evHoy&&evHoy.fecha===f) return; if(evEstado===f) return; evEstado=f;
-  try{ const r=await fetch((esNativo()?SITIO:"")+"evangelio/"+f+".json",{cache:"no-store"}); if(!r.ok) throw 0; const j=await r.json(); if(!j||!j.evangelio||!j.evangelio.texto) throw 0; evHoy=j; }
+  try{ const r=await fetch((esNativo()?SITIO:"")+"evangelio/"+f+".json",{cache:"no-store"}); if(!r.ok) throw 0; const j=await r.json(); if(!j||!j.evangelio||!j.evangelio.texto) throw 0; evHoy=evTrad(j); }
   catch(e){ const L=LECTIO[semilla(f)%LECTIO.length]; evHoy={fecha:f,dia:"",evangelio:{titulo:"Evangelio según "+L[0].split(" ")[0],cita:L[0],texto:L.slice(1).map(x=>x[1]).join("\n\n")},respaldo:true}; }
   render(); }
 const ideaHoy=()=>IDEAS[semilla(hoy()+"i")%IDEAS.length];
@@ -523,12 +535,13 @@ function renderMas(){ const claro=document.documentElement.getAttribute("data-th
      (PAGOS_WEB&&!esNativo()?'<div class="row"><div class="n"><b>Botón de arrepentimiento</b><small>10 días corridos desde el pago para arrepentirte</small></div><a class="ghost g" href="arrepentimiento.html" target="_blank" rel="noopener">Abrir</a></div>'+
        '<div class="row"><div class="n"><b>Botón de baja</b><small>Cancelar Scaeli+ pagado desde la web</small></div><a class="ghost g" href="baja.html" target="_blank" rel="noopener">Abrir</a></div>':'')+
      '<div class="row"><div class="n"><b>Créditos y licencias</b><small>De dónde viene cada texto</small></div><button class="ghost g" data-a="creditos">Ver</button></div></div>'+
-   '<p class="hint" style="text-align:center">Scaeli Daily '+VERSION+' · Biblia Platense (Mons. Straubinger)</p>'; }
+   '<p class="hint" style="text-align:center">Scaeli Daily '+VERSION+' · Biblias de Torres Amat y Platense</p>'; }
 
 /* ── 2.1: créditos y licencias: de dónde viene cada texto y cada recurso ── */
 const CREDITOS=[
- ["La Biblia y las lecturas","Biblia Platense, traducción de Mons. Juan Straubinger (La Plata, 1948-1951). Es el texto de la Biblia, de la Palabra del día, de las lecturas de la Misa, de las meditaciones del Rosario, de la Lectio y de los cánticos (Magníficat, Benedictus y Nunc dimittis)."],
- ["Las citas de las lecturas del día","Las citas (qué lectura toca cada día) se toman de Evangelizo.org. El texto que se lee en la app es siempre el de la Biblia Platense."],
+ ["La Biblia y las lecturas de la Misa","Dos traducciones católicas, a elección (en la Biblia o al pie de las lecturas). Por defecto, la Biblia de Torres Amat: traducción de la Vulgata al castellano de Félix Torres Amat (1823-1825), en dominio público; texto digital de credobiblestudy.com, tomado del proyecto Iter Catholicum. La otra, la Biblia Platense."],
+ ["La Biblia Platense","Traducción de Mons. Juan Straubinger (La Plata, 1948-1951). Además de poder elegirse para la Biblia y las lecturas, es el texto de la Palabra del día, de las meditaciones del Rosario, de la Lectio y de los cánticos (Magníficat, Benedictus y Nunc dimittis)."],
+ ["Las citas de las lecturas del día","Las citas (qué lectura toca cada día) se toman de Evangelizo.org. El texto que se lee en la app es siempre el de la Biblia de Torres Amat o el de la Platense."],
  ["Liturgia de las Horas","No está copiada en la app: cada Hora se abre en liturgiadelashoras.github.io, en tu navegador."],
  ["Novenas, examen y caminos","Texto propio de Scaeli, con lecturas de la Biblia Platense. El Te Deum, el Ven, Espíritu Creador y la oración del Regina caeli son traducciones propias del latín. Más novenas, en Catholic.net (se abre en tu navegador)."],
  ["Oraciones de siempre","Las oraciones tradicionales de la Iglesia (Padrenuestro, Avemaría, Credo, Salve, Yo confieso, Pésame y otras), de uso común, y sus textos latinos."],
@@ -545,7 +558,7 @@ const BIB={idx:null,lib:{},cargando:{}};
 const BIB_K="daily_biblia";
 function bibGuardado(){ try{ return JSON.parse(localStorage.getItem(BIB_K)||"null"); }catch(e){ return null; } }
 function bibUltima(){ const g=bibGuardado(); if(!g||!BIB.idx) return ""; const L=BIB.idx.find(x=>x.id===g.b); return L?L.n+" "+g.c:""; }
-const bibURL=f=>"biblia/"+f;   // viene adentro de la app: se lee sin internet
+const bibURL=f=>(trad()==="ta"?"biblia-ta/":"biblia/")+f;   // vienen adentro de la app: se leen sin internet
 async function bibIndice(){ if(BIB.idx) return BIB.idx; if(!BIB.cargando.idx) BIB.cargando.idx=fetch(bibURL("indice.json")).then(r=>r.json()).then(j=>{ BIB.idx=j; return j; }); return BIB.cargando.idx; }
 async function bibLibro(id){ if(BIB.lib[id]) return BIB.lib[id]; if(!BIB.cargando[id]) BIB.cargando[id]=fetch(bibURL(id+".json")).then(r=>{ if(!r.ok) throw 0; return r.json(); }).then(j=>{ BIB.lib[id]=j; return j; }).catch(e=>{ delete BIB.cargando[id]; throw e; }); return BIB.cargando[id]; }
 bibIndice().catch(()=>{});
@@ -565,9 +578,9 @@ function shBiblia(){ const m=sheet.m||"libros";
   const buscador='<form class="bibq" data-f="bibBuscar"><input type="search" id="bibQ" placeholder="Jn 3,16 · Sal 23 · palabra" value="'+esc(sheet.q||"")+'" enterkeyhint="search" autocomplete="off"><button class="primary" type="submit" aria-label="Buscar">Buscar</button></form>';
   if(m==="libros"){ const g=bibGuardado(), gL=g&&BIB.idx.find(x=>x.id===g.b);
     const grupo=(t,gs)=>'<div class="sect">'+t+'</div>'+gs.map(gn=>'<div class="bibg"><small>'+gn+'</small><div class="bibl">'+BIB.idx.filter(b=>b.g===gn).map(b=>'<button data-a="bibLibro" data-p="'+b.id+'">'+esc(b.n)+'</button>').join("")+'</div></div>').join("");
-    return shTop("La Biblia","Biblia Platense · Mons. Juan Straubinger")+'<div class="scroll"><div class="sbanner"><img src="'+ilu("biblia")+'" alt=""><span class="g"></span></div>'+buscador+palabraCard()+
+    return shTop("La Biblia",trad()==="ta"?"Biblia de Torres Amat · 1823":"Biblia Platense · Mons. Juan Straubinger")+'<div class="scroll"><div class="sbanner"><img src="'+ilu("biblia")+'" alt=""><span class="g"></span></div>'+buscador+palabraCard()+
      (gL?'<button class="card lhnow" data-a="bibIr" data-p="'+g.b+'|'+g.c+'"><span class="n"><span class="eyebrow">Seguir leyendo</span><b>'+esc(gL.n)+' '+(g.b==="Ps"?salmoHoy(g.c):g.c)+'</b></span>'+ic("right")+'</button>':'')+
-     grupo("Antiguo Testamento",GRUPOS_AT)+grupo("Nuevo Testamento",GRUPOS_NT)+'<p class="hint" style="margin-top:14px">Texto: Biblia Platense o Biblia Comentada, traducción católica hecha en La Plata por Mons. Juan Straubinger (1948). Los Salmos llevan la numeración de esta Biblia y, entre paréntesis, la de hoy.</p></div>'+
+     grupo("Antiguo Testamento",GRUPOS_AT)+grupo("Nuevo Testamento",GRUPOS_NT)+'<div class="eyebrow" style="margin-top:18px">Traducción</div>'+tradSeg()+'<p class="hint" style="margin-top:10px">'+(trad()==="ta"?"Biblia de Torres Amat: traducción católica de la Vulgata al castellano, de Félix Torres Amat (1823-1825). No trae los capítulos 11 a 16 de Ester ni 13 y 14 de Daniel: están en la Platense.":"Biblia Platense o Biblia Comentada, traducción católica hecha en La Plata por Mons. Juan Straubinger (1948).")+' Los Salmos llevan la numeración de esta Biblia y, entre paréntesis, la de hoy.</p></div>'+
      '<button class="primary ink" data-a="cerrar">Volver</button>'; }
   if(m==="caps"){ const b=BIB.idx.find(x=>x.id===sheet.b);
     return shTop(esc(b.n),b.k+(b.k===1?" capítulo":" capítulos"))+'<div class="scroll"><div class="bibcaps">'+Array.from({length:b.k},(_,i)=>'<button data-a="bibIr" data-p="'+b.id+'|'+(i+1)+'">'+(b.id==="Ps"?salmoHoy(i+1):i+1)+'</button>').join("")+'</div></div>'+
@@ -1417,7 +1430,7 @@ function shHora(){ const H=HORA[sheet.p]||HORA.mediodia, k=momKey[sheet.p], d=da
 const EV_DIAS=14, evOtros={};
 const fechaMas=n=>{ const d=new Date(); d.setDate(d.getDate()+n); return d.getFullYear()+"-"+pad(d.getMonth()+1)+"-"+pad(d.getDate()); };
 async function cargarEvDe(f){ if(evOtros[f]!==undefined) return; evOtros[f]=null;
-  try{ const r=await fetch((esNativo()?SITIO:"")+"evangelio/"+f+".json",{cache:"no-store"}); if(!r.ok) throw 0; const j=await r.json(); if(!j||!j.evangelio||!j.evangelio.texto) throw 0; evOtros[f]=j; }
+  try{ const r=await fetch((esNativo()?SITIO:"")+"evangelio/"+f+".json",{cache:"no-store"}); if(!r.ok) throw 0; const j=await r.json(); if(!j||!j.evangelio||!j.evangelio.texto) throw 0; evOtros[f]=evTrad(j); }
   catch(e){ evOtros[f]=false; setTimeout(()=>{ if(evOtros[f]===false) delete evOtros[f]; },60000); }
   if(sheet&&sheet.view==="evangelio"&&sheet.f===f) renderSheet(); }
 function evTira(sel){ const DS=["dom","lun","mar","mié","jue","vie","sáb"]; let h='<div class="evtira hscroll" role="tablist" aria-label="Elegir el día">';
@@ -1431,10 +1444,10 @@ function shEvangelioDe(f){ const j=evOtros[f], cab='<div class="scroll lecturas"
   const lec=(rot,x)=>x&&x.texto?'<div class="eyebrow" style="margin-top:18px">'+rot+'</div><h3 class="st" style="font-size:20px;margin:4px 0 2px">'+esc(citaCorta(x.cita))+'</h3>'+(x.titulo?'<h4>'+evTit(x.titulo)+'</h4>':'')+'<p>'+esc(x.texto)+'</p>':'';
   return cab+'<div class="eyebrow">'+esc(fLarga(f))+'</div><h2 class="st" style="font-size:22px">'+esc(String(j.dia||"Lecturas del día").replace(/(\d+)a (semana|domingo)/gi,"$1.ª $2"))+'</h2>'+
    lec("Evangelio",j.evangelio)+lec("Primera lectura",j.primera)+lec("Salmo",j.salmo)+lec("Segunda lectura",j.segunda)+
-   '<p class="novsrc">Texto: Biblia Platense (Mons. Juan Straubinger)</p>'+pie; }
+   tradPie(j)+pie; }
 function shEvangelio(){ if(sheet.f&&sheet.f!==hoy()) return shEvangelioDe(sheet.f);
   const ev=evHoy; if(!ev) return shTop("Evangelio del día")+'<p class="hint">Cargando…</p>';
-  return '<div class="scroll lecturas"><div class="sbanner"><img src="'+ilu("evangelio")+'" alt=""><span class="g"></span><button class="iconbtn x" data-a="cerrar" aria-label="Cerrar">'+ic("x")+'</button></div>'+(ev.respaldo?'':evTira(hoy()))+'<div class="eyebrow">'+esc(String(ev.dia||"Evangelio del día").replace(/(\d+)a (semana|domingo)/gi,"$1.ª $2"))+'</div><h2 class="st">'+esc(citaCorta(ev.evangelio.cita))+'</h2><h4>'+esc(String(ev.evangelio.titulo||"").replace(/\.\s*$/,""))+'</h4><p>'+esc(ev.evangelio.texto)+'</p>'+(ev.respaldo?'<p class="hint">Hoy no se pudieron traer las lecturas del día; este es un pasaje para quedarse con Él.</p>':'<p class="novsrc">Texto: Biblia Platense (Mons. Juan Straubinger)</p>')+
+  return '<div class="scroll lecturas"><div class="sbanner"><img src="'+ilu("evangelio")+'" alt=""><span class="g"></span><button class="iconbtn x" data-a="cerrar" aria-label="Cerrar">'+ic("x")+'</button></div>'+(ev.respaldo?'':evTira(hoy()))+'<div class="eyebrow">'+esc(String(ev.dia||"Evangelio del día").replace(/(\d+)a (semana|domingo)/gi,"$1.ª $2"))+'</div><h2 class="st">'+esc(citaCorta(ev.evangelio.cita))+'</h2><h4>'+esc(String(ev.evangelio.titulo||"").replace(/\.\s*$/,""))+'</h4><p>'+esc(ev.evangelio.texto)+'</p>'+(ev.respaldo?'<p class="hint">Hoy no se pudieron traer las lecturas del día; este es un pasaje para quedarse con Él.</p>':tradPie(ev))+
    '<div class="card pad" style="margin-top:12px"><div class="eyebrow">Para hoy</div><p style="margin:6px 0 0">'+esc(ideaHoy())+'</p></div></div>'+'<div class="grid2"><button class="ghost g" data-a="lectio">'+ic("pen")+' Hacer lectio</button>'+(dayOf(hoy()).e?'<button class="ghost g" data-a="desmarcar" data-p="e">'+ic("x")+' Ya leído · sacar</button>':'<button class="primary" data-a="evOk" style="height:40px;font-size:14px">Amén</button>')+'</div>'; }
 /* los otros santos de cada día (data/santoral-mas.js, del Martirologio Romano): se cargan recién cuando se abre el santoral */
 let MAS=null, masCarga=null;
@@ -1784,7 +1797,7 @@ function shMisa(){ const ev=evHoy, f=hoy(), O=ordoDia(f), C=cicloDe(f);
       (G.N.length?'<div class="card"><div class="eyebrow">Para tener en cuenta</div><ul class="notas">'+G.N.map(n=>'<li>'+esc(n)+'</li>').join("")+'</ul></div>':''); }
   const ord='<div class="sect" style="margin-top:18px">El Ordinario de la Misa, paso a paso</div><p class="hint" style="margin:4px 0 8px">Ritos, gestos y posturas, según la Ordenación General del Misal Romano. Los textos están en el Misal.</p>'+
     MISA_ORDINARIO.map(p=>p[1]===null?'<div class="ordp">'+esc(p[0])+'</div>':'<details class="ord"><summary><b>'+esc(p[0])+'</b><small>'+esc(p[2])+'</small></summary><p><span class="ql">Sacerdote</span>'+esc(p[1])+'</p><p><span class="ql">Fieles</span>'+esc(p[2])+'</p>'+(p[3]?'<p class="nota">'+esc(p[3])+'</p>':'')+'</details>').join("");
-  const textos=lect.length?'<div class="sect" style="margin-top:18px">Las lecturas completas</div>'+lect.map(x=>'<details class="ord"><summary><b>'+x[0]+'</b><small>'+esc(citaCorta(x[1].cita))+'</small></summary><p class="lecttx">'+esc(x[1].texto||"Esta lectura se puede leer en la Biblia: "+citaCorta(x[1].cita)+".")+'</p></details>').join("")+'<p class="novsrc">Texto: Biblia Platense (Mons. Juan Straubinger) · citas del leccionario</p>':'';
+  const textos=lect.length?'<div class="sect" style="margin-top:18px">Las lecturas completas</div>'+lect.map(x=>'<details class="ord"><summary><b>'+x[0]+'</b><small>'+esc(citaCorta(x[1].cita))+'</small></summary><p class="lecttx">'+esc(x[1].texto||"Esta lectura se puede leer en la Biblia: "+citaCorta(x[1].cita)+".")+'</p></details>').join("")+'<p class="novsrc">Texto: '+TRADS[trad()][1]+' · citas del leccionario</p>':'';
   return shTop("La Misa de hoy","Guía del celebrante")+'<div class="scroll lecturas misa">'+guia+textos+ord+'<p class="novsrc">Calendario de la Argentina: GCatholic.org · Citas de las lecturas: Evangelizo.org</p></div>'+(dayOf(hoy()).misa?'<button class="primary ok" data-a="desmarcar" data-p="misa">'+ic("x")+' Fui a Misa hoy · sacar la marca</button>':'<button class="primary" data-a="misaOk">Fui a Misa hoy</button>'); }
 
 /* ── login ── */
@@ -1961,6 +1974,11 @@ const ACC={ ...CANC.ACC,
   async habSugerido(p){ const [v,...t]=String(p).split("|"); const tx=t.join("|"); const r={diarias:[...(rutina.diarias||[])],habitos:[...(rutina.habitos||[]),{id:newId("h"),t:tx,v}]}; await backend.setDoc("daily_settings/rutina",r); toast("Hábito agregado: "+tx); },
   async habVirtud(p){ const [id,v]=String(p).split("|"); const r={diarias:[...(rutina.diarias||[])],habitos:(rutina.habitos||[]).map(h=>h.id===id?{...h,v}:h)}; await backend.setDoc("daily_settings/rutina",r); },
   biblia(){ openSheet({view:"biblia",m:"libros"}); },
+  /* 2.8: cambia la traducción de la Biblia y de las lecturas (queda en el dispositivo) */
+  tradSet(p){ if(!TRADS[p]||p===trad()) return; try{ localStorage.setItem("daily_trad",p); }catch(e){}
+    BIB.idx=null; BIB.lib={}; BIB.cargando={}; evTrad(evHoy); Object.keys(evOtros).forEach(f=>evTrad(evOtros[f]));
+    bibIndice().then(()=>{ if(sheet&&sheet.view==="biblia"&&sheet.b){ const b=BIB.idx.find(x=>x.id===sheet.b); if(!b||(sheet.c||1)>b.k){ sheet.m="libros"; sheet.b=null; } } renderSheet(); }).catch(()=>{});
+    toast("Traducción: "+TRADS[p][1]); render(); if(sheet) renderSheet(); },
   bibLibro(p){ const b=BIB.idx&&BIB.idx.find(x=>x.id===p); if(!b) return; if(b.k===1) bibAbrir(p,1); else { sheet.m="caps"; sheet.b=p; renderSheet(); } bibLibro(p).catch(()=>{}); },
   bibCaps(p){ sheet.m="caps"; sheet.b=p; renderSheet(); },
   bibIr(p){ const [b,c,v]=String(p).split("|"); bibAbrir(b,+c,+(v||0)); },
@@ -2085,6 +2103,7 @@ try{ if(localStorage.getItem("daily_theme")==="light") document.documentElement.
    2) Al abrir la versión nueva: una vez, la hoja «Novedades» con lo que cambió desde la última que viste (NOVEDADES, la más nueva primero).
    En cada versión nueva hay que sumar su entrada acá (t38 lo comprueba). */
 const NOVEDADES=[   /* 2.4 (Lorenzo: «presentemos lo más importante, no cosas mínimas»): pocas líneas por versión, solo lo que alguien notaría; una versión de arreglos lleva [] y no abre el aviso */
+  ["2.8",["La Biblia y las lecturas de la Misa, ahora en la traducción de Torres Amat.","Si preferís la Platense, la elegís al pie de las lecturas o en la Biblia."]],
   ["2.7",["Scaeli+: cuatro fondos especiales para tu personaje.","Cada intención del grupo dice de cuándo es.","La barba corta es nueva: ya no se parece al candado."]],
   ["2.6",["El grupo tiene su pantalla: está abajo, entre Rezar y Día.","Avisos de Scaeli: activalos en Yo → Ajustes y más.","Personaje: barbas, caras nuevas y consagrados adultos y mayores.","Ahora podés estar en 2 grupos; con Scaeli+, hasta 10.","La piel oscura del personaje quedó más pareja."]],
   ["2.5",["El muro del grupo ahora es un chat, con recordatorios.","Encuentros del grupo: proponé el día y cada uno avisa si va.","Las intenciones del grupo tienen su propio lugar.","Cantos del grupo: los carga uno y los ven todos.","Cancionero: 20 cantos más."]],

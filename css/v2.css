@@ -355,3 +355,6 @@ button.sbanner.gpage{display:block;width:100%;padding:0;border:0;text-align:left
 .grow .gint .gcu.nv{color:var(--accent)}.grow .gint .gcu.vj{opacity:.75;font-weight:500}
 .fondo.plus small{color:var(--accent);font-weight:700}
 .fondos-sub{margin:16px 0 10px}
+
+/* 2.8 · elegir la traducción (Torres Amat / Platense) al pie de las lecturas y en la Biblia */
+.trseg{margin:10px 0 4px}
