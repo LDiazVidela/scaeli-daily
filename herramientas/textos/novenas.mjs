@@ -196,7 +196,7 @@ export const NOV = [
     ["Al más pequeño", "Mt 25,34-40", "Que sirvamos a Cristo en los más pequeños."],
     ["Dios, todo en todos", "1 Cor 15,24-28", "Que todo quede en manos de Cristo."]] },
 { id: "jose", n: "San José", u: "03-18", a: "a San José",
-  quien: "San José, esposo de María y padre de Jesús en la tierra, era carpintero en Nazaret. El Evangelio no guarda ninguna palabra suya, solo sus obras. Es patrono de la Iglesia universal, de los trabajadores, de las familias y de la buena muerte. Se lo celebra el 19 de marzo.",
+  quien: "San José, esposo de la Virgen María y padre adoptivo de Jesús, era carpintero en Nazaret. El Evangelio no guarda ninguna palabra suya, solo sus obras. Es patrono de la Iglesia universal, de los trabajadores, de las familias y de la buena muerte. Se lo celebra el 19 de marzo.",
   ora: "San José, hombre justo y silencioso: cuidaste a Jesús y a María con tus manos de trabajador. Cuida también de mí y de mi familia. Enséñame a obedecer a Dios aunque no entienda todo, a trabajar con honradez y a amar sin hacer ruido. Te confío esta intención… Amén.",
   dias: [["El hombre justo", "Mt 1,18-19", "Que seamos justos y buenos, como José."],
     ["No temas", "Mt 1,20-24", "Que hagamos lo que Dios nos pide, aunque dé miedo."],
