@@ -9,6 +9,8 @@ for (const f of (await readdir(C)).filter(x => /^\d{4}-\d{2}-\d{2}\.json$/.test(
     if (!j[k] || !j[k].cita) continue;
     const r = await textoDe(j[k].cita); if (!r) { console.log("sin texto:", f, k, j[k].cita); continue; }
     if (r.texto !== j[k].texto) { j[k].texto = r.texto; j[k].titulo = tituloDe(k, r); cambio = true; }
+    const ta = await textoDe(j[k].cita, "ta"); const tt = ta ? ta.texto : undefined;   // 2.8: el mismo pasaje en Torres Amat
+    if (tt !== j[k].ta) { if (tt) j[k].ta = tt; else delete j[k].ta; cambio = true; }
   }
   if (cambio) { await writeFile(u, JSON.stringify(j, null, 1) + "\n"); n++; }
 }

@@ -1,5 +1,5 @@
 // Scaeli Daily · trae las citas de las lecturas de la Misa de los próximos días desde Evangelizo.org,
-// arma el texto con la Biblia Platense
+// arma el texto con la Biblia Platense («texto») y con la de Torres Amat («ta»)
 // y deja un archivo por día en evangelio/AAAA-MM-DD.json, para que la app las lea sin internet de terceros.
 // Lo corre GitHub Actions todos los días (ver .github/workflows/evangelio.yml).
 import { mkdir, writeFile, readdir, unlink, access } from "node:fs/promises";
@@ -48,7 +48,8 @@ async function lectura(fecha, content, k) {
   if (!cita || !/\d/.test(cita)) return null;
   const r = await textoDe(cita);
   if (!r) return { titulo: "", cita, texto: "", fuente: "" };
-  return { titulo: tituloDe(k, r), cita, texto: r.texto, fuente: PLATENSE };
+  const ta = await textoDe(cita, "ta");   // 2.8: el mismo pasaje en Torres Amat (la app la muestra por defecto; «texto» sigue siendo la Platense)
+  return { titulo: tituloDe(k, r), cita, texto: r.texto, ...(ta ? { ta: ta.texto } : {}), fuente: PLATENSE };
 }
 
 async function dia(fecha) {

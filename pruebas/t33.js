@@ -5,7 +5,7 @@ const { chromium } = require('playwright');
   p.on('request', r => { const u = r.url(); if (!/^http:\/\/localhost:8765/.test(u) && !/^data:/.test(u)) afuera.push(u); });
   p.on('pageerror', e => errs.push('PAGEERROR ' + e.message)); p.on('console', m => { if (m.type() === 'error' && !/Failed to load resource/.test(m.text())) errs.push('CONSOLE ' + m.text()); });
   await p.clock.setFixedTime(new Date('2026-11-15T10:00:00-03:00'));
-  await p.goto('http://localhost:8765/index.html'); await p.evaluate(() => localStorage.clear()); await p.reload(); await p.waitForTimeout(1200); await p.click('#invitado'); await p.waitForTimeout(1500);
+  await p.goto('http://localhost:8765/index.html'); await p.evaluate(() => { localStorage.clear(); localStorage.setItem('daily_trad', 'pl'); }); await p.reload(); await p.waitForTimeout(1200); await p.click('#invitado'); await p.waitForTimeout(1500);
   const A = async (a, q, ms = 500) => { await p.evaluate(([a, q]) => window.DAILY.ACC[a](q), [a, q]); await p.waitForTimeout(ms); };
   const SH = () => p.evaluate(() => document.querySelector('#sheet').textContent);
   ok(!afuera.some(u => /fonts\.(googleapis|gstatic)/.test(u)), 'sin Google Fonts: ' + afuera.join(' '));

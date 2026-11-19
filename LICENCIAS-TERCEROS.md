@@ -3,7 +3,8 @@
 | Qué | De dónde | Licencia / situación |
 |---|---|---|
 | Texto de la Biblia (`biblia/`) y de todas las lecturas, meditaciones, cánticos y pasajes de la app | Biblia Platense, traducción de Mons. Juan Straubinger (La Plata, 1948-1951) | Texto usado como fuente bíblica de la app (ver `claude/LEEME-derechos-y-licencias.md` del proyecto). |
-| Citas de las lecturas del día (solo qué lectura toca) | Evangelizo.org | Se toma solo la cita; el texto es el de la Biblia Platense. |
+| Biblia de Torres Amat (`biblia-ta/`), traducción por defecto de la Biblia y de las lecturas de la Misa desde 2.8 | Félix Torres Amat, traducción de la Vulgata al castellano (1823-1825) | Dominio público (el traductor murió en 1847). Texto digital: credobiblestudy.com, tomado del proyecto Iter Catholicum (github.com/danloi2/itercatholicum, que lo marca «Dominio Público»). No trae Ester 11-16 ni Daniel 13-14. |
+| Citas de las lecturas del día (solo qué lectura toca) | Evangelizo.org | Se toma solo la cita; el texto es el de la Biblia de Torres Amat o el de la Platense. |
 | Liturgia de las Horas | liturgiadelashoras.github.io | No se copia: se abre el sitio en el navegador. |
 | Calendario litúrgico de la Argentina (`data/ordo/`) | GCatholic.org | Datos de fechas y celebraciones. |
 | Biblioteca (`libros/`) | Ejercicios espirituales de San Ignacio (transcripción literal del autógrafo) e Imitación de Cristo (trad. P. Juan Eusebio Nieremberg, s. XVII) | Obras de dominio público, sin notas de ediciones modernas. |

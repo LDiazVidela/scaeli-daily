@@ -35,6 +35,6 @@ const { chromium } = require('playwright'); const fs = require('fs');
   const r = await p.evaluate(async () => { const PJ = await import('./js/personaje.js'); await PJ.cargar(); const px = P => { const cv = document.createElement('canvas'); PJ.pintar(cv, P); return cv.getContext('2d').getImageData(0, 0, 128, 128).data; };
     const s0 = px({ sx: 'm', prenda: 'deportiva' }); const dif = k => { const c = px({ sx: 'm', prenda: 'deportiva', barba: k }); let n = 0, x0 = 128, x1 = 0; for (let i = 0; i < c.length; i += 4) if (c[i] !== s0[i] || c[i + 1] !== s0[i + 1] || c[i + 2] !== s0[i + 2]) { n++; const x = (i >> 2) & 127; if (x < x0) x0 = x; if (x > x1) x1 = x; } return [n, x1 - x0]; }; return { corta: dif('corta'), candado: dif('candado') }; });
   ok(r.corta[0] > r.candado[0] * 2 && r.corta[1] > r.candado[1] + 4, 'la barba corta es distinta del candado: ' + JSON.stringify(r));
-  const app = fs.readFileSync(__dirname + '/../js/app.js', 'utf8'); ok(/VERSION="2\.7"/.test(app) && /\["2\.7",\[/.test(app), 'versión 2.7 con sus novedades');
+  const app = fs.readFileSync(__dirname + '/../js/app.js', 'utf8'); ok(/\["2\.7",\[/.test(app), 'las novedades de la 2.7 siguen en la lista');
   await b.close(); if (errs.length) fails.push(...errs);
   if (fails.length) { console.log('t43 FALLA\n - ' + fails.join('\n - ')); process.exit(1); } console.log('t43 OK'); })();

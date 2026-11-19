@@ -36,7 +36,7 @@ HOY
 REZAR
 • Santo Rosario a pantalla completa, cuenta por cuenta: el Credo, el Yo confieso o el Pésame, los cinco misterios con su meditación y su fruto, y al final por el Papa y la Iglesia. Podés dejarlo y seguir después o quedarte solo con el contador.
 • Liturgia de las Horas: Laudes, Vísperas, Completas y más, con un toque se abren los textos oficiales en liturgiadelashoras.github.io y después la marcás como rezada.
-• La Biblia completa (Biblia Platense de Mons. Straubinger), con buscador por cita o por palabra.
+• La Biblia completa en dos traducciones católicas (Torres Amat y Platense), con buscador por cita o por palabra.
 • Tu oración de la mañana y de la noche, con tus palabras, y el historial para ver cómo vas creciendo.
 • Lectio Divina y Examen en pantalla completa, sin distracciones, con los siete pecados capitales. Examen para confesarte que te arma una hoja que queda solo en tu teléfono.
 • 30 novenas propias, día por día, con la Palabra de Dios de cada jornada (la Virgen de Luján, San Cayetano, San José, el Cura Brochero, Santa Rita, la Divina Misericordia y muchas más), y la Confesión explicada paso a paso.
