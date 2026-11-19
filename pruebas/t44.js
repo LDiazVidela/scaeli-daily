@@ -31,10 +31,11 @@ const { chromium } = require('playwright'); const fs = require('fs');
   await A('bibIr', 'Luke|19', 1200); t = await SH(); ok(/derramó lágrimas sobre ella/.test(t), 'Lucas 19 en Torres Amat');
   await A('tradSet', 'pl', 1200); await A('bibIr', 'Luke|19', 1200); t = await SH(); ok(/lloró sobre ella/.test(t), 'Lucas 19 en la Platense');
   await A('bibIr', 'Dan|13', 1200); t = await SH(); ok(/Susana/.test(t), 'Daniel 13 está en la Platense');
-  await A('tradSet', 'ta', 1500); t = await SH(); ok(!/Susana/.test(t) || /Antiguo Testamento/i.test(t), 'al pasar a Torres Amat, que no lo trae, vuelve a la lista de libros');
+  await A('tradSet', 'ta', 1500); await A('bibIr', 'Dan|13', 1200); t = await SH(); ok(/Susana/.test(t) && /Joakim/.test(t), 'y, desde 2.8.1, también en Torres Amat');
   // 3 · los archivos
   const idx = JSON.parse(fs.readFileSync(__dirname + '/../biblia-ta/indice.json', 'utf8')), mapa = JSON.parse(fs.readFileSync(__dirname + '/../biblia-ta/mapa.json', 'utf8'));
   ok(idx.length === 73 && idx.every(x => fs.existsSync(__dirname + '/../biblia-ta/' + x.id + '.json')), 'biblia-ta/: los 73 libros');
+  const idxP = JSON.parse(fs.readFileSync(__dirname + '/../biblia/indice.json', 'utf8')); ok(idx.every((x, i) => x.id === idxP[i].id && x.k === idxP[i].k), 'con los mismos capítulos que la Platense (Ester 16, Daniel 14): canon católico completo');
   const ps = JSON.parse(fs.readFileSync(__dirname + '/../biblia-ta/Ps.json', 'utf8')); ok(ps.c.length === 150 && /El Señor es mi pastor/.test(ps.c[21][0]), 'los Salmos con la numeración de la Vulgata (22: El Señor es mi pastor)');
   ok(JSON.stringify(mapa.Num['30,2']) === '[[30,1]]' && JSON.stringify(mapa.Song['5,17']) === '[[6,1]]', 'mapa de versículos donde las dos Biblias cortan distinto');
   const dias = fs.readdirSync(__dirname + '/../evangelio').filter(f => /^\d{4}/.test(f)); let con = 0, tot = 0; for (const f of dias) { const j = JSON.parse(fs.readFileSync(__dirname + '/../evangelio/' + f, 'utf8')); for (const k of ['primera', 'salmo', 'segunda', 'evangelio']) if (j[k] && j[k].texto) { tot++; if (j[k].ta) con++; } }
@@ -43,8 +44,8 @@ const { chromium } = require('playwright'); const fs = require('fs');
   const a = await textoDe('Lc 19,41-44', 'ta'), c = await textoDe('Lc 19,41-44'), d = await textoDe('Dn 13,1-9', 'ta'), e = await textoDe('Ps 23(22),1-3', 'ta');
   ok(a && /^Al llegar cerca de Jerusalén,/.test(a.texto) && /Dios te ha visitado\.$/.test(a.texto), 'herramienta: Lc 19,41-44 en Torres Amat');
   ok(c && /lloró sobre ella\. Y dijo/.test(c.texto), 'Platense: mayúscula después del punto al unir versículos');
-  ok(d === null, 'lo que Torres Amat no trae devuelve vacío (se usa la Platense)');
+  ok(d && /^Había un varón, que habitaba en Babilonia, llamado Joakim/.test(d.texto), 'Daniel 13 (Susana) en Torres Amat');
   ok(e && /^El Señor es mi pastor/.test(e.texto), 'el salmo, sin el epígrafe');
-  const app = fs.readFileSync(__dirname + '/../js/app.js', 'utf8'); ok(/VERSION="2\.8"/.test(app) && /\["2\.8",\[/.test(app), 'versión 2.8 con sus novedades');
+  const app = fs.readFileSync(__dirname + '/../js/app.js', 'utf8'); ok(/\["2\.8",\[/.test(app), 'las novedades de la 2.8 están en la lista');
   await b.close(); if (errs.length) fails.push(...errs);
   if (fails.length) { console.log('t44 FALLA\n - ' + fails.join('\n - ')); process.exit(1); } console.log('t44 OK'); })();

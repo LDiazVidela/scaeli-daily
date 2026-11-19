@@ -4,12 +4,16 @@
 # Arma biblia-ta/ con el mismo formato que biblia/ (la Platense) y biblia-ta/mapa.json: en los capítulos donde las dos Biblias
 # cortan distinto los versículos, a qué versículos de Torres Amat corresponde cada versículo de la Platense (alineado por el contenido).
 # Las citas de las lecturas se resuelven con la numeración de la Platense (herramientas/platense.mjs) y de ahí se pasa a Torres Amat.
+# 2.8.1: a esa copia le faltan Ester 11-16 y Daniel 13-14 (partes que solo traen las Biblias católicas). Se completan con el mismo texto
+# de su fuente, credobiblestudy.com («Sagrada Biblia · Félix Amat», /es/read/sagrada-biblia-felix-amat-ot/esther|daniel/chapter-N),
+# guardado en herramientas/textos/torres_amat_extra.json.
 # Uso: python3 herramientas/torres_amat.py <carpeta 1823_torres_amat_es>
 import json, os, re, sys, unicodedata
 R=os.path.dirname(os.path.dirname(os.path.abspath(__file__))); SRC=sys.argv[1]; OUT=os.path.join(R,'biblia-ta'); PL=os.path.join(R,'biblia')
 IDS="Gen Exod Lev Num Deut Josh Judg Ruth 1Sam 2Sam 1Kgs 2Kgs 1Chr 2Chr Ezra Neh Tob Jdt Esth 1Macc 2Macc Job Ps Prov Eccl Song Wis Sir Isa Jer Lam Bar Ezek Dan Hos Joel Amos Obad Jonah Mic Nah Hab Zeph Hag Zech Mal Matt Mark Luke John Acts Rom 1Cor 2Cor Gal Eph Phil Col 1Thess 2Thess 1Tim 2Tim Titus Phlm Heb Jas 1Pet 2Pet 1John 2John 3John Jude Rev".split()
 def limpio(t):
     t=t.replace('*','').replace(' ',' '); t=re.sub(r'\s+',' ',t); t=re.sub(r' ([,.;:!?»”)])',r'\1',t); t=re.sub(r'([¡¿«“(]) ',r'\1',t)
+    t=re.sub(r'\bá\b','a',t); t=re.sub(r'\bó\b','o',t); t=re.sub(r'\bé\b','e',t)   # ortografía vieja en los capítulos agregados
     return t.strip()
 def pal(t):
     t=unicodedata.normalize('NFD',t.lower()); t=''.join(c for c in t if unicodedata.category(c)!='Mn')
@@ -39,13 +43,15 @@ def alinear(P,T):
 def main():
     fs=sorted(f for f in os.listdir(SRC) if f.endswith('.json')); assert len(fs)==73
     idx=json.load(open(os.path.join(PL,'indice.json'))); pi={x['id']:x for x in idx}; nidx=[]; mapa={}; tot=0
-    libros={}
+    libros={}; EXTRA=json.load(open(os.path.join(R,'herramientas','textos','torres_amat_extra.json')))
     for f,i in zip(fs,IDS):
         t=json.load(open(os.path.join(SRC,f))); assert t['licentia']=='Dominio Público'
         caps=[]
         for c in t['capitula']:
             ks=[int(k) for k in c['versus'].keys()]; assert ks==list(range(ks[0],ks[0]+len(ks))),(i,c['numerus'])   # Sal 115 y 147 siguen la cuenta (10-19, 12-20): acá van desde 1, como en la Platense
             caps.append([limpio(v) for v in c['versus'].values()])
+        for c in sorted(EXTRA.get(i,{}),key=int):
+            assert int(c)==len(caps)+1,(i,c); caps.append([limpio(v) for v in EXTRA[i][c]])
         p=json.load(open(os.path.join(PL,i+'.json'))); libros[i]=caps
         json.dump({'id':i,'n':p['n'],'a':p['a'],'c':caps,'t':'Torres Amat'},open(os.path.join(OUT,i+'.json'),'w'),ensure_ascii=False,separators=(',',':'))
         e=dict(pi[i]); e['k']=len(caps); nidx.append(e); tot+=sum(len(c) for c in caps)
