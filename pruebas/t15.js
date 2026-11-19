@@ -2,7 +2,7 @@ const { chromium } = require('playwright');
 (async () => { const b = await chromium.launch(); const p = await b.newPage({ viewport: { width: 390, height: 844 }, deviceScaleFactor:2 }); const errs=[]; p.on('pageerror', e => errs.push('PAGEERROR '+e.message));
   p.on('console', m => { if(m.type()==='error' && !/Failed to load resource/.test(m.text())) errs.push('CONSOLE '+m.text()); });
   const ok=(c,m)=>{ if(!c) errs.push('FALLA '+m); };
-  await p.goto('http://localhost:8765/index.html'); await p.evaluate(()=>localStorage.clear()); await p.reload(); await p.waitForTimeout(1500); await p.click('#invitado'); await p.waitForTimeout(1500);
+  await p.goto('http://localhost:8765/index.html'); await p.evaluate(()=>{ localStorage.clear(); localStorage.setItem('daily_trad', 'pl'); }); await p.reload(); await p.waitForTimeout(1500); await p.click('#invitado'); await p.waitForTimeout(1500);
   const A = async (a, q, ms = 350) => { await p.evaluate(([a, q]) => window.DAILY.ACC[a](q), [a, q]); await p.waitForTimeout(ms); };
   const T = async () => (await p.textContent('#sheetIn') || '').replace(/\s+/g, ' ');
   const shot = async n => p.screenshot({path:n});
