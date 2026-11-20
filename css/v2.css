@@ -283,6 +283,8 @@ body.conhoja{overflow:hidden}
 .gbot{margin-top:20px}
 /* 2.4 · cancionero */
 .chips.canc{flex-wrap:nowrap;overflow-x:auto;scrollbar-width:none;margin:0 -2px 12px;padding:2px}.chips.canc::-webkit-scrollbar{display:none}.chips.canc button{flex:none;white-space:nowrap}
+.clab{display:block;font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin:2px 0 6px}.chips.canc.mom{margin-bottom:10px}
+.cantos h3.cmom{font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);font-weight:600;margin:18px 0 2px}.cantos h3.cmom:first-child{margin-top:4px}
 .row.canto .cton{flex:none;color:var(--accent);display:inline-flex;align-items:center}.row.canto .cton svg.i{width:16px;height:16px}.row.canto .cton.txt{font-size:11px;color:var(--ink2);letter-spacing:.04em;text-transform:uppercase}
 .cbar{display:flex;flex-direction:column;gap:10px;margin:0 0 16px}
 .ctono{display:flex;align-items:center;justify-content:space-between;gap:10px;border:1px solid var(--line);border-radius:16px;padding:8px 10px}

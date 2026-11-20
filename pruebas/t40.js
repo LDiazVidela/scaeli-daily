@@ -66,7 +66,7 @@ const { chromium } = require('playwright'); const fs = require('fs'); const path
 
   // 6 · cancionero
   const C = await import(path.join(__dirname, '..', 'data', 'cancionero.js'));
-  ok(C.CANTOS.length >= 25 && new Set(C.CANTOS.map(x => x.id)).size === C.CANTOS.length && C.CANTOS.every(x => x.t && x.a && x.l && x.cat.length && x.cat.every(c => C.CANTOS_CAT.some(k => k[0] === c))), 'cancionero: ' + C.CANTOS.length + ' cantos con título, autor, letra y categoría');
+  ok(C.CANTOS.length >= 25 && new Set(C.CANTOS.map(x => x.id)).size === C.CANTOS.length && C.CANTOS.every(x => x.t && x.a && x.l && (x.cat.length || (x.mo || []).length) && x.cat.every(c => C.CANTOS_CAT.some(k => k[0] === c))), 'cancionero: ' + C.CANTOS.length + ' cantos con título, autor, letra y categoría');
   ok(C.CANTOS.every(x => (x.l.match(/\[([^\]]+)\]/g) || []).every(c => /^\[[A-G][#b]?(m|7|m7|maj7|sus4|dim)?(\/[A-G][#b]?)?\]$/.test(c))), 'todos los acordes están bien escritos');
   ok(C.CANTOS.filter(x => /\[/.test(x.l)).every(x => x.ton), 'los cantos con acordes dicen su tono');
   await p.evaluate(() => window.DAILY.ir('rezar')); await p.waitForTimeout(500); ok(await p.$('.cov[data-a="cancionero"]'), 'portada del Cancionero en Rezar');
