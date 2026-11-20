@@ -3,7 +3,7 @@
 // Uso: node pruebas/barrido.js [carpeta-salida]   (con el servidor en :8765)
 const { chromium } = require('playwright');
 const out = process.argv[2] || 'barrido'; require('fs').mkdirSync(out, { recursive: true });
-const SHEETS = [['hora',{p:'manana'}],['evangelio',{}],['rosario',{}],['horas',{}],['oraciones',{}],['oracion',{p:0}],['novenas',{}],['novena',{p:'jose'}],['examen',{ex:{p:0,no:[],prop:'',gracias:''},full:1}],['confesion',{}],['misa',{}],['santo',{}],['santoral',{}],['lectioGuia',{}],['lectio',{lp:0,full:1}],['exConf',{p:0,h:{m:{},n:{},u:''},full:1}],['biblia',{}],['progreso',{}],['camino',{}],['grupo',{}],['biblioteca',{a:'',v:''}],['libros',{}],['libro',{p:'moradas'}],['orar',{p:'m',full:1}],['misOraciones',{}],['plus',{}],['donar',{}],['borrar',{}],['palabra',{}],['album',{}],['sobre',{full:1,sale:['miguel','kolbe','ceferino'],nuevas:['miguel']}],['sobre',{full:1,abierto:1,sale:['miguel','kolbe','ceferino'],nuevas:['miguel']}],['figu',{p:'virgenmaria'}],['diploma',{full:1}],['retiros',{}],['retiro',{p:'consagracion'}],['diario',{}],['musica',{}]];
+const SHEETS = [['hora',{p:'manana'}],['evangelio',{}],['rosario',{}],['horas',{}],['oraciones',{}],['oracion',{p:0}],['novenas',{}],['novena',{p:'jose'}],['examen',{ex:{p:0,no:[],prop:'',gracias:''},full:1}],['confesion',{}],['misa',{}],['santo',{}],['santoral',{}],['lectioGuia',{}],['lectio',{lp:0,full:1}],['exConf',{p:0,h:{m:{},n:{},u:''},full:1}],['biblia',{}],['progreso',{}],['camino',{}],['grupo',{}],['biblioteca',{a:'',v:''}],['libros',{}],['libro',{p:'moradas'}],['orar',{p:'m',full:1}],['misOraciones',{}],['plus',{}],['donar',{}],['borrar',{}],['palabra',{}],['album',{}],['sobre',{full:1,sale:['miguel','kolbe','ceferino'],nuevas:['miguel']}],['sobre',{full:1,abierto:1,sale:['miguel','kolbe','ceferino'],nuevas:['miguel']}],['figu',{p:'virgenmaria'}],['diploma',{full:1}],['retiros',{}],['retiro',{p:'consagracion'}],['diario',{}],['musica',{}],['modo',{}]];
 (async () => {
   const b = await chromium.launch(); const informe = [];
   for (const [W, H, tema] of [[360, 740, 'dark'], [390, 844, 'dark'], [390, 844, 'light']]) {
@@ -38,7 +38,7 @@ const SHEETS = [['hora',{p:'manana'}],['evangelio',{}],['rosario',{}],['horas',{
         for (const e of all) { if (!e.children.length && (e.innerText || '').trim()) { const r = e.getBoundingClientRect(); const pr = e.parentElement.getBoundingClientRect(); if (r.left < -1) prob.push('SALE por la izquierda: ' + desc(e)); } }
         // sistema de botones (2.0): principal 54 px, de fila e ícono 44 px; los de fila de una misma tarjeta, del mismo ancho
         for (const e of root.querySelectorAll('button.primary, .ghost, .iconbtn')) { if (!vis(e) || e.closest('.hero2,.lhnow,.cov,.chips,.seg')) continue; const h = Math.round(e.getBoundingClientRect().height);
-          const grande = e.classList.contains('primary') || e.matches('.sheet .in>.grid2>button, .dlgc .grid2>button'); const ok = grande ? (h >= 53 && h <= 55) : (h >= 43 && h <= 45); if (!ok) prob.push('BOTÓN fuera de medida (' + h + 'px): ' + desc(e)); }
+          const grande = e.classList.contains('primary') || e.matches('.sheet .in>.grid2>button, .dlgc .grid2>button, .gbot>button'); const ok = grande ? (h >= 53 && h <= 55) : (h >= 43 && h <= 45); if (!ok) prob.push('BOTÓN fuera de medida (' + h + 'px): ' + desc(e)); }
         for (const card of root.querySelectorAll('.card.list')) { const W = [...card.querySelectorAll(':scope>.row>.ghost, :scope>.row>a.ghost')].filter(vis).map(e => Math.round(e.getBoundingClientRect().width)); if (W.length > 1 && Math.max(...W) - Math.min(...W) > 2) prob.push('BOTONES DE FILA de distinto ancho: ' + W.join(', ')); }
         return [...new Set(prob)].slice(0, 25);
       });
@@ -50,6 +50,14 @@ const SHEETS = [['hora',{p:'manana'}],['evangelio',{}],['rosario',{}],['horas',{
         const largo = await p.evaluate(() => { const s = document.querySelector('#sheet .scroll, #sheet .fcuerpo'); return s ? s.scrollHeight : 0; });
         if (largo > 900) { await p.evaluate(() => { const s = document.querySelector('#sheet .scroll, #sheet .fcuerpo'); s.scrollTop = s.scrollHeight; }); await p.waitForTimeout(200); await p.screenshot({ path: `${out}/${W}${tema[0]}_s_${view}_fin.png` }); }
         await revisar('panel ' + view); await p.evaluate(() => window.DAILY.closeSheet()); await p.waitForTimeout(200); } catch (e) { informe.push(`## ${W} ${view}: ERROR ${e.message.slice(0, 120)}`); } }
+    // 2.10 · modo sobrio: las mismas vistas sin personaje ni juego, y el grupo (de ejemplo) con iniciales
+    await p.evaluate(() => { const K = 'scaeli-daily-local'; const st = JSON.parse(localStorage.getItem(K) || '{}'); st['daily_settings/profile'] = { ...(st['daily_settings/profile'] || {}), sobrio: true }; localStorage.setItem(K, JSON.stringify(st)); });
+    await p.reload(); await p.waitForTimeout(1300); await p.evaluate(t => { document.documentElement.dataset.theme = t; }, tema);
+    for (const v of ['hoy', 'dia', 'rezar', 'yo', 'mas']) { await p.evaluate(v => window.DAILY.ir(v), v); await p.waitForTimeout(500); await p.screenshot({ path: `${out}/${W}${tema[0]}_sob_${v}.png`, fullPage: true }); await revisar('sobrio · vista ' + v); }
+    try { await p.evaluate(() => window.DAILY.ACC.grupo()); await p.waitForTimeout(400); await p.evaluate(() => window.DAILY.ACC.gEjemplo()); await p.waitForTimeout(1500);
+      for (const gt of ['miembros', 'muro', 'ranking']) { await p.evaluate(gt => window.DAILY.ACC.gTab(gt), gt); await p.waitForTimeout(400); await p.screenshot({ path: `${out}/${W}${tema[0]}_sob_grupo_${gt}.png` }); await revisar('sobrio · grupo ' + gt); }
+      await p.evaluate(() => window.DAILY.closeSheet()); await p.evaluate(() => window.DAILY.ir('grupo')); await p.waitForTimeout(500); await p.screenshot({ path: `${out}/${W}${tema[0]}_sob_v_grupo.png`, fullPage: true }); await revisar('sobrio · vista grupo');
+    } catch (e) { informe.push(`## ${W} sobrio grupo: ERROR ${e.message.slice(0, 120)}`); }
     if (errs.length) informe.push(`## ${W}${tema[0]} ERRORES JS\n` + errs.map(x => '- ' + x).join('\n'));
     await ctx.close();
   }

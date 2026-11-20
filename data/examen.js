@@ -33,7 +33,7 @@ export const VIDA = [
 
 /* para el final de la hoja (texto propio de Scaeli) */
 export const CONF_CIERRE = {
-  nota: "Estas preguntas son una ayuda, no una lista para recitar. Los pecados graves hay que decirlos todos, y cuántas veces, hasta donde te acuerdes; los demás conviene decirlos también. Decilo con sencillez, sin rodeos y sin esconder nada a propósito.",
+  nota: "Estas preguntas son una ayuda, no una lista para recitar. Los pecados graves hay que decirlos todos, con su especie y número (qué fue y cuántas veces), hasta donde te acuerdes después de examinarte bien; los veniales no es obligatorio confesarlos, pero es muy recomendable. Decilo con sencillez, sin rodeos y sin esconder nada a propósito.",
   recorda: "En la confesión es Cristo quien te perdona por medio del sacerdote. No te espera alguien que lleva la cuenta de tus caídas: te espera un Padre que te conoce, te quiere y te deja empezar de nuevo.",
   oracion: "Señor Jesús, pequé contra vos y me duele. Gracias por quererme igual. Dame fuerza para cambiar, para arreglar lo que pueda y para volver a empezar con vos.",
   cita: "«Dios no se cansa nunca de perdonar; somos nosotros los que nos cansamos de acudir a su misericordia.» — Papa Francisco, Evangelii gaudium 3"

@@ -1,5 +1,5 @@
 // t31 · Daily 2.0: piel nueva (bordó y crema, tipografía del sistema, barra flotante), entrada con la «Puerta de luz»,
-// ocho rangos con insignias y puntitos (Celestial y Divino piden racha de más de 30 días), portadas propias, Ángelus y latín en Más.
+// ocho rangos con insignias y puntitos (Celestial y Glorioso —«Divino» hasta 2.9— piden racha de más de 30 días), portadas propias, Ángelus y latín en Más.
 const { chromium } = require('playwright');
 (async () => { const b = await chromium.launch(); const errs = [], fails = []; const ok = (c, m) => { if (!c) fails.push(m); };
   const p = await (await b.newContext({ viewport: { width: 390, height: 844 } })).newPage();
@@ -28,7 +28,7 @@ const { chromium } = require('playwright');
   ok(r.esc === 8 && /assets\/rangos\/diamante\.png$/.test(r.img) && r.nat === 64, 'escalera de ocho e insignia de PixelLab: ' + r.esc + ' ' + r.img.slice(-30) + ' ' + r.nat);
   r = await sembrar(40); ok(/Celestial III\b/.test(r.t) && /\b590 puntos/.test(r.t) && r.on === 1 && r.yo === 'Celestial', 'racha de 40: Celestial III con 590 y un puntito: ' + r.t.slice(0, 120));
   r = await sembrar(68); ok(/Celestial I\b/.test(r.t) && /\b730 puntos/.test(r.t) && r.on === 3, 'racha de 68: Celestial I con 730: ' + r.t.slice(0, 120));
-  r = await sembrar(110); ok(/Divino I\b/.test(r.t) && /\b940 puntos/.test(r.t) && /rango más alto/.test(r.t) && r.on === 3 && r.faltan === 0 && /divino\.png$/.test(r.img), 'racha de 110: Divino I con 940, el más alto: ' + r.t.slice(0, 140));
+  r = await sembrar(110); ok(/Glorioso I\b/.test(r.t) && !/Divino/.test(r.t) && /\b940 puntos/.test(r.t) && /rango más alto/.test(r.t) && r.on === 3 && r.faltan === 0 && /divino\.png$/.test(r.img), 'racha de 110: Glorioso I (el dibujo sigue siendo divino.png) con 940, el más alto: ' + r.t.slice(0, 140));
   r = await sembrar(400); ok(/\b940 puntos/.test(r.t), 'tope de 940 aunque la racha siga: ' + r.t.slice(0, 90));
   r = await sembrar(10); ok(/Plata II\b/.test(r.t) && /\b180 puntos/.test(r.t) && r.on === 2, 'los rangos de antes no cambian (10 días = Plata II, 180): ' + r.t.slice(0, 100));
   // Portadas propias (los caminos guiados son de Scaeli+: se activa el gancho de prueba solo para mirar la portada)

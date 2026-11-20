@@ -15,7 +15,7 @@ const { chromium } = require('playwright'); const fs = require('fs');
   await p.click('#nav button[data-view="grupo"]'); await p.waitForTimeout(600); let t = await T();
   ok(await p.evaluate(() => window.DAILY.get().view === 'grupo') && /grupo/i.test(t) && await p.$('#app [data-a="grupo"]'), 'sin grupo: la pantalla invita a crear o unirse');
   await A('gEjemplo', undefined, 900); await A('cerrar'); await p.evaluate(() => window.DAILY.ir('grupo')); await p.waitForTimeout(600); t = await T();
-  ok((await p.$$('#app .gmenu .gfila')).length >= 5 && /Chat/.test(t) && /Intenciones/.test(t) && /Encuentros/.test(t) && /Cantos del grupo/.test(t) && /Ranking/.test(t), 'con grupo: chat, intenciones, desafío, encuentros, cantos y ranking a un toque');
+  ok((await p.$$('#app .gmenu .gfila')).length >= 5 && /Chat/.test(t) && /Intenciones/.test(t) && /Encuentros/.test(t) && /Cantos del grupo/.test(t) && /Constancia de los grupos/.test(t), 'con grupo: chat, intenciones, desafío, encuentros, cantos y ranking a un toque');
   await p.click('#app .gmenu .gfila'); await p.waitForTimeout(600); ok(await p.evaluate(() => { const s = window.DAILY.get().sheet; return s && s.view === 'grupo'; }), 'la primera fila abre el grupo'); await A('cerrar');
   ok(/<symbol id="i-send"[^>]*><path d="M12 19V5"/.test(fs.readFileSync(__dirname + '/../index.html', 'utf8')), 'ícono de enviar nuevo (flecha)');
   // 2 · Más vive dentro de Yo

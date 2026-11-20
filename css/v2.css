@@ -360,3 +360,21 @@ button.sbanner.gpage{display:block;width:100%;padding:0;border:0;text-align:left
 
 /* 2.8 · elegir la traducción (Torres Amat / Platense) al pie de las lecturas y en la Biblia */
 .trseg{margin:10px 0 4px}
+
+/* 2.10 · modo sobrio (adultos, sin personaje ni juego): texto un poco más grande y menos tarjetas, al estilo de Hallow */
+body.sobrio{font-size:16px;line-height:1.45}
+body.sobrio .hint{font-size:14.5px;line-height:1.45}
+body.sobrio .hero2.sob .tx{left:18px;right:18px;bottom:18px}
+body.sobrio .hero2.sob .q{font-size:21px;line-height:1.3}
+body.sobrio .cov b{font-size:17px}body.sobrio .cov small{font-size:13px}
+body.sobrio #app>.card:not(.grupoc):not(.lhnow):not(.camhoy):not(.anioc):not(.palc):not(.actban){background:none;border:0;border-top:1px solid var(--line);border-radius:0;padding:18px 2px;margin-left:0;margin-right:0}
+body.sobrio #app>.card.vosnom{border-top:0;padding-top:4px}
+body.sobrio .stcam .stat .v{font-size:30px}
+/* el círculo con la inicial, en lugar del personaje (grupo, actividad) */
+.ini{flex:none;display:inline-flex;align-items:center;justify-content:center;border-radius:999px;background:var(--accent-dim);border:1px solid var(--accent-line);color:var(--accent);font-weight:700;line-height:1;letter-spacing:0}
+/* «¿Cómo querés usar Scaeli?» */
+.modo .modop{display:flex;align-items:center;gap:14px;width:100%;text-align:left;background:var(--surface);border:1px solid var(--line);border-radius:20px;padding:12px;margin:0 0 12px;color:inherit;font:inherit}
+.modo .modop img{flex:none;width:84px;height:84px;border-radius:14px;object-fit:cover;image-rendering:pixelated}
+.modo .modop .n{flex:1;min-width:0;display:flex;flex-direction:column;gap:4px}.modo .modop .n b{font-size:17px;font-weight:700}.modo .modop .n small{font-size:13.5px;line-height:1.4;color:var(--ink2)}
+.modo .modop svg.i{flex:none;color:var(--ink2)}
+.chips.estado{margin-bottom:4px}

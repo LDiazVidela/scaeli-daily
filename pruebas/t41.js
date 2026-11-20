@@ -46,7 +46,7 @@ const { chromium } = require('playwright'); const fs = require('fs'); const path
   ok(!(await p.$('.gpan[data-gp="miembros"] [data-a="gInvitar"]')) && await p.$('.gpan[data-gp="ranking"] [data-a="gInvitar"]'), 'invitar y salir pasaron a «Grupo»');
 
   // 4 · encuentros
-  await A('gTab', 'ranking'); t = await SH(); ok(/Encuentros/i.test(t) && /Cantos del grupo/.test(t) && /Ranking de grupos/i.test(t), '«Grupo»: encuentros, cantos y ranking');
+  await A('gTab', 'ranking'); t = await SH(); ok(/Encuentros/i.test(t) && /Cantos del grupo/.test(t) && /Constancia de los grupos/i.test(t), '«Grupo»: encuentros, cantos y constancia de los grupos');
   await A('encNuevo'); ok(await p.evaluate(() => window.DAILY.get().sheet.view === 'encuentro'), 'formulario de encuentro');
   const manana = await p.evaluate(() => { const d = new Date(Date.now() + 864e5); return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0'); });
   await p.fill('input[name=ti]', 'Adoración y guitarreada'); await p.fill('input[name=f]', manana); await p.fill('input[name=h]', '20:30'); await p.fill('input[name=lu]', 'Capilla del colegio');

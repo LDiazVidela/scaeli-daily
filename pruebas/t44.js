@@ -1,7 +1,8 @@
 // t44 · Daily 2.8: dos traducciones (Torres Amat por defecto, Platense a elección) en las lecturas de la Misa y en la Biblia.
 const { chromium } = require('playwright'); const fs = require('fs');
 (async () => { const b = await chromium.launch(); const errs = [], fails = []; const ok = (c, m) => { if (process.env.V) console.log((c ? '  ok ' : '  XX ') + m); if (!c) fails.push(m); };
-  const p = await (await b.newContext({ viewport: { width: 390, height: 844 } })).newPage();
+  // 2.10: sin service worker: si toma el control antes de tiempo, atiende él los pedidos y la lectura falsa de abajo (page.route) no se usa
+  const p = await (await b.newContext({ viewport: { width: 390, height: 844 }, serviceWorkers: 'block' })).newPage();
   p.on('pageerror', e => errs.push('PAGEERROR ' + e.message));
   const DIA = { fecha: '', dia: 'Jueves de la 33a semana del Tiempo Ordinario',
     primera: { titulo: 'Apocalipsis', cita: 'Ap 5,1-10.', texto: 'Y vi en la diestra de Aquel que estaba sentado sobre el trono un libro.', ta: 'Después vi en la mano derecha del que estaba sentado en el solio, un libro.' },

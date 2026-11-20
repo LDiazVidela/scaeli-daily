@@ -54,7 +54,7 @@ const { chromium } = require('playwright'); const fs = require('fs'); const path
   ok(!(await visible('.grow .gmas:not([hidden])')), 'reportar, bloquear y sacar quedan guardados'); await A('gMas', otro);
   ok(await visible('.grow .gmas:not([hidden])') && /Bloquear/.test(await SH()), '«más» los muestra con su nombre');
   await A('gTab', 'muro'); ok(await visible('form[data-f="muro"]'), '«Muro» con su caja para escribir');
-  await A('gTab', 'ranking'); ok(/Ranking de grupos/i.test(await SH()), '«Ranking»'); await A('cerrar');
+  await A('gTab', 'ranking'); ok(/Constancia de los grupos/i.test(await SH()), '«Constancia de los grupos»'); await A('cerrar');
 
   // 5 · novedades: pocas y en una sola lista
   const app = fs.readFileSync(path.join(__dirname, '..', 'js', 'app.js'), 'utf8');

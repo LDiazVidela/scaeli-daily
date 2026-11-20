@@ -23,7 +23,7 @@ import * as PJ from "./personaje.js";
 import { RETIROS } from "../data/retiros.js";   // 2.2: caminos largos de oración (Scaeli+)
 import { MUSICAS, musicaPlay, musicaStop, musicaEstado, musicaAlCambiar, campana, vozDisponible, decir, callar } from "./audio.js";
 
-export const VERSION="2.9";
+export const VERSION="2.10";
 const LOGO_GOOGLE='<svg class="logo-g" viewBox="0 0 48 48" aria-hidden="true"><path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/><path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/><path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/><path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/></svg>';
 const LOGO_APPLE='<svg class="logo-a" viewBox="0 0 814 1000" aria-hidden="true"><path fill="currentColor" d="M788.1 340.9c-5.8 4.5-108.2 62.2-108.2 190.5 0 148.4 130.3 200.9 134.2 202.2-.6 3.2-20.7 71.9-68.7 141.9-42.8 61.6-87.5 123.1-155.5 123.1s-85.5-39.5-164-39.5c-76.5 0-103.7 40.8-165.9 40.8s-105.6-57-155.5-127C46.7 790.7 0 663 0 541.8c0-194.4 126.4-297.5 250.8-297.5 66.1 0 121.2 43.4 162.7 43.4 39.5 0 101.1-46 176.3-46 28.5 0 130.9 2.6 198.3 99.2zm-234-181.5c31.1-36.9 53.1-88.1 53.1-139.3 0-7.1-.6-14.3-1.9-20.1-50.6 1.9-110.8 33.7-147.1 75.8-28.5 32.4-55.1 83.6-55.1 135.5 0 7.8 1.3 15.6 1.9 18.1 3.2.6 8.4 1.3 13.6 1.3 45.4 0 102.5-30.4 135.5-71.3z"/></svg>';
 /* la dirección publicada: la app de las tiendas lee de acá los Evangelios del día (los genera la GitHub Action cada noche) */
@@ -72,6 +72,12 @@ const misteriosHoy=(d)=>{const w=(d||new Date()).getDay();for(const k in MISTERI
 const TODAS_ORA=()=>ORACIONES.concat(ORACIONES_MAS);
 const ORA_SUB={"Magníficat":"Cántico de María","Benedictus":"Cántico de Zacarías","Nunc dimittis":"Cántico de Simeón","Te Deum":"Himno de acción de gracias"};
 const rosLat=()=>!!(profile&&profile.rosLat);
+/* 2.10 · modo sobrio (Lorenzo: «una interfaz para adultos que no quieran avatars… no quiero dejar a nadie afuera»): sin personaje,
+   fondos, nivel, logros, rango, álbum, premios, rachas, misiones ni ranking; la oración queda igual. profile.sobrio, en la cuenta.
+   Ranking de grupos opcional (profile.rankOff): se llama «constancia» y no mide la santidad de nadie. */
+const sobrio=()=>!!(profile&&profile.sobrio);
+const verRank=()=>!sobrio()&&!(profile&&profile.rankOff);
+const inicial=n=>{ const s=String(n||"").trim(); return s?s.charAt(0).toUpperCase():"·"; };
 // latín por defecto (2.0): dentro de Oraciones manda lo que se eligió ahí; al entrar, la preferencia de Más
 const latDef=()=>((sheet&&/^oraci/.test(sheet.view||"")?sheet.lat:(profile||{}).lat)?1:0);
 const oraTxt=(n,lat)=>{const o=TODAS_ORA().find(x=>x.n===n);if(!o) return "";return (lat&&o.lat&&o.lat.length?o.lat:o.es).join("\n")};
@@ -202,6 +208,8 @@ function renderNow(){ if(!ready){ htmlApp=null; renderLogin(); return; }
   document.querySelectorAll(".nav button").forEach(b=>{ if(b.dataset.view===view) b.setAttribute("aria-current","page"); else b.removeAttribute("aria-current"); });
   document.querySelectorAll('.nav button[data-view="yo"]').forEach(b=>{ if(view==="mas") b.setAttribute("aria-current","page"); });   /* 2.6: «Más» vive dentro de Yo */
   const R={hoy:renderHoy,rezar:renderRezar,grupo:renderGrupo,dia:renderDia,yo:renderYo,mas:renderMas}[view]||renderHoy;
+  const sob=sobrio(); document.body.classList.toggle("sobrio",sob); const ny=document.querySelector('.nav button[data-view="yo"]');
+  if(ny){ const t=sob?"Vos":"Yo"; if(ny.getAttribute("aria-label")!==t){ ny.setAttribute("aria-label",t); const sp=ny.querySelector("span"); if(sp) sp.textContent=t; } }
   const h=R(); if(h!==htmlApp){ htmlApp=h; $("#app").innerHTML=h; pintarPersonajes(); } if(sheet) renderSheetQuieto(); }
 /* ── 2.4: navegación. El botón «atrás» del teléfono cierra la hoja abierta o vuelve a Hoy (antes salía de la app); al cerrar una
    hoja se vuelve al mismo lugar de la pantalla (antes subía al principio); y si la app se recarga, abre en la pestaña y el lugar
@@ -230,8 +238,8 @@ function cab(ey,t,der){ return '<div class="top"><div class="l"><div class="eyeb
 /* la racha es una vela: encendida si hoy ya la cumpliste, en riesgo si todavía no (se apaga al terminar el día), apagada si la perdiste */
 // 2.2.5: la racha es una llama sola (Lorenzo: «la llama sola me gustó»); encendida, tenue en riesgo, solo el contorno en 0
 const VELA_SVG='<svg class="vl" viewBox="3 2 10 13" aria-hidden="true"><path class="ol" d="M8 3c2.2 2.6 3.6 4.6 3.6 7.1A3.6 3.6 0 0 1 4.4 10.1C4.4 7.6 5.8 5.6 8 3z"/><path class="fl" d="M8 3c2.2 2.6 3.6 4.6 3.6 7.1A3.6 3.6 0 0 1 4.4 10.1C4.4 7.6 5.8 5.6 8 3z"/><path class="hu" d="M8 7.2c1 1.3 1.6 2.3 1.6 3.4a1.6 1.6 0 0 1-3.2 0c0-1.1.6-2.1 1.6-3.4z"/></svg>';
-const velaHTML=(n,hoyOk,cls)=>'<span class="vela '+(n?(hoyOk?"on":"riesgo"):"off")+(cls?" "+cls:"")+'" title="'+(n?(hoyOk?"Racha de "+n:"Hoy todavía no · racha de "+n):"Sin racha")+'">'+VELA_SVG+'<b>'+n+'</b></span>';
-const rachaChip=()=>'<span class="chip vch">'+velaHTML(racha(),rezoAlgo(dayOf(hoy())))+' '+(racha()===1?"día":"días")+'</span>';
+const velaHTML=(n,hoyOk,cls)=>sobrio()?'':'<span class="vela '+(n?(hoyOk?"on":"riesgo"):"off")+(cls?" "+cls:"")+'" title="'+(n?(hoyOk?"Racha de "+n:"Hoy todavía no · racha de "+n):"Sin racha")+'">'+VELA_SVG+'<b>'+n+'</b></span>';
+const rachaChip=()=>sobrio()?'':'<span class="chip vch">'+velaHTML(racha(),rezoAlgo(dayOf(hoy())))+' '+(racha()===1?"día":"días")+'</span>';
 const tile=(k,icn,t,s,done,extra)=>'<button class="tile'+(done?" done":"")+(extra||"")+'" data-a="'+k+'"><div class="ic">'+(done?ic("check"):ic(icn))+'</div><b>'+t+'</b><small>'+s+'</small></button>';
 
 const horaLHahora=()=>{ const h=new Date().getHours(); return h<9?"laudes":h<12?"tercia":h<15?"sexta":h<18?"nona":h<21?"visperas":"completas"; };
@@ -267,7 +275,7 @@ function nivelDe(){ const ks=Object.keys(days).filter(k=>/^\d{4}-\d\d-\d\d$/.tes
   let n=1, resto=xp; while(resto>=xpNivel(n)){ resto-=xpNivel(n); n++; } const nivel=Math.max(1,n-caidas);
   const P=PJ.normal(profile||{}), T=[...TITULOS].reverse().find(t=>nivel>=t[0]); return {xp,nivel,resto,falta:xpNivel(n),animo:Math.max(0,an),caidas,titulo:P.sx==="f"?T[2]:T[1],sinDatos:!ini}; }
 let nivelAntes=null;
-function nivelAviso(){ const N=nivelDe(); if(nivelAntes!==null){ if(N.nivel>nivelAntes.nivel) toast("¡Subiste al nivel "+N.nivel+"! "+N.titulo); else if(N.nivel<nivelAntes.nivel) toast("Bajaste al nivel "+N.nivel+". El ánimo vuelve a 50: la Confesión lo restaura entero."); else if(N.animo<=20&&nivelAntes.animo>20) toast("¡Ojo! Tu ánimo está en "+N.animo+". Rezá algo hoy o confesate."); } nivelAntes=N; return N; }
+function nivelAviso(){ const N=nivelDe(); if(nivelAntes!==null&&!sobrio()){ if(N.nivel>nivelAntes.nivel) toast("¡Subiste al nivel "+N.nivel+"! "+N.titulo); else if(N.nivel<nivelAntes.nivel) toast("Bajaste al nivel "+N.nivel+". El ánimo vuelve a 50: la Confesión lo restaura entero."); else if(N.animo<=20&&nivelAntes.animo>20) toast("¡Ojo! Tu ánimo está en "+N.animo+". Rezá algo hoy o confesate."); } nivelAntes=N; return N; }
 const corazonSVG='<svg class="cor" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 21s-7.5-4.6-9.5-9.3C1 7.6 3.6 4 7.2 4c2 0 3.4 1 4.8 2.7C13.4 5 14.8 4 16.8 4 20.4 4 23 7.6 21.5 11.7 19.5 16.4 12 21 12 21z"/></svg>';
 function nivelHTML(cls){ const N=nivelDe(), f=N.resto/N.falta, C=2*Math.PI*26;
   return '<div class="nivel '+(cls||"")+'"><span class="nv"><svg viewBox="0 0 60 60" aria-hidden="true"><circle class="t" cx="30" cy="30" r="26"/><circle class="p" cx="30" cy="30" r="26" stroke-dasharray="'+C.toFixed(1)+'" stroke-dashoffset="'+(C*(1-f)).toFixed(1)+'"/></svg><b>'+N.nivel+'</b></span>'+
@@ -309,7 +317,7 @@ const habCk=(id,p)=>'<button class="ck hck'+(p>0?' on':'')+'" data-a="habMas" da
 /* 2.2.6: el «−» para anotar una caída, a la izquierda del círculo (Lorenzo: el menos a la izquierda y el más a la derecha); rojizo si hoy hubo caídas */
 const habMn=(id,m)=>'<button class="hmn'+(m>0?' on':'')+'" data-a="habMenos" data-p="'+id+'" aria-label="Anotar una caída">'+ic("minus")+'</button>';
 function habitosHoyHTML(){ const H=rutina.habitos||[], lun=lunesDe(hoy()), n=diasHabitoSemana(lun);
-  if(!H.length) return '<div class="card habhoy"><div class="hd"><div class="eyebrow">Tus hábitos esta semana</div></div><p class="hint" style="margin:6px 0 12px">Un hábito es algo que querés hacer crecer: rezar antes de comer, no quejarte, agradecer. Cada vez que lo hacés sumás experiencia; cada caída te baja el ánimo.</p><div class="grid2"><button class="ghost" data-a="biblioteca">'+ic("book")+' Biblioteca</button><button class="ghost g" data-a="irDia">'+ic("plus")+' Escribir uno</button></div></div>';
+  if(!H.length) return '<div class="card habhoy"><div class="hd"><div class="eyebrow">Tus hábitos esta semana</div></div><p class="hint" style="margin:6px 0 12px">Un hábito es algo que querés hacer crecer: rezar antes de comer, no quejarte, agradecer. '+(sobrio()?'Anotalo cada vez que lo hacés y mirá cómo va tu semana.':'Cada vez que lo hacés sumás experiencia; cada caída te baja el ánimo.')+'</p><div class="grid2"><button class="ghost" data-a="biblioteca">'+ic("book")+' Biblioteca</button><button class="ghost g" data-a="irDia">'+ic("plus")+' Escribir uno</button></div></div>';
   /* 2.2.5: lista sobria (opción C): nombre, la semana en barritas, la racha en una pastilla y un círculo para sumar */
   return '<div class="card habhoy"><div class="hd"><div class="eyebrow">Tus hábitos esta semana</div><span class="hint" style="margin:0">'+n+' de 7 días</span></div>'+
    H.map(h=>{ const x=((dayOf(hoy()).hb||{})[h.id]||{}), p=x.p||0; return '<div class="hrow3"><button class="n" data-a="habIr" data-p="'+h.id+'" aria-label="Corregir '+esc(h.t)+'"><b>'+esc(h.t)+'</b>'+semBarras(h.id)+(x.m?'<small class="cai">'+x.m+(x.m===1?' caída hoy':' caídas hoy')+'</small>':'')+'</button>'+velaHTML(rachaHab(h.id),p>0)+habMn(h.id,x.m||0)+habCk(h.id,p)+'</div>'; }).join("")+
@@ -340,10 +348,11 @@ function renderHoy(){ cargarEvangelio(); const d=dayOf(hoy()), nom=(profile&&pro
   const lh=horaLHahora(), LHn=LH_HORAS.find(x=>x[0]===lh)||["","",""], lhOk=!!((d.h||{})[lh]);
   const mes=MISIONES_MES[new Date().getMonth()], nv=novenaEnCurso();
   // 2.0.2: ninguna ilustración dos veces en la pantalla (el fondo de arriba puede ser la noche, un misterio, el Evangelio…)
-  const heroImg=fondoActual()||mo, usa=new Set([heroImg]), im=(...c)=>{ const k=c.find(x=>!usa.has(x))||c[0]; usa.add(k); return k; };
+  const sob=sobrio(), heroImg=(sob?null:fondoActual())||mo, usa=new Set([heroImg]), im=(...c)=>{ const k=c.find(x=>!usa.has(x))||c[0]; usa.add(k); return k; };
   return cab(cap(fLarga(hoy()))+' · '+esc(L.l),saludo()+(nom?',<br>'+esc(nom):''),rachaChip())+
-   '<div class="hero2"><img class="bg" src="'+ilu(heroImg)+'" alt=""><span class="sh"></span><button class="pjbtn" data-a="pjIr" aria-label="Personalizar tu personaje">'+personajeHTML("vivo","south",150)+'</button><button class="pjedit" data-a="pjIr" aria-label="Editar tu personaje">'+ic("edit")+'</button>'+
-     heroTexto(mo,d,ev)+'</div>'+nivelHTML("card")+
+   /* 2.10: en modo sobrio, el inicio sin personaje (la ilustración del momento del día y la oración que toca) y sin nivel */
+   '<div class="hero2'+(sob?' sob':'')+'"><img class="bg" src="'+ilu(heroImg)+'" alt=""><span class="sh"></span>'+(sob?'':'<button class="pjbtn" data-a="pjIr" aria-label="Personalizar tu personaje">'+personajeHTML("vivo","south",150)+'</button><button class="pjedit" data-a="pjIr" aria-label="Editar tu personaje">'+ic("edit")+'</button>')+
+     heroTexto(mo,d,ev)+'</div>'+(sob?'':nivelHTML("card"))+
    (anioListo()?'<button class="card anioc" data-a="anio"><span class="n"><span class="eyebrow">Cristo Rey · termina el año litúrgico</span><b>Tu año con Dios · '+hoy().slice(0,4)+'</b><small>Mirá tu año en historias y compartilo</small></span>'+(esPlus()?ic("right"):'<span class="plus-mini">'+ic("lock")+' Scaeli+</span>')+'</button>':'')+
    '<button class="card lhnow" data-a="horaLH" data-p="'+lh+'"><span class="n"><span class="eyebrow">Ahora · Liturgia de las Horas</span><b>'+esc(LHn[1])+'</b><small>'+esc(LHn[2])+'</small></span>'+(lhOk?'<span class="ck on" aria-label="Rezada">'+ic("check")+'</span>':'<span class="ghost">Rezar</span>')+'</button>'+caminoHoyHTML()+retiroHoyHTML()+
    actBanner()+'<div class="covers">'+
@@ -353,7 +362,7 @@ function renderHoy(){ cargarEvangelio(); const d=dayOf(hoy()), nom=(profile&&pro
      (nv?cov("novena",im("novenas","santo"),"Novena",esc(nv.n.n)+" · día "+nv.D.dia,nv.D.hoyYa,"",nv.n.id):cov("orar",im("noche","oraciones"),"Tu oración de la noche","¿Cómo estuvo tu día con Dios?",d.n,"","noche"))+
      (santo?cov("santo",im("santo","misa"),esc(santo[0].split(",")[0]),"Santo del día"+(fichaSanto(mm).p?" · "+esc(fichaSanto(mm).p[0]):""),d.s,"w"):'')+
    '</div>'+
-   habitosHoyHTML()+grupoCardHTML()+(sobreEstado().k==="listo"?albumCard():'')+
+   habitosHoyHTML()+grupoCardHTML()+(!sob&&sobreEstado().k==="listo"?albumCard():'')+
    '<div class="card"><div class="eyebrow" style="margin-bottom:12px">Tu semana con Dios</div>'+semanaHTML()+'<p class="hint" style="margin-top:12px">'+esc(mes[0])+'. '+esc(mes[1])+'</p></div>'; }
 
 function renderRezar(){ const d=dayOf(hoy()); const nv=novenaEnCurso(); const lh=horaLHahora(), LHn=LH_HORAS.find(x=>x[0]===lh)||["",""];
@@ -391,7 +400,7 @@ function diariasHoy(){ const d=dayOf(hoy()), dd=d.dd||{};
           ...(rutina.diarias||[]).map(x=>({k:x.id,t:x.t,ok:!!dd[x.id],racha:rachaDe(z=>!!(z.dd&&z.dd[x.id])),fija:0}))]; }
 function fechaTarea(f){ if(!f) return ""; const h=hoy(); if(f===h) return "Hoy"; if(f===addDays(h,1)) return "Mañana"; if(f<h) return "Venció "+(f===addDays(h,-1)?"ayer":fLarga(f).replace(/^\w+ /,"")); return cap(fLarga(f)); }
 /* 2.2.5: arriba de los hábitos, la vela grande con la racha más larga encendida */
-function habMejorHTML(){ let m=null; (rutina.habitos||[]).forEach(h=>{ const r=rachaHab(h.id); if(r>=2&&(!m||r>m.r)) m={r,h}; }); if(!m) return "";
+function habMejorHTML(){ if(sobrio()) return ""; let m=null; (rutina.habitos||[]).forEach(h=>{ const r=rachaHab(h.id); if(r>=2&&(!m||r>m.r)) m={r,h}; }); if(!m) return "";
   const ok=((((dayOf(hoy()).hb||{})[m.h.id])||{}).p||0)>0;
   return '<div class="hmejor">'+velaHTML(m.r,ok,"grande")+'<div class="n"><b>'+m.r+' días</b><small>Tu racha más larga'+(ok?' encendida':' · hoy todavía no')+' · '+esc(m.h.t)+'</small></div></div>'; }
 function renderDia(){ const s=hoy(), d=dayOf(s), hb=d.hb||{};
@@ -462,8 +471,24 @@ function intCuando(t){ if(!t) return ""; const d=Math.max(0,Math.round((new Date
 /* 2.2.4: el juego todavía no se publica; en lugar del enlace, una tarjeta «Muy pronto» con el logo del juego (sin enlace) */
 function juegoPronto(){ return '<div class="card juegop"><img src="assets/juego-scaeli.png" alt="Scaeli, el juego"><div class="n"><span class="eyebrow">El juego</span><b>Muy pronto en las plataformas</b><small>Scaeli, la aventura de la fe en pixel art. Lo que ganes acá va a aparecer en el juego.</small></div></div>'; }
 /* ── Yo: el personaje y su personalización básica (lo demás se gana jugando Scaeli) ── */
+/* 2.10 · intenciones y «Tu camino» (las estadísticas), compartidos por Yo y por el Yo sobrio («Vos») */
+function intencionesHTML(){ return '<div class="card"><div class="eyebrow">Intenciones</div><p class="hint" style="margin:6px 0 10px">Por quién rezás estos días. Aparecen en el Rosario y en las Horas.</p><div class="chips">'+intents.map((t,i)=>'<button class="on" data-a="intDel" data-p="'+i+'">'+esc(t)+' ✕</button>').join("")+'</div><form data-f="int" style="margin-top:10px"><div class="grid2" style="grid-template-columns:1fr auto"><input type="text" name="t" placeholder="Por mi familia…" maxlength="40" required><button class="iconbtn acc" type="submit" aria-label="Agregar">'+ic("plus")+'</button></div></form></div>'; }
+function caminoHTML(st){ return '<div class="card tucamino"><div class="eyebrow" style="margin-bottom:12px">Tu camino</div><div class="grid2 stcam">'+st.map(x=>'<div class="stat"><div class="v">'+x[1]+'</div><small class="d">'+x[0]+'</small></div>').join("")+'</div>'+
+     '<button class="plusrow" data-a="anio"><span class="n"><b>Tu año con Dios</b><small>'+(esPlus()?"Tu año en historias, para ver y compartir":"Con Scaeli+")+'</small></span>'+(esPlus()?ic("right"):'<span class="plus-mini">'+ic("lock")+' Scaeli+</span>')+'</button></div>'; }
+function renderVos(raw,st){ const nom=raw.nombre||(user&&user.displayName)||"";
+  return cab("Vos",nom?esc(nom):"Tu camino con Dios",'<button class="iconbtn irmas" data-a="irMas" aria-label="Ajustes y más">'+ic("gear")+'</button>')+
+   intencionesHTML()+caminoHTML(st)+
+   '<div class="card opt vosnom"><label class="f">Cómo te llamás<input type="text" data-nombre value="'+esc(raw.nombre||"")+'" placeholder="'+esc(user&&user.displayName||"Tu nombre")+'" maxlength="24"></label></div>'+
+   '<button class="row yomas" data-a="irMas"><span class="gi">'+ic("gear")+'</span><span class="n"><b>Ajustes y más</b><small>Recordatorios, avisos, aspecto, Scaeli+, tu cuenta y créditos</small></span>'+ic("right")+'</button>'; }
+/* 2.10 · consagrados: la sotana, el clergyman y los hábitos se ofrecen solo a quien marca que es sacerdote, seminarista, religioso o consagrado
+   (Magisterium: lo prudente es no ofrecerlos como apariencia de un laico; Redemptionis Sacramentum 153). profile.estado: laico | sacerdote | religioso.
+   Si un laico ya tenía puesta una prenda consagrada, se le deja (no se cambia sola), pero no se le ofrecen las demás. */
+const ESTADOS={m:[["laico","Laico"],["sacerdote","Sacerdote o seminarista"],["religioso","Religioso o consagrado"]],f:[["laico","Laica"],["religioso","Religiosa o consagrada"]]};
+const consagrado=(raw,sx)=>{ const e=(raw||{}).estado; return e==="religioso"||(e==="sacerdote"&&sx!=="f"); };
 function renderYo(){ const raw=profile||{}, P=PJ.normal(raw), nom=raw.nombre||(user&&user.displayName)||(P.sx==="f"?"Peregrina":"Peregrino"); const tot=Object.values(days);
   const st=[["Rosarios",tot.filter(x=>x.r).length],["Evangelios",tot.filter(x=>x.e).length],["Exámenes",tot.filter(x=>x.x).length],["Días con Dios",tot.filter(rezoAlgo).length]];
+  if(sobrio()) return renderVos(raw,st);
+  const esCons=x=>x[0]!=="base"&&x[0]!=="deportiva"&&!PJ.CON_COLOR.includes(x[0]), cons=consagrado(raw,P.sx), est=ESTADOS[P.sx]||ESTADOS.m, estV=cons?raw.estado:"laico";
   const chips=(campo,L,val)=>'<div class="chips">'+L.map(x=>'<button data-a="pjSet" data-p="'+campo+'|'+x[0]+'" aria-pressed="'+(val===x[0])+'">'+esc(x[1])+'</button>').join("")+'</div>';
   const OP=PJ.opciones(P);
   const ropa=f=>'<div class="chips">'+OP.prendas.filter(f).map(x=>'<button data-a="pjSet" data-p="prenda|'+(PJ.CON_COLOR.includes(x[0])?x[0]+":"+(P.tipo===x[0]?P.color:"gris"):x[0])+'" aria-pressed="'+(P.tipo===x[0])+'">'+esc(x[1])+'</button>').join("")+'</div>';
@@ -474,14 +499,15 @@ function renderYo(){ const raw=profile||{}, P=PJ.normal(raw), nom=raw.nombre||(u
    '<details class="card opt fondos-d"'+(sheet&&sheet.view==="x"?"":"")+'><summary><span class="eyebrow">Fondo</span><b>'+esc((FONDOS.find(x=>x[0]===fondoActual())||["","Mañana"])[1])+'</b><span class="muted">'+ic("down")+'</span></summary><p class="hint" style="margin:8px 0 10px">Se desbloquean con tu nivel y tus logros. El elegido va también al inicio de Hoy.</p>'+fondosHTML()+'</details>'+
    '<div class="card opt">'+
      '<div class="eyebrow">Soy</div><div class="seg">'+[["m","Varón"],["f","Mujer"]].map(x=>'<button data-a="pjSet" data-p="sx|'+x[0]+'" aria-pressed="'+(P.sx===x[0])+'">'+x[1]+'</button>').join("")+'</div>'+
+     '<div class="eyebrow">Estado de vida</div>'+chips("estado",est,estV).replace('<div class="chips">','<div class="chips estado">')+
      /* 2.3: la edad del personaje (niño, joven, adulto, mayor) */
      (OP.edades&&OP.edades.length>1?'<div class="eyebrow">Edad</div><div class="seg edad">'+OP.edades.map(x=>'<button data-a="pjSet" data-p="edad|'+x[0]+'" aria-pressed="'+(P.edad===x[0])+'">'+esc(x[1])+'</button>').join("")+'</div>':'')+
      (OP.peinados.length<2?'':'<div class="eyebrow">Peinado</div>'+chips("peinado",OP.peinados,P.peinado))+
      /* 2.6: caras y barbas del joven (capas de PixelLab sobre la cara de siempre) */
      (OP.caras.length?'<div class="eyebrow">Cara</div>'+chips("cara",OP.caras,P.cara):'')+
      (OP.barbas.length?'<div class="eyebrow">Barba</div>'+chips("barba",OP.barbas,P.barba):'')+
-     '<div class="eyebrow">Ropa</div>'+ropa(x=>x[0]==="base"||x[0]==="deportiva"||PJ.CON_COLOR.includes(x[0]))+
-     (OP.prendas.some(x=>x[0]!=="base"&&x[0]!=="deportiva"&&!PJ.CON_COLOR.includes(x[0]))?'<div class="eyebrow">'+(P.sx==="f"?"Consagradas":"Consagrados")+'</div>'+ropa(x=>x[0]!=="base"&&x[0]!=="deportiva"&&!PJ.CON_COLOR.includes(x[0])):'')+
+     '<div class="eyebrow">Ropa</div>'+ropa(x=>!esCons(x)||(!cons&&P.tipo===x[0]))+
+     (cons&&OP.prendas.some(esCons)?'<div class="eyebrow">'+(P.sx==="f"?"Consagradas":"Consagrados")+'</div>'+ropa(esCons):'')+
      (P.color&&OP.colores.length>1?'<div class="eyebrow">Color</div><div class="sw">'+OP.colores.map(c=>'<button data-a="pjSet" data-p="prenda|'+P.tipo+':'+c[0]+'" aria-pressed="'+(P.color===c[0])+'" aria-label="'+esc(c[1])+'" title="'+esc(c[1])+'" style="background:'+c[2]+'"></button>').join("")+'</div>':'')+
      '<div class="eyebrow">Piel</div><div class="sw piel">'+PJ.TONOS.map(t=>'<button data-a="pjSet" data-p="tono|'+t[0]+'" aria-pressed="'+(P.tono===t[0])+'" aria-label="'+esc(t[1])+'" title="'+esc(t[1])+'" style="background:'+t[2]+'"></button>').join("")+'</div>'+
      '<div class="eyebrow">Altura</div><div class="seg">'+PJ.ALTURAS.map(x=>'<button data-a="pjSet" data-p="alt|'+x[0]+'" aria-pressed="'+(P.alt===x[0])+'">'+x[1]+'</button>').join("")+'</div>'+
@@ -494,10 +520,7 @@ function renderYo(){ const raw=profile||{}, P=PJ.normal(raw), nom=raw.nombre||(u
    '</div>'+juegoPronto()+
    '<div class="card"><div class="eyebrow" style="margin-bottom:10px">Tu nivel</div>'+nivelHTML()+'<p class="hint" style="margin:8px 0 0">Cada diaria, hábito u oración suma experiencia. Las caídas y las diarias sin hacer bajan el ánimo; si llega a 0, bajás un nivel. La Confesión lo restaura entero.</p></div>'+
    '<div class="card"><div class="eyebrow" style="margin-bottom:10px">Tus logros</div>'+logrosHTML(true)+'</div>'+
-   rangoHTML()+albumCard()+premiosHTML()+
-   '<div class="card"><div class="eyebrow" style="margin-bottom:12px">Tu camino</div><div class="grid2 stcam">'+st.map(x=>'<div class="stat"><div class="v">'+x[1]+'</div><small class="d">'+x[0]+'</small></div>').join("")+'</div>'+
-     '<button class="plusrow" data-a="anio"><span class="n"><b>Tu año con Dios</b><small>'+(esPlus()?"Tu año en historias, para ver y compartir":"Con Scaeli+")+'</small></span>'+(esPlus()?ic("right"):'<span class="plus-mini">'+ic("lock")+' Scaeli+</span>')+'</button></div>'+
-   '<div class="card"><div class="eyebrow">Intenciones</div><p class="hint" style="margin:6px 0 10px">Por quién rezás estos días. Aparecen en el Rosario y en las Horas.</p><div class="chips">'+intents.map((t,i)=>'<button class="on" data-a="intDel" data-p="'+i+'">'+esc(t)+' ✕</button>').join("")+'</div><form data-f="int" style="margin-top:10px"><div class="grid2" style="grid-template-columns:1fr auto"><input type="text" name="t" placeholder="Por mi familia…" maxlength="40" required><button class="iconbtn acc" type="submit" aria-label="Agregar">'+ic("plus")+'</button></div></form></div>'; }
+   rangoHTML()+albumCard()+premiosHTML()+caminoHTML(st)+intencionesHTML(); }
 
 /* 2.6 · Avisos de Scaeli (push): los activa cada uno acá; los manda Lorenzo desde Firebase → Messaging. Solo web por ahora
    (en la app nativa hace falta el plugin de push de Capacitor y google-services.json). En iPhone solo con la app instalada. */
@@ -519,13 +542,16 @@ function renderMas(){ const claro=document.documentElement.getAttribute("data-th
    (pushPosible()?'<div class="row"><div class="n"><b>Avisos de Scaeli</b><small>'+(pushOn()?"Activados en este dispositivo":pushFaltaInstalar()?"En iPhone, primero agregá Scaeli a la pantalla de inicio":"De vez en cuando, un recordatorio para rezar o una novedad. Llegan aunque la app esté cerrada.")+'</small></div>'+swt("pushOn",pushOn(),"Avisos de Scaeli")+'</div>':'')+'</div></div>'+
    '<button class="card plusmas" data-a="plus"><span class="plus-tag">Scaeli<b>+</b></span><span class="n"><b>'+(esPlus()?"Scaeli+ activo":"Scaeli+")+'</b><small>'+(esPlus()?"Caminos de oración, audio, grupos y diario sin límites":"Caminos de oración, audio, grupos y diario sin límites · desde USD 1,67 por mes")+'</small></span>'+ic("right")+'</button>'+
    '<div class="card list"><div class="row"><div class="n"><b>Ayudar a Scaeli</b><small>Una donación para sostener el proyecto</small></div><button class="ghost g" data-a="donarVer">'+ic("heart")+' Donar</button></div></div>'+
-   '<div class="card list"><div class="row"><div class="n"><b>Modo claro</b><small>Para leer de día</small></div>'+swt("tema",claro,"Modo claro")+'</div>'+
+   /* 2.10: modo sobrio (sin personaje ni juego) y el ranking de grupos, opcional */
+   '<div class="card list"><div class="row"><div class="n"><b>Modo sobrio</b><small>Sin personaje, niveles ni juegos: solo la oración</small></div>'+swt("sobrioSet",sobrio(),"Modo sobrio")+'</div>'+
+   (sobrio()?'':'<div class="row"><div class="n"><b>Mostrar el ranking de grupos</b><small>La constancia de tu grupo junto a la de los demás. No mide la santidad de nadie</small></div>'+swt("rankOff",!(profile&&profile.rankOff),"Mostrar el ranking de grupos")+'</div>')+
+   '<div class="row"><div class="n"><b>Modo claro</b><small>Para leer de día</small></div>'+swt("tema",claro,"Modo claro")+'</div>'+
    '<div class="row"><div class="n"><b>Oraciones en latín</b><small>Las que tienen versión en latín se abren así</small></div>'+swt("prefLat",profile&&profile.lat,"Oraciones en latín")+'</div>'+
    '<div class="row"><div class="n"><b>Compartir mi actividad</b><small>Tu grupo ve qué rezaste, nunca lo que escribiste</small></div>'+swt("actOff",!(profile&&profile.actOff),"Compartir mi actividad")+'</div>'+
    '<div class="row"><div class="n"><b>Exportar mis datos</b><small>Un archivo con todo lo tuyo</small></div><button class="ghost g" data-a="exportar">Exportar</button></div>'+
    '<div class="row"><div class="n"><b>Importar</b><small>Desde un archivo exportado</small></div><button class="ghost g" data-a="importar">Importar</button><input type="file" id="impFile" accept="application/json" hidden></div></div>'+
    /* 2.2.6: el acceso a Scaeli Fit queda oculto por ahora (pedido de Lorenzo); para volver, poner FIT_VISIBLE=true */
-   (FIT_VISIBLE?'<div class="card list"><div class="row"><div class="n"><b>Scaeli Fit</b><small>Ordenar el cuerpo desde la templanza</small></div><a class="ghost g" href="https://ldiazvidela.github.io/scaeli-fit/" target="_blank" rel="noopener">Abrir</a></div></div>':'')+juegoPronto()+
+   (FIT_VISIBLE?'<div class="card list"><div class="row"><div class="n"><b>Scaeli Fit</b><small>Ordenar el cuerpo desde la templanza</small></div><a class="ghost g" href="https://ldiazvidela.github.io/scaeli-fit/" target="_blank" rel="noopener">Abrir</a></div></div>':'')+(sobrio()?'':juegoPronto())+
    '<div class="card list"><div class="row"><div class="n"><b>'+(backend&&backend.mode==="firestore"?esc(user.displayName||user.email||"Tu cuenta"):"Sin cuenta")+'</b><small>'+(backend&&backend.mode==="firestore"?"Guardado en tu cuenta de Google":"Guardado solo en este dispositivo")+'</small></div>'+(backend&&backend.mode==="firestore"?'<button class="ghost g" id="logout">'+ic("out")+' Salir</button>':'<button class="ghost g" id="login" data-q="google">'+LOGO_GOOGLE+' Entrar</button>')+'</div>'+
      (backend&&backend.mode==="firestore"?'<div class="row"><div class="n"><b>Borrar mis datos de Daily</b><small>Tu cuenta sigue</small></div><button class="ghost g" data-a="borrar" data-p="datos">Borrar</button></div><div class="row"><div class="n"><b>Borrar mi cuenta</b><small>La cuenta y todos sus datos (Daily, Fit y el juego)</small></div><button class="ghost g peligro" data-a="borrar" data-p="cuenta">Borrar</button></div>'
        :'<div class="row"><div class="n"><b>Borrar mis datos</b><small>Lo guardado en este dispositivo</small></div><button class="ghost g peligro" data-a="borrar" data-p="datos">Borrar</button></div>')+
@@ -679,7 +705,8 @@ async function grupoEntrar(gid,n){ const otros=grupo.gid&&grupo.gid!==gid&&grupo
   await backend.setDoc("daily_settings/grupo",{gid,otros:otros.filter(x=>x.gid!==gid).slice(0,GRUPOS_PLUS-1)}); }
 async function grupoDejar(){ const [sig,...resto]=gOtros; await backend.setDoc("daily_settings/grupo",{gid:sig?sig.gid:null,otros:resto}); return sig||null; }
 const DESAFIOS=[["r","Rosarios",3,"rosary"],["e","Evangelios",5,"book"],["d","Días con Dios",5,"flame"],["x","Exámenes del día",4,"check"],["o","Oraciones escritas",4,"pen"]];
-const ALIENTOS=["¡Vamos, que podés!","Hoy rezo por vos","Una decena por vos","No aflojes, falta poco","Dios te ve y te quiere","Te espero en el ranking","Encendé la vela hoy"];
+/* 2.10: «Te espero en el ranking» compara; en su lugar (mismo número, así los alientos ya mandados se leen bien) va uno que acompaña */
+const ALIENTOS=["¡Vamos, que podés!","Hoy rezo por vos","Una decena por vos","No aflojes, falta poco","Dios te ve y te quiere","Te acompaño con mi oración","Encendé la vela hoy"];
 const MALAS=["puto","puta","mierda","pelotudo","pelotuda","boludo","boluda","forro","forra","culo","verga","pija","concha","carajo","hdp","sorete"];
 const limpio=t=>{ const q=sinTilde(t); return !MALAS.some(w=>new RegExp("(^|[^a-z])"+w+"(s|$|[^a-z])").test(q)); };
 const semanaDe=f=>lunesDe(f||hoy());
@@ -710,37 +737,42 @@ function desafioEstado(lun){ const D=desafioDe(lun), L=grupo.L||[], n=L.length, 
 function insignias(){ const out=[]; if(!grupo.L) return out; const u=yo(); for(let i=1;i<=6;i++){ const lun=addDays(semanaDe(),-7*i); const R=rankingDe(lun); if(!R.some(x=>x.pts>0)) continue; const me=R.find(x=>x.uid===u); const E=desafioEstado(lun); if(E.ok&&me) out.push({k:"equipo",lun,d:E.D}); } return out; }
 const INSIG={oro:["Vela de oro","Primero del grupo en una semana"],plata:["Vela de plata","Segundo del grupo en una semana"],bronce:["Vela de bronce","Tercero del grupo en una semana"],equipo:["Meta del grupo","El grupo cumplió el desafío de la semana"]};
 const insigniaSVG=k=>k==="equipo"?'<span class="ins eq">'+ic("heart")+'</span>':'<span class="ins '+k+'">'+VELA_SVG+'</span>';
-function avatarHTML(av,tam){ return '<canvas class="pj" data-pj="south" data-pjp=\''+esc(JSON.stringify(av||{}))+'\' data-tam="'+(tam||56)+'" width="128" height="128" aria-hidden="true"></canvas>'; }
+/* 2.10: en modo sobrio, en lugar del personaje, un círculo con la inicial */
+function avatarHTML(av,tam,n){ if(sobrio()) return '<span class="ini" style="width:'+(tam||56)+'px;height:'+(tam||56)+'px;font-size:'+Math.round((tam||56)*.42)+'px" aria-hidden="true">'+esc(inicial(n))+'</span>'; return '<canvas class="pj" data-pj="south" data-pjp=\''+esc(JSON.stringify(av||{}))+'\' data-tam="'+(tam||56)+'" width="128" height="128" aria-hidden="true"></canvas>'; }
 /* 2.6 · la pantalla Grupo (pestaña propia en la barra de abajo, donde estaba «Más»): el grupo a la vista, con accesos a cada parte.
    Cada fila abre la hoja del grupo en su pestaña (`grupoEn`); sin grupo, invita a crear uno o sumarse. */
 function renderGrupo(){ const G=grupo.meta, u=yo(), local=backend&&backend.mode==="local";
   if(!grupo.gid||!G) return cab("Grupo","Rezar con otros")+'<div class="card gvacio"><div class="sbanner"><img src="'+ilu("grupo")+'" alt=""><span class="g"></span></div><h3>Un grupo para perseverar</h3><p class="hint">Con tus amigos, tu curso, el grupo de la parroquia o tu familia: rezan unos por otros, se animan con un desafío por semana, chatean, arman los encuentros y comparten los cantos.</p>'+
     '<button class="primary" data-a="grupo">'+ic("plus")+' Crear un grupo o sumarme</button>'+(local?'<p class="hint" style="margin-top:10px;text-align:center">Para armar un grupo de verdad, entrá con Google. Sin cuenta podés ver uno de ejemplo.</p>':'')+'</div>';
   const R=grupo.L||[], M=muro.filter(m=>!muroOculto(m)), ult=M[0], nuevos=M.filter(m=>m.u!==u&&m.t>muroVisto()).length, ENC=encuentros(), creador=G.creador===u;
-  const ints=R.filter(x=>x.int&&x.uid!==u&&!((profile&&profile.bloq)||[]).includes(x.uid)).length, nC=gExtra.filter(m=>m.k==="canto").length, rk=rankMio(), E=desafioEstado(semanaDe());
+  const ints=R.filter(x=>x.int&&x.uid!==u&&!((profile&&profile.bloq)||[]).includes(x.uid)).length, nC=gExtra.filter(m=>m.k==="canto").length, rk=verRank()?rankMio():null, E=desafioEstado(semanaDe()), sob=sobrio();
   const fila=(a,p,icono,t,s,extra)=>'<button class="row gfila" data-a="'+a+'"'+(p?' data-p="'+p+'"':'')+'><span class="gi">'+ic(icono)+'</span><span class="n"><b>'+t+'</b><small>'+s+'</small></span>'+(extra||'')+ic("right")+'</button>';
   const cambia=gOtros.length?'<div class="seg gsw'+(gOtros.length>2?" muchos":"")+'">'+[{gid:grupo.gid,n:G.n},...gOtros].map(x=>'<button data-a="gCambiar" data-p="'+esc(x.gid)+'" aria-pressed="'+(x.gid===grupo.gid)+'">'+esc(x.n||x.gid)+'</button>').join("")+'</div>':'';
   return cab("Grupo",gOtros.length?"Tus grupos":"Tu grupo",'<button class="iconbtn" data-a="gInvitar" aria-label="Invitar amigos">'+ic("plus")+'</button>')+cambia+
-   '<button class="sbanner gban gpage" data-a="grupoEn" data-p="hoy"><img class="'+(G.portada?"foto":"")+'" src="'+gPortada()+'" alt=""><span class="g"></span><span class="gt"><b>'+esc(G.n)+'</b><small>'+R.length+(R.length===1?" miembro":" miembros")+(rk?' · '+rk.pos+'.º de '+rk.L.length+' grupos':'')+'</small></span></button>'+
+   '<button class="sbanner gban gpage" data-a="grupoEn" data-p="hoy"><img class="'+(G.portada?"foto":"")+'" src="'+gPortada()+'" alt=""><span class="g"></span><span class="gt"><b>'+esc(G.n)+'</b><small>'+R.length+(R.length===1?" miembro":" miembros")+(rk&&rk.pos?' · '+rk.pos+'.º de '+rk.L.length+' grupos':'')+'</small></span></button>'+
    (ENC.length?'<div class="card genc"><div class="hd"><div class="eyebrow">Próximo encuentro</div>'+(ENC.length>1?'<button class="lnk" data-a="grupoEn" data-p="ranking">Ver los '+ENC.length+'</button>':'')+'</div>'+encHTML(ENC[0],u,creador)+'</div>':'')+
    '<div class="list gmenu">'+
     fila("grupoEn","muro","chat","Chat",ult?'<b>'+esc(ult.u===u?"Vos":ult.n||"")+':</b> '+esc((ult.tl||ult.tx||"").slice(0,60)):'Todavía no escribió nadie: saludá al grupo',nuevos?'<em class="gnv">'+(nuevos>9?"9+":nuevos)+'</em>':'')+
     fila("grupoEn","miembros","heart","Intenciones",ints?ints+(ints===1?' intención para rezar':' intenciones para rezar')+' esta semana':'Dejá tu intención y rezá por las de los demás')+
-    fila("grupoEn","hoy","flame","Desafío y misiones",'Desafío de la semana: '+(E.ok?'¡cumplido!':E.tot+' de '+E.meta))+
+    (sob?'':fila("grupoEn","hoy","flame","Desafío y misiones",'Desafío de la semana: '+(E.ok?'¡cumplido!':E.tot+' de '+E.meta)))+
     fila("encNuevoOVer",null,"hour","Encuentros",ENC.length?ENC.length+(ENC.length===1?' encuentro propuesto':' encuentros propuestos'):'Proponé el próximo: Misa, reunión, salida')+
     fila("gCantos",null,"music","Cantos del grupo",nC?nC+(nC===1?' canto compartido':' cantos compartidos'):'El cancionero que arman entre todos')+
-    fila("grupoEn","ranking","star","Ranking de grupos",rk?'Tu grupo va '+rk.pos+'.º de '+rk.L.length:'Cómo viene tu grupo esta semana')+
+    (rk?fila("grupoEn","ranking","star","Constancia de los grupos",rk.pos?'Tu grupo va '+rk.pos+'.º de '+rk.L.length:'Cómo viene tu grupo esta semana'):'')+
    '</div>'+
    '<button class="primary" data-a="gInvitar" style="margin-top:16px">'+ic("plus")+' Invitar amigos</button>'; }
-function grupoCardHTML(){ if(backend&&backend.mode==="local"&&!grupo.gid) return '<button class="card grupoc" data-a="grupo"><span class="n"><span class="eyebrow">Grupo de perseverancia</span><b>Rezá con tus amigos</b><small>Un desafío por semana, intenciones y ranking de grupos. Para armar uno, entrá con Google.</small></span>'+ic("right")+'</button>';
-  if(!grupo.gid||grupo.meta===false) return '<button class="card grupoc" data-a="grupo"><span class="n"><span class="eyebrow">Grupo de perseverancia</span><b>Rezá con tus amigos</b><small>Invitá a tus amigos: un desafío por semana, intenciones por las que rezar y ranking de grupos.</small></span>'+ic("right")+'</button>';
+function grupoCardHTML(){ const sob=sobrio(), qu=sob?'Intenciones por las que rezar, un chat y los encuentros':'Un desafío por semana, intenciones'+(verRank()?' y ranking de grupos':' por las que rezar y un chat');
+  if(backend&&backend.mode==="local"&&!grupo.gid) return '<button class="card grupoc" data-a="grupo"><span class="n"><span class="eyebrow">Grupo de perseverancia</span><b>Rezá con tus amigos</b><small>'+qu+'. Para armar uno, entrá con Google.</small></span>'+ic("right")+'</button>';
+  if(!grupo.gid||grupo.meta===false) return '<button class="card grupoc" data-a="grupo"><span class="n"><span class="eyebrow">Grupo de perseverancia</span><b>Rezá con tus amigos</b><small>Invitá a tus amigos: '+qu.charAt(0).toLowerCase()+qu.slice(1)+'.</small></span>'+ic("right")+'</button>';
   if(!grupo.meta) return '<button class="card grupoc" data-a="grupo"><span class="n"><span class="eyebrow">Grupo de perseverancia</span><b>Cargando tu grupo…</b></span>'+ic("right")+'</button>';
   const E=desafioEstado(semanaDe()), R=rankingDe(semanaDe()), me=R.find(x=>x.uid===yo());
-  const nuevo=muro.find(m=>m.u!==yo()&&m.t>muroVisto()&&!muroOculto(m));
+  const nuevo=muro.find(m=>m.u!==yo()&&m.t>muroVisto()&&!muroOculto(m)), rp=verRank()?rankMio().pos:0;
+  const encH=(encuentros().length&&encuentros()[0].f<=addDays(hoy(),7)?'<small class="mnue">Próximo encuentro: <b>'+esc(encuentros()[0].ti||"")+'</b> · '+esc(encCuando(encuentros()[0]))+'</small>':''),
+    nuevoH=(nuevo?'<small class="mnue">'+ic("chat")+' <b>'+esc(nuevo.n)+'</b> escribió: «'+esc(nuevo.tx.length>60?nuevo.tx.slice(0,58)+'…':nuevo.tx)+'»</small>':'');
+  /* 2.10: en modo sobrio, la tarjeta del grupo sin desafío, misiones ni posición: las intenciones, el encuentro y el chat */
+  if(sob){ const ints=R.filter(x=>x.int&&x.uid!==yo()&&!bloqueado(x.uid)).length;
+    return '<button class="card grupoc port" data-a="grupo"><img class="bg'+(grupo.meta.portada?" foto":"")+'" src="'+gPortada()+'" alt=""><span class="sh"></span><span class="n"><span class="eyebrow">'+esc(grupo.meta.n)+' · '+R.length+(R.length===1?" miembro":" miembros")+'</span><b>'+(ints?ints+(ints===1?' intención para rezar':' intenciones para rezar'):'Rezá por las intenciones del grupo')+'</b>'+encH+nuevoH+'</span>'+ic("right")+'</button>'; }
   return '<button class="card grupoc port" data-a="grupo"><img class="bg'+(grupo.meta.portada?" foto":"")+'" src="'+gPortada()+'" alt=""><span class="sh"></span><span class="n"><span class="eyebrow">'+esc(grupo.meta.n)+' · '+R.length+(R.length===1?" miembro":" miembros")+'</span><b>'+esc(E.D[1])+': '+E.tot+' de '+E.meta+(E.ok?' · ¡meta cumplida!':'')+'</b>'+
-   '<span class="bar"><i style="width:'+Math.min(100,Math.round(E.tot/E.meta*100))+'%"></i></span><small>'+'Misiones de hoy: '+misDia(hoy()).n+' de 3'+(rankMio().pos?' · tu grupo va '+rankMio().pos+'.º de '+rankMio().L.length:'')+'</small>'+
-   (encuentros().length&&encuentros()[0].f<=addDays(hoy(),7)?'<small class="mnue">Próximo encuentro: <b>'+esc(encuentros()[0].ti||"")+'</b> · '+esc(encCuando(encuentros()[0]))+'</small>':'')+
-   (nuevo?'<small class="mnue">'+ic("chat")+' <b>'+esc(nuevo.n)+'</b> escribió: «'+esc(nuevo.tx.length>60?nuevo.tx.slice(0,58)+'…':nuevo.tx)+'»</small>':'')+'</span>'+ic("right")+'</button>'; }
+   '<span class="bar"><i style="width:'+Math.min(100,Math.round(E.tot/E.meta*100))+'%"></i></span><small>'+'Misiones de hoy: '+misDia(hoy()).n+' de 3'+(rp?' · tu grupo va '+rp+'.º de '+rankMio().L.length:'')+'</small>'+encH+nuevoH+'</span>'+ic("right")+'</button>'; }
 /* 2.1: bloquear a alguien del grupo: no ves sus mensajes, su intención, su actividad ni sus alientos (profile.bloq, solo en tu cuenta) */
 const bloq=()=>(profile&&profile.bloq)||{}, bloqueado=uid=>!!uid&&!!bloq()[uid];
 const muroOculto=m=>{ const r=m.rep||{}; return !!r[yo()]||Object.keys(r).length>=2||bloqueado(m.u); };
@@ -751,9 +783,10 @@ function shGrupo(){ const local=backend&&backend.mode==="local";
   if(!grupo.gid||grupo.meta===false||otro){ const m=sheet.m||"";
     return shTop(otro?"Otro grupo":"Grupo de perseverancia",otro?"Seguís también en «"+esc(grupo.meta.n)+"»":"Rezar es más fácil acompañado")+'<div class="scroll"><div class="sbanner"><img src="'+ilu("grupo")+'" alt=""><span class="g"></span></div>'+
      (grupo.meta===false?'<p class="hint">Ese grupo ya no existe.</p>':'')+
-     '<div class="list"><div class="benef">'+ic("check")+'<div><b>Un desafío por semana</b><small>Rosarios, Evangelios o días con Dios entre todos; si lo cumplen, todos ganan la insignia.</small></div></div>'+
+     '<div class="list">'+(sobrio()?'':'<div class="benef">'+ic("check")+'<div><b>Un desafío por semana</b><small>Rosarios, Evangelios o días con Dios entre todos; si lo cumplen, todos ganan la insignia.</small></div></div>')+
      '<div class="benef">'+ic("check")+'<div><b>Intenciones</b><small>Cada uno deja por qué pide, y los demás tocan «Recé por vos».</small></div></div>'+
-     '<div class="benef">'+ic("check")+'<div><b>Ranking de grupos</b><small>Tu grupo compite con los demás por el promedio de constancia de la semana. Adentro no hay posiciones: se alientan.</small></div></div></div>'+
+     (sobrio()?'<div class="benef">'+ic("check")+'<div><b>Chat, encuentros y cantos</b><small>Para hablar, armar la próxima Misa o reunión y compartir los cantos.</small></div></div>':'')+
+     (verRank()?'<div class="benef">'+ic("check")+'<div><b>Constancia de los grupos</b><small>Cómo viene tu grupo junto a los demás, por el promedio de la semana. Cuenta la constancia registrada, no mide la santidad de nadie.</small></div></div>':'')+'</div>'+
      (local?'<p class="texto chico" style="margin-top:14px">Para rezar con tus amigos de verdad hace falta tu cuenta: así te ven con tu nombre. Sin cuenta, podés ver cómo funciona con un grupo de ejemplo.</p><div style="display:flex;flex-direction:column;gap:10px;margin-top:6px"><button class="entrar google" id="login" data-q="google">'+LOGO_GOOGLE+'<span>Continuar con Google</span></button><button class="ghost g" data-a="gEjemplo" style="justify-content:center;height:48px">'+ic("user")+' Ver un grupo de ejemplo</button></div>':
       (m==="crear"?'<form data-f="grupoCrear" class="gform"><label class="f">Nombre del grupo<input type="text" name="n" placeholder="Los de la parroquia" maxlength="40" required autocomplete="off"></label><button class="primary" type="submit">Crear el grupo</button></form>':
        m==="codigo"?'<form data-f="grupoUnirse" class="gform"><label class="f">Código del grupo<input type="text" name="c" placeholder="8 letras y números" maxlength="8" required autocomplete="off" style="text-transform:uppercase;letter-spacing:.2em" value="'+esc(sheet.inv||"")+'"></label>'+(sheet.err?'<p class="hint" style="color:var(--over)">'+esc(sheet.err)+'</p>':'')+'<button class="primary" type="submit">Entrar al grupo</button></form>':
@@ -764,35 +797,37 @@ function shGrupo(){ const local=backend&&backend.mode==="local";
   const G=grupo.meta, lun=semanaDe(), R=rankingDe(lun), E=desafioEstado(lun), u=yo(), me=R.find(x=>x.uid===u)||{}, creador=G.creador===u, ant=rankingDe(addDays(lun,-7)), ganador=ant[0]&&ant[0].pts>0?ant[0]:null;
   const miRep=(me.rep||{}), reportado=x=>!!miRep[x.uid]||R.filter(y=>(y.rep||{})[x.uid]).length>=2;
   const recibidos=R.filter(x=>x.uid!==u&&x.rece&&x.rece[u]&&x.rece[u].t>Date.now()-7*864e5).length, alientos=R.filter(x=>x.uid!==u&&!bloqueado(x.uid)&&x.al&&x.al[u]&&x.al[u][1]>Date.now()-3*864e5).map(x=>({n:x.n,t:ALIENTOS[x.al[u][0]]||""}));
-  const fila=x=>{ if(x.uid!==u&&bloqueado(x.uid)) return '<div class="grow bloq">'+avatarHTML(x.av,40)+'<span class="n"><b>'+esc(x.n)+'</b><small class="muted">Bloqueado: no ves nada suyo</small></span><span class="acts"><button class="gb" data-a="gDesbloquear" data-p="'+x.uid+'">'+ic("lock")+' Desbloquear</button>'+(creador?'<button class="sm" data-a="gEchar" data-p="'+x.uid+'" aria-label="Sacar del grupo" title="Sacar del grupo">'+ic("trash")+'</button>':'')+'</span></div>';
+  const sob=sobrio();
+  const fila=x=>{ if(x.uid!==u&&bloqueado(x.uid)) return '<div class="grow bloq">'+avatarHTML(x.av,40,x.n)+'<span class="n"><b>'+esc(x.n)+'</b><small class="muted">Bloqueado: no ves nada suyo</small></span><span class="acts"><button class="gb" data-a="gDesbloquear" data-p="'+x.uid+'">'+ic("lock")+' Desbloquear</button>'+(creador?'<button class="sm" data-a="gEchar" data-p="'+x.uid+'" aria-label="Sacar del grupo" title="Sacar del grupo">'+ic("trash")+'</button>':'')+'</span></div>';
     const esYo=x.uid===u, oculta=x.int&&reportado(x), rece=me.rece&&me.rece[x.uid]&&me.rece[x.uid].t>Date.now()-864e5;
     /* 2.4: la fila de cada miembro, con aire: arriba quién es, abajo su intención y dos botones grandes; lo demás (reportar, bloquear, sacar) en «más» */
-    const rg=rangoDe(esYo?rangoPts().pts:x.rg); return '<div class="grow'+(esYo?" yo":"")+'"><div class="gr1"><span class="rk rgk" title="'+rg.n+'">'+insignia(rg,32)+'</span>'+avatarHTML(x.av,40)+'<span class="n"><b>'+esc(x.n)+(esYo?' (vos)':'')+'</b><small class="rgn">'+rg.n+'</small></span>'+(x.mh&&x.mh.f===hoy()?'<em class="mhc'+(x.mh.n>=3?' ok':'')+'">'+x.mh.n+'/3 hoy</em>':'')+
+    const rg=rangoDe(esYo?rangoPts().pts:x.rg); return '<div class="grow'+(esYo?" yo":"")+'"><div class="gr1">'+(sob?'':'<span class="rk rgk" title="'+rg.n+'">'+insignia(rg,32)+'</span>')+avatarHTML(x.av,40,x.n)+'<span class="n"><b>'+esc(x.n)+(esYo?' (vos)':'')+'</b>'+(sob?'':'<small class="rgn">'+rg.n+'</small>')+'</span>'+(!sob&&x.mh&&x.mh.f===hoy()?'<em class="mhc'+(x.mh.n>=3?' ok':'')+'">'+x.mh.n+'/3 hoy</em>':'')+
       (esYo?'':'<button class="sm gmb" data-a="gMas" data-p="'+x.uid+'" aria-label="Más opciones" aria-expanded="'+(sheet.gmas===x.uid)+'">'+ic("more")+'</button>')+'</div>'+
      (x.int&&!oculta?'<p class="gint">«'+esc(x.int)+'»'+intCuando(x.it)+'</p>':x.int&&oculta?'<p class="gint muted">Intención ocultada</p>':'<p class="gint muted">'+(esYo?'Todavía no dejaste tu intención':'Sin intención todavía')+'</p>')+
      (esYo?'':'<div class="acts">'+(x.int&&!oculta?'<button class="gb" data-a="gRece" data-p="'+x.uid+'" aria-pressed="'+!!rece+'">'+ic("rosary")+' '+(rece?"Rezaste ✓":"Recé por vos")+'</button>':'')+'<button class="gb" data-a="gAliento" data-p="'+x.uid+'" aria-pressed="'+(sheet.al===x.uid)+'">'+ic("heart")+' Mandar aliento</button></div>'+
       '<div class="gmas"'+(sheet.gmas===x.uid?'':' hidden')+'>'+(x.int&&!oculta?'<button data-a="gReportar" data-p="'+x.uid+'">'+ic("x")+' Reportar la intención</button>':'')+'<button data-a="gBloquear" data-p="'+x.uid+'">'+ic("lock")+' Bloquear</button>'+(creador?'<button data-a="gEchar" data-p="'+x.uid+'">'+ic("trash")+' Sacar del grupo</button>':'')+'</div>')+
      (sheet.al===x.uid?'<div class="chips gal">'+ALIENTOS.map((a,i)=>'<button data-a="gAlientoOk" data-p="'+x.uid+'|'+i+'">'+esc(a)+'</button>').join("")+'</div>':'')+'</div>'; };
-  const I=insignias(), gt=["hoy","muro","miembros","ranking"].includes(sheet.gt)?sheet.gt:"hoy"; if(muro.length&&gt==="muro") lsSet("daily_muro_visto",Date.now());
+  /* 2.10: en modo sobrio el grupo es intenciones, chat, encuentros y cantos: sin la pestaña Hoy (desafío, misiones), sin rangos ni insignias */
+  const I=insignias(), TABS=[["hoy","Hoy"],["muro","Chat"],["miembros","Intenciones"],["ranking","Grupo"]].filter(x=>!(sob&&x[0]==="hoy")), gt=TABS.some(x=>x[0]===sheet.gt)?sheet.gt:(sob?"miembros":"hoy"); if(muro.length&&gt==="muro") lsSet("daily_muro_visto",Date.now());
   const mNuevos=gt!=="muro"&&muro.some(m=>m.u!==u&&m.t>muroVisto()&&!muroOculto(m));
   /* 2.5 (actualización de grupos): Hoy · Chat (el muro, ahora conversación) · Intenciones (su apartado) · Grupo (encuentros, cantos, ranking, invitar). Las claves internas de las pestañas no cambian. */
   const ENC=encuentros(), nCantos=gExtra.filter(m=>m.k==="canto").length;
-  const tabs='<div class="seg gtabs" role="tablist">'+[["hoy","Hoy"],["muro","Chat"],["miembros","Intenciones"],["ranking","Grupo"]].map(x=>'<button role="tab" data-a="gTab" data-p="'+x[0]+'" aria-pressed="'+(gt===x[0])+'">'+x[1]+(x[0]==="muro"&&mNuevos?'<i class="pt"></i>':'')+'</button>').join("")+'</div>';
+  const tabs='<div class="seg gtabs" role="tablist">'+TABS.map(x=>'<button role="tab" data-a="gTab" data-p="'+x[0]+'" aria-pressed="'+(gt===x[0])+'">'+x[1]+(x[0]==="muro"&&mNuevos?'<i class="pt"></i>':'')+'</button>').join("")+'</div>';
   const pan=(k,h)=>'<section class="gpan" data-gp="'+k+'"'+(gt===k?'':' hidden')+'>'+h+'</section>';
   const cambia=gOtros.length?'<div class="seg gsw">'+[{gid:grupo.gid,n:G.n},...gOtros].map(x=>'<button data-a="gCambiar" data-p="'+esc(x.gid)+'" aria-pressed="'+(x.gid===grupo.gid)+'">'+esc(x.n||x.gid)+'</button>').join("")+'</div>':'';
   return shTop("Tu grupo",gOtros.length?"Estás en "+(gOtros.length+1)+" grupos":"Grupo de perseverancia")+'<div class="scroll">'+cambia+'<div class="sbanner gban"><img class="'+(G.portada?"foto":"")+'" src="'+gPortada()+'" alt=""><span class="g"></span>'+
    (creador?'<label class="gport" title="Cambiar la portada">'+ic("image")+'<input type="file" accept="image/*" id="gPortada"></label>':'')+'<span class="gt"><b>'+esc(G.n)+'</b><small>'+R.length+(R.length===1?" miembro":" miembros")+' · código '+G.id+'</small></span></div>'+tabs+
-   pan("hoy",(ENC.length?'<div class="card genc"><div class="hd"><div class="eyebrow">Próximo encuentro</div>'+(ENC.length>1?'<button class="lnk" data-a="gTab" data-p="ranking">Ver los '+ENC.length+'</button>':'')+'</div>'+encHTML(ENC[0],u,creador)+'</div>':'')+(alientos.length?'<div class="card gali">'+alientos.map(a=>'<p>'+ic("heart")+' <b>'+esc(a.n)+'</b> te manda: «'+esc(a.t)+'»</p>').join("")+'</div>':'')+
+   (sob?'':pan("hoy",(ENC.length?'<div class="card genc"><div class="hd"><div class="eyebrow">Próximo encuentro</div>'+(ENC.length>1?'<button class="lnk" data-a="gTab" data-p="ranking">Ver los '+ENC.length+'</button>':'')+'</div>'+encHTML(ENC[0],u,creador)+'</div>':'')+(alientos.length?'<div class="card gali">'+alientos.map(a=>'<p>'+ic("heart")+' <b>'+esc(a.n)+'</b> te manda: «'+esc(a.t)+'»</p>').join("")+'</div>':'')+
    '<div class="card gdes"><div class="hd"><div class="eyebrow">Desafío de la semana</div><span class="chip">'+ic(E.D[3])+' '+E.D[2]+' c/u</span></div><b class="gt">'+esc(E.D[1])+' entre todos: '+E.tot+' de '+E.meta+'</b><div class="bar3"><i style="width:'+Math.min(100,Math.round(E.tot/E.meta*100))+'%"></i></div><p class="hint">'+(E.ok?'¡Meta cumplida! Todos se llevan la insignia del equipo.':'Si llegan antes del domingo, todos ganan la insignia del equipo. Lo tuyo: '+(((me.s||{})[lun]||{})[E.D[0]]||0)+'.')+'</p></div>'+
-   misionesHTML(R,u)+actividadHTML())+pan("muro",muroHTML(u,creador))+
-   pan("miembros",'<div class="card gtuya"><div class="hd"><div class="eyebrow">Tu intención de la semana</div>'+(recibidos?'<span class="hint" style="margin:0;color:var(--accent);display:inline-flex;align-items:center;gap:5px;white-space:nowrap">'+ic("heart")+' '+recibidos+' rezaron por vos</span>':'')+'</div>'+
+   misionesHTML(R,u)+actividadHTML()))+pan("muro",muroHTML(u,creador))+
+   pan("miembros",(sob&&alientos.length?'<div class="card gali">'+alientos.map(a=>'<p>'+ic("heart")+' <b>'+esc(a.n)+'</b> te manda: «'+esc(a.t)+'»</p>').join("")+'</div>':'')+'<div class="card gtuya"><div class="hd"><div class="eyebrow">Tu intención de la semana</div>'+(recibidos?'<span class="hint" style="margin:0;color:var(--accent);display:inline-flex;align-items:center;gap:5px;white-space:nowrap">'+ic("heart")+' '+recibidos+' rezaron por vos</span>':'')+'</div>'+
      '<form data-f="grupoInt" class="add"><input type="text" name="i" placeholder="Por qué pedís esta semana…" maxlength="80" value="'+esc(me.int||"")+'" autocomplete="off"><button class="iconbtn acc" type="submit" aria-label="Guardar">'+ic("check")+'</button></form><p class="hint" style="margin:8px 0 0">La ven los de tu grupo, para rezar por vos'+(me.int&&me.it?', con su fecha (la tuya es '+intCuando(me.it).replace(/<[^>]+>/g,"")+'). Guardala de nuevo para renovarla':'')+'.</p></div>'+
      '<div class="eyebrow gsub">Intenciones del grupo</div><div class="gmiem">'+R.slice().sort((a,b)=>(b.uid===u)-(a.uid===u)||String(a.n).localeCompare(String(b.n))).map(fila).join("")+'</div>')+
    pan("ranking",'<div class="card gencs"><div class="hd"><div class="eyebrow">Encuentros</div><button class="lnk" data-a="encNuevo">'+ic("plus")+' Proponer uno</button></div>'+
      (ENC.length?ENC.map(m=>encHTML(m,u,creador)).join(""):'<p class="hint" style="margin:4px 0 0">La Misa del domingo, la reunión del grupo, una salida: proponé la fecha y cada uno avisa si va.</p>')+'</div>'+
    '<button class="plusrow gcantos" data-a="gCantos"><span class="n"><b>Cantos del grupo</b><small>'+(nCantos?nCantos+(nCantos===1?' canto compartido':' cantos compartidos')+' entre todos, con sus acordes':'El cancionero que arman entre todos: lo carga uno y lo ven todos.')+'</small></span>'+ic("music")+'</button>'+
-   rankGruposHTML()+
-   (I.length?'<div class="card"><div class="eyebrow" style="margin-bottom:8px">Tus insignias</div><div class="insrow">'+I.map(x=>'<span class="insc">'+insigniaSVG(x.k)+'<b>'+esc(INSIG[x.k][0])+'</b><small>'+esc(fLarga(x.lun).replace(/^\w+ /,""))+'</small></span>').join("")+'</div></div>':'<p class="hint">Cuando el grupo cumple el desafío de la semana, todos se llevan la insignia del equipo. Lo que ganás acá va a quedar en tu cuenta para el juego Scaeli.</p>')+
+   (verRank()?rankGruposHTML():'')+
+   (sob?'':I.length?'<div class="card"><div class="eyebrow" style="margin-bottom:8px">Tus insignias</div><div class="insrow">'+I.map(x=>'<span class="insc">'+insigniaSVG(x.k)+'<b>'+esc(INSIG[x.k][0])+'</b><small>'+esc(fLarga(x.lun).replace(/^\w+ /,""))+'</small></span>').join("")+'</div></div>':'<p class="hint">Cuando el grupo cumple el desafío de la semana, todos se llevan la insignia del equipo. Lo que ganás acá va a quedar en tu cuenta para el juego Scaeli.</p>')+
    '<div class="gbot"><button class="primary" data-a="gInvitar">'+ic("plus")+' Invitar amigos</button><button class="ghost g" data-a="gSalir">'+ic("out")+' Salir del grupo</button></div>'+
    (local?'':'<button class="plusrow gotro" data-a="gOtro"><span class="n"><b>Sumarme a otro grupo</b><small>'+(esPlus()?'Hasta '+GRUPOS_PLUS+' grupos a la vez: la parroquia, el colegio, la familia… Seguís en este.':'Podés estar en '+GRUPOS_GRATIS+' grupos a la vez; con Scaeli+, hasta '+GRUPOS_PLUS+': la parroquia, el colegio, la familia…')+'</small></span>'+(esPlus()||misGrupos()<GRUPOS_GRATIS?ic("plus"):'<span class="plus-mini">'+ic("lock")+' Scaeli+</span>')+'</button>')+
    '<p class="hint" style="text-align:center;margin-top:10px">Código: <b style="letter-spacing:.2em">'+G.id+'</b>'+(creador&&G.portada?' · <button class="lnk" data-a="gPortadaQuitar">Quitar la portada</button>':'')+'</p>')+
@@ -837,20 +872,22 @@ async function encGuardar(f){ const F=new FormData(f), ti=String(F.get("ti")||""
 
 /* ── Rango de perseverancia (1.12; ocho rangos desde 2.0): últimos 30 días.
    puntos = días con Dios × 10 + racha más larga del mes × 5 + Rosarios × 3 (tope 30) → hasta 540 (Diamante I pide 520).
-   Celestial y Divino (2.0) piden además sostener la racha más allá del mes: +5 por cada día de racha después del 30, tope 400. Máximo 940. ── */
-const RANGOS=["Hierro","Bronce","Plata","Oro","Platino","Diamante","Celestial","Divino"], RG_PISO=[0,20,40,60,80,100,130,160,190,225,260,295,335,375,415,455,490,520,590,660,730,800,870,940];
+   Celestial y Glorioso (2.0; «Divino» hasta 2.9) piden además sostener la racha más allá del mes: +5 por cada día de racha después del 30, tope 400. Máximo 940. ── */
+/* 2.10: el octavo rango se llama «Glorioso» (antes «Divino»: Magisterium lo dio por ambiguo). Solo cambia el nombre visible; el dibujo
+   sigue en assets/rangos/divino.png (RG_ARCH es la clave del archivo y de la clase CSS, separada del nombre) */
+const RANGOS=["Hierro","Bronce","Plata","Oro","Platino","Diamante","Celestial","Glorioso"], RG_ARCH=["hierro","bronce","plata","oro","platino","diamante","celestial","divino"], RG_PISO=[0,20,40,60,80,100,130,160,190,225,260,295,335,375,415,455,490,520,590,660,730,800,870,940];
 function rangoPts(){ const h=hoy(); let dias=0, ros=0, rmax=0, r=0; for(let i=29;i>=0;i--){ const d=dayOf(addDays(h,-i)); if(rezoAlgo(d)){ dias++; r++; if(r>rmax) rmax=r; } else r=0; if(d.r) ros+=Math.max(1,d.rn||1); }
   ros=Math.min(30,ros); const rac=racha(), extra=Math.min(400,Math.max(0,rac-30)*5); return {dias,rmax,ros,rac,extra,pts:dias*10+rmax*5+ros*3+extra}; }
 function rangoDe(p){ p=+p||0; let i=0; while(i+1<RG_PISO.length&&p>=RG_PISO[i+1]) i++; const g=RANGOS[Math.floor(i/3)], s=["III","II","I"][i%3];
-  return {i,n:g+" "+s,base:g,sub:s,piso:RG_PISO[i],sig:i+1<RG_PISO.length?RG_PISO[i+1]:null,sigN:i+1<RG_PISO.length?RANGOS[Math.floor((i+1)/3)]+" "+["III","II","I"][(i+1)%3]:""}; }
+  return {i,n:g+" "+s,base:g,arch:RG_ARCH[Math.floor(i/3)],sub:s,piso:RG_PISO[i],sig:i+1<RG_PISO.length?RG_PISO[i+1]:null,sigN:i+1<RG_PISO.length?RANGOS[Math.floor((i+1)/3)]+" "+["III","II","I"][(i+1)%3]:""}; }
 // insignia del rango (dibujo de PixelLab, tal cual) con tres puntitos de subnivel: III = uno, II = dos, I = los tres
-function insignia(rg,tam){ return '<span class="rgi'+(tam<40?' ch':'')+'"><img class="escudo" src="assets/rangos/'+rg.base.toLowerCase()+'.png" width="'+tam+'" height="'+tam+'" alt="'+rg.n+'"><span class="rgd" aria-hidden="true">'+[0,1,2].map(k=>'<i'+(k<=rg.i%3?' class="on"':'')+'></i>').join("")+'</span></span>'; }
+function insignia(rg,tam){ return '<span class="rgi'+(tam<40?' ch':'')+'"><img class="escudo" src="assets/rangos/'+rg.arch+'.png" width="'+tam+'" height="'+tam+'" alt="'+rg.n+'"><span class="rgd" aria-hidden="true">'+[0,1,2].map(k=>'<i'+(k<=rg.i%3?' class="on"':'')+'></i>').join("")+'</span></span>'; }
 function rangoHTML(){ const P=rangoPts(), rg=rangoDe(P.pts), falta=rg.sig!=null?rg.sig-P.pts:0, pct=rg.sig!=null?Math.round((P.pts-rg.piso)/(rg.sig-rg.piso)*100):100, gi=Math.floor(rg.i/3);
-  return '<div class="card rangoc r-'+rg.base.toLowerCase()+'"><div class="rgtop">'+insignia(rg,64)+'<div class="n"><div class="eyebrow">Tu rango de perseverancia</div><b>'+rg.n+'</b><small>Últimos 30 días</small></div><div class="pt"><b>'+P.pts+'</b><small>puntos</small></div></div>'+
-   '<div class="rgesc" role="img" aria-label="Escalera de rangos: '+RANGOS.join(", ")+'">'+RANGOS.map((n,k)=>'<span class="'+(k===gi?"yo":k>gi?"falta":"")+'"><img class="escudo" src="assets/rangos/'+n.toLowerCase()+'.png" width="32" height="32" alt="">'+n+'</span>').join("")+'</div>'+
+  return '<div class="card rangoc r-'+rg.arch+'"><div class="rgtop">'+insignia(rg,64)+'<div class="n"><div class="eyebrow">Tu rango de perseverancia</div><b>'+rg.n+'</b><small>Últimos 30 días</small></div><div class="pt"><b>'+P.pts+'</b><small>puntos</small></div></div>'+
+   '<div class="rgesc" role="img" aria-label="Escalera de rangos: '+RANGOS.join(", ")+'">'+RANGOS.map((n,k)=>'<span class="'+(k===gi?"yo":k>gi?"falta":"")+'"><img class="escudo" src="assets/rangos/'+RG_ARCH[k]+'.png" width="32" height="32" alt="">'+n+'</span>').join("")+'</div>'+
    '<div class="bar3"><i style="width:'+Math.max(3,pct)+'%"></i></div><p class="hint" style="margin:8px 0 12px">'+(rg.sig!=null?'Te '+(falta===1?'falta 1 punto':'faltan '+falta+' puntos')+' para <b>'+rg.sigN+'</b>.':'Llegaste al rango más alto. Ahora, a sostenerlo.')+'</p>'+
    '<div class="rgdes"><span><b>'+P.dias+'</b><small>días con Dios × 10</small></span><span><b>'+P.rmax+'</b><small>racha del mes × 5</small></span><span><b>'+P.ros+'</b><small>Rosarios × 3</small></span><span><b>'+P.extra+'</b><small>por racha de más de 30 días</small></span></div>'+
-   '<p class="hint" style="margin:10px 0 0">Ocho rangos, de Hierro a Divino, cada uno con tres pasos (los puntitos). Mira los últimos 30 días: si aflojás, baja. Celestial y Divino piden además sostener la racha más allá del mes.</p></div>'; }
+   '<p class="hint" style="margin:10px 0 0">Ocho rangos, de Hierro a Glorioso, cada uno con tres pasos (los puntitos). Mira los últimos 30 días: si aflojás, baja. Celestial y Glorioso piden además sostener la racha más allá del mes.</p></div>'; }
 
 
 /* ── 1.12 · Ranking de GRUPOS: cada grupo con el promedio semanal de puntos de sus miembros. Adentro del grupo no hay posiciones. ── */
@@ -865,10 +902,10 @@ function rankMio(){ const lun=semanaDe(), mio={id:grupo.gid,n:enGrupo()?grupo.me
   const L=(rankG.sem===lun?rankG.L:[]).filter(x=>x.id!==grupo.gid&&typeof x.pts==="number").concat(enGrupo()?[mio]:[]); L.sort((a,b)=>b.pts-a.pts||String(a.n).localeCompare(String(b.n)));
   return {L,pos:L.findIndex(x=>x.id===grupo.gid)+1,mio}; }
 function rankGruposHTML(){ const {L,pos,mio}=rankMio(), top=L.slice(0,10), fila=(x,i)=>'<div class="rgf'+(x.id===grupo.gid?" yo":"")+'"><span class="rk">'+(i+1)+'</span><span class="n"><b>'+esc(x.n)+(x.id===grupo.gid?' (tu grupo)':'')+'</b><small>'+x.m+(x.m===1?" miembro":" miembros")+'</small></span><span class="pts">'+x.pts+'<small>pts</small></span></div>';
-  return '<div class="card granq"><div class="hd"><div class="eyebrow">Ranking de grupos</div><span class="hint" style="margin:0">Se reinicia el lunes</span></div>'+
+  return '<div class="card granq"><div class="hd"><div class="eyebrow">Constancia de los grupos</div><span class="hint" style="margin:0">Se reinicia el lunes</span></div>'+
    '<div class="gpos"><b>'+(pos||"—")+(pos?'.º':'')+'</b><span>de '+L.length+(L.length===1?" grupo":" grupos")+'<small>'+mio.pts+' puntos promedio por persona esta semana</small></span></div>'+
    '<div class="rgl">'+top.map(fila).join("")+(pos>10?'<div class="rgf sep">…</div>'+fila(mio,pos-1):'')+'</div>'+
-   '<p class="hint" style="margin-top:10px">Cuenta el promedio de los miembros: lo que suma cada uno con sus diarias, hábitos, oraciones y misiones. Adentro del grupo no hay posiciones: se reza juntos y se alientan.</p></div>'; }
+   '<p class="hint granq-ayuda" style="margin-top:10px">Cuenta la constancia registrada, no mide la santidad de nadie. Es el promedio de lo que anota cada uno con sus diarias, hábitos, oraciones y misiones; adentro del grupo no hay posiciones. Si preferís no verlo, se apaga en Yo → Ajustes y más.</p></div>'; }
 
 /* ── 1.11.1 · actividad del grupo: qué rezó cada uno (nunca lo que escribió), en la ficha del grupo; «Amén» para acompañar ── */
 let actividad={L:[],am:{}};
@@ -888,7 +925,7 @@ function actGrupo(){ if(!enGrupo()) return []; const u=yo(), R=(grupo.L||[]).fil
   out.sort((a,b)=>b.t-a.t); const am=id=>R.filter(x=>x.am&&x.am[id]).length; return out.filter(a=>a.t>Date.now()-36*36e5).map(a=>({...a,amen:am(a.uid+"|"+a.id),mio:!!(actividad.am||{})[a.uid+"|"+a.id]})); }
 function actividadHTML(){ const A=actGrupo(), u=yo(), ver=sheet.aver||6, L=A.slice(0,ver);
   return '<div class="card gact"><div class="hd"><div class="eyebrow">Hoy en el grupo</div>'+(profile&&profile.actOff?'<span class="hint" style="margin:0">No compartís lo tuyo</span>':'')+'</div>'+
-   (L.length?L.map(a=>'<div class="ac">'+avatarHTML(a.av,36)+'<div class="t"><b>'+esc(a.n)+'</b> '+esc(actTexto(a))+'<small>'+hace(a.t)+'</small></div>'+
+   (L.length?L.map(a=>'<div class="ac">'+avatarHTML(a.av,36,a.uid===u?miFicha().n:a.n)+'<div class="t"><b>'+esc(a.n)+'</b> '+esc(actTexto(a))+'<small>'+hace(a.t)+'</small></div>'+
      (a.uid===u?(a.amen?'<span class="amen2 quieto">Amén · '+a.amen+'</span>':''):'<button class="amen2'+(a.mio?" on":"")+'" data-a="actAmen" data-p="'+esc(a.uid+"|"+a.id)+'" aria-pressed="'+a.mio+'">Amén'+(a.amen?' · '+a.amen:'')+'</button>')+'</div>').join("")+
      (A.length>ver?'<button class="lnk" data-a="actMas" style="margin:8px auto 0;display:block">Ver más</button>':''):'<p class="hint" style="margin:4px 0 0">Cuando alguien rece el Rosario, lea el Evangelio o termine una novena, aparece acá para que todos se animen.</p>')+
    '<p class="hint" style="margin:10px 0 0">Se ve qué rezó cada uno, nunca lo que escribió.</p></div>'; }
@@ -896,7 +933,7 @@ function actividadHTML(){ const A=actGrupo(), u=yo(), ver=sheet.aver||6, L=A.sli
 function actBanner(){ if(!enGrupo()) return ""; const h0=parse(hoy()).getTime(), d=dayOf(hoy()), u=yo(), A=actGrupo().filter(a=>a.uid!==u&&a.t>=h0);
   for(const [k,falta,acc,pl,sg] of [["r",!d.r,"rosario","ya rezaron el Rosario hoy","ya rezó el Rosario hoy"],["e",!d.e,"evangelio","ya leyeron el Evangelio de hoy","ya leyó el Evangelio de hoy"],["pal",!(d.pal&&d.pal.r),"palabra","ya rezaron con la Palabra del día","ya rezó con la Palabra del día"]]){
     if(!falta) continue; const N=[...new Set(A.filter(a=>a.k===k).map(a=>a.n))]; if(!N.length) continue; const quien=N.length===1?N[0]:N.length===2?N[0]+" y "+N[1]:N[0]+", "+N[1]+" y "+(N.length-2===1?"1 más":(N.length-2)+" más"), pv=A.find(a=>a.k===k);
-    return '<div class="card actban">'+avatarHTML(pv.av,40)+'<div class="t"><b>'+esc(quien)+'</b> '+(N.length===1?sg:pl)+'</div><button class="ghost mesumo" data-a="'+acc+'">Me sumo</button></div>'; }
+    return '<div class="card actban">'+avatarHTML(pv.av,40,pv.n)+'<div class="t"><b>'+esc(quien)+'</b> '+(N.length===1?sg:pl)+'</div><button class="ghost mesumo" data-a="'+acc+'">Me sumo</button></div>'; }
   return ""; }
 
 /* ═════════ 1.10 · Palabra del día, misiones del grupo, premios semanales y álbum de santos ═════════ */
@@ -946,12 +983,12 @@ function ganoSemana(lun){ const s=statsSemana(lun); if(s.d>=7) return "7 días c
 let premT=null;
 function premiosRevisar(){ clearTimeout(premT); premT=setTimeout(async()=>{ if(!backend||!profile) return; const nuevos=[]; const it=new Set(premios.items||[]), vis=new Set(premios.vis||[]);
   for(let i=1;i<=6;i++){ const lun=addDays(semanaDe(),-7*i); if(vis.has(lun)) continue; const por=ganoSemana(lun); if(!por) continue; const k=premioDe(lun); vis.add(lun); if(!it.has(k)){ it.add(k); nuevos.push([k,por]); } }
-  if(vis.size!==(premios.vis||[]).length){ premios={items:[...it],vis:[...vis].sort().slice(-30)}; await backend.setDoc("daily_settings/premios",premios); if(nuevos.length) toast("Ganaste: "+premioNom(nuevos[0][0])+" (por "+nuevos[0][1]+")"); } },1500); }
+  if(vis.size!==(premios.vis||[]).length){ premios={items:[...it],vis:[...vis].sort().slice(-30)}; await backend.setDoc("daily_settings/premios",premios); if(nuevos.length&&!sobrio()) toast("Ganaste: "+premioNom(nuevos[0][0])+" (por "+nuevos[0][1]+")"); } },1500); }
 const rosDis=()=>{ const r=(profile||{}).ros||"clasico"; return tengo("ros:"+r)?r:"clasico"; };
 function acentoAplicar(){ const a=(profile||{}).acento||"ambar", ok=tengo("ac:"+a)?a:"ambar"; if(ok==="ambar") document.documentElement.removeAttribute("data-acento"); else document.documentElement.setAttribute("data-acento",ok); }
 function premiosHTML(){ const lun=semanaDe(), k=premioDe(lun), r=rosDis(), a=(profile||{}).acento||"ambar";
   const op=(t,L,sel)=>L.map(x=>{ const kk=t+":"+x[0], si=tengo(kk); return '<button class="prem'+(si?"":" lock")+'" data-a="'+(si?"premUsar":"premInfo")+'" data-p="'+kk+'" aria-pressed="'+(sel===x[0])+'">'+(t==="ros"?'<span class="rmues r-'+x[0]+'"><i></i><i></i><i></i><i></i><i></i></span>':'<span class="amues" style="--c:'+x[2]+'"></span>')+'<b>'+esc(x[1])+'</b>'+(si?'':'<small>'+ic("lock")+' Premio</small>')+'</button>'; }).join("");
-  return '<div class="card premc" id="premsec"><div class="eyebrow">Tus premios</div><p class="hint" style="margin:6px 0 12px">Cada semana hay un premio exclusivo. Se gana con <b>7 días con Dios</b>, con <b>las misiones del grupo 5 días</b> o <b>saliendo primero en tu grupo</b>. Esta semana: <b>'+esc(premioNom(k))+'</b>.</p>'+
+  return '<div class="card premc" id="premsec"><div class="eyebrow">Tus premios</div><p class="hint" style="margin:6px 0 12px">Cada semana hay un premio exclusivo. Se gana con <b>7 días con Dios</b>, con <b>las misiones del grupo 5 días</b> o <b>cumpliendo la meta del grupo</b>. Esta semana: <b>'+esc(premioNom(k))+'</b>.</p>'+
    '<div class="sect">Rosario</div><div class="premrow">'+op("ros",ROSARIOS,r)+'</div><div class="sect">Color de la app</div><div class="premrow">'+op("ac",ACENTOS,a)+'</div></div>'; }
 
 /* ── Álbum de santos (1.11): cartas con los santos del juego Scaeli. Un álbum por grupo que se llena entre todos;
@@ -1413,7 +1450,7 @@ function openSheet(s){ if(!sheet){ lugarPrevio=Math.round(window.scrollY); navHo
 function closeSheet(deAtras){ if(sheet&&sheet.timer) clearTimeout(sheet.timer); if(deAtras!==true) navHojaCierra(); document.body.classList.remove("conhoja");
   if(sheet){ const yPrev=lugarPrevio, vPrev=view; requestAnimationFrame(()=>{ if(!sheet&&view===vPrev&&Math.abs(window.scrollY-yPrev)>2) window.scrollTo(0,yPrev); }); }
   sheet=null; htmlHoja=null; rosVozSeguir(); if(musicaEstado()) musChip(); $("#scrim").hidden=true; $("#sheet").hidden=true; $("#sheet").classList.remove("full"); document.body.classList.remove("enfoque"); render(); }
-function renderSheet(){ if(!sheet) return; const S={palabra:shPalabra,album:shAlbum,sobre:shSobre,figu:shFigu,diploma:shDiploma,hora:shHora,evangelio:shEvangelio,rosario:shRosario,horas:shHoras,hora_lh:shHoraLH,oraciones:shOraciones,oracion:shOracion,novenas:shNovenas,novena:shNovena,examen:shExamen,confesion:shConfesion,misa:shMisa,santo:shSanto,santoral:shSantoral,lectio:shLectio,lectioGuia:shLectioGuia,creditos:shCreditos,novedades:shNovedades,exConf:shExConf,biblia:shBiblia,progreso:shProgreso,camino:shCamino,anio:shAnio,retiros:shRetiros,retiro:shRetiro,diario:shDiario,musica:shMusica,grupo:shGrupo,biblioteca:shBiblioteca,libros:shLibros,libro:shLibro,catecismo:shCatecismo,encuentro:shEncuentro,cancionero:CANC.shCancionero,canto:CANC.shCanto,cantoEd:CANC.shCantoEd,orar:shOrar,misOraciones:shMisOraciones,plus:shPlus,donar:shDonar,borrar:shBorrar}[sheet.view];
+function renderSheet(){ if(!sheet) return; const S={palabra:shPalabra,album:shAlbum,sobre:shSobre,figu:shFigu,diploma:shDiploma,hora:shHora,evangelio:shEvangelio,rosario:shRosario,horas:shHoras,hora_lh:shHoraLH,oraciones:shOraciones,oracion:shOracion,novenas:shNovenas,novena:shNovena,examen:shExamen,confesion:shConfesion,misa:shMisa,santo:shSanto,santoral:shSantoral,lectio:shLectio,lectioGuia:shLectioGuia,creditos:shCreditos,novedades:shNovedades,modo:shModo,exConf:shExConf,biblia:shBiblia,progreso:shProgreso,camino:shCamino,anio:shAnio,retiros:shRetiros,retiro:shRetiro,diario:shDiario,musica:shMusica,grupo:shGrupo,biblioteca:shBiblioteca,libros:shLibros,libro:shLibro,catecismo:shCatecismo,encuentro:shEncuentro,cancionero:CANC.shCancionero,canto:CANC.shCanto,cantoEd:CANC.shCantoEd,orar:shOrar,misOraciones:shMisOraciones,plus:shPlus,donar:shDonar,borrar:shBorrar}[sheet.view];
   const hh=S?S():""; if(quietoAhora&&hh===htmlHoja) return;   // 2.4: si la hoja no cambió, no se toca (sin parpadeo ni saltos)
   htmlHoja=hh; $("#sheetIn").innerHTML=hh; pintarPersonajes(); cartasAjustar(); $("#sheet").classList.toggle("short",!!sheet.short); $("#sheet").classList.toggle("full",!!sheet.full); document.body.classList.toggle("enfoque",!!sheet.full); const sc=$("#sheet .scroll"); if(sc&&sheet.top!==false) sc.scrollTop=0; rosVozSeguir(); if(musicaEstado()) musChip(); }
 let quietoAhora=false, htmlHoja=null;
@@ -1806,7 +1843,7 @@ function renderLogin(){ $("#nav").hidden=true;
    '<div class="pie"><h1>Tu fe, a otro nivel</h1><p class="hint">El Evangelio, el Rosario, las Horas y el examen del día. Tu semana con Dios, guardada en tu cuenta.</p>'+
    (APPLE_LISTO&&plataforma()!=="android"?'<button class="entrar apple" id="loginApple" data-q="apple">'+LOGO_APPLE+'<span>Continuar con Apple</span></button>':'')+'<button class="entrar google" id="login" data-q="google">'+LOGO_GOOGLE+'<span>Continuar con Google</span></button><button class="ghost g" id="invitado" style="justify-content:center;height:54px;width:100%;font-size:17px">Probar sin cuenta</button>'+
    '<p class="hint" id="status" style="margin:8px 0 0">'+esc(statusTxt||"La misma cuenta que Scaeli Fit y el juego. Nada es público.")+'</p><p class="hint" style="margin:0"><a href="privacidad.html" target="_blank" rel="noopener">Política de privacidad</a></p></div></div>'; }
-function startSession(u,local){ user=u; unsubs.forEach(f=>{try{f()}catch(e){}}); unsubs=[]; setTimeout(novedadesVer,1600);
+function startSession(u,local){ user=u; unsubs.forEach(f=>{try{f()}catch(e){}}); unsubs=[]; setTimeout(novedadesVer,1600); setTimeout(modoOfrecer,2600);
   backend=local?localBackend():userBackend(u.uid,e=>{ if(e&&e.code==="permission-denied") setStatus("La base de datos rechazó la operación: hay que publicar firestore.rules.",true); else setStatus("Sin conexión: los cambios se guardan y se sincronizan después."); });
   setStatus(local?"Guardado solo en este dispositivo":"Sincronizado · "+(u.displayName||u.email||"")); $("#nav").hidden=false;
   const w=(fn)=>{ const un=fn(); if(typeof un==="function") unsubs.push(un); };
@@ -1950,7 +1987,7 @@ const ACC={ ...CANC.ACC,
   async gAlientoOk(p){ const [u2,i]=String(p).split("|"); const me=(grupo.L||[]).find(x=>x.uid===yo())||{}; const al={...(me.al||{})}; al[u2]=[+i,Date.now()]; sheet.al=null; await grupoBE.setMiembro(grupo.gid,{al}); toast("Aliento enviado"); },
   async gReportar(p){ if(!(await confirmar("¿Reportar esta intención?","Se oculta para vos; si dos personas la reportan, se oculta para todos.","Reportar"))) return; const me=(grupo.L||[]).find(x=>x.uid===yo())||{}; const rep={...(me.rep||{})}; rep[p]=1; await grupoBE.setMiembro(grupo.gid,{rep}); toast("Intención ocultada"); },
   async gEchar(p){ const x=(grupo.L||[]).find(y=>y.uid===p); if(!x||!(await confirmar("¿Sacar a "+x.n+" del grupo?","Puede volver a entrar con el código.","Sacar"))) return; try{ await grupoBE.echar(grupo.gid,p); toast("Listo"); }catch(e){ toast("No se pudo"); } },
-  async gSalir(){ if(!(await confirmar("¿Salir del grupo?","Perdés tu lugar en el ranking; podés volver con el código.","Salir","Quedarme"))) return; const gid=grupo.gid; try{ await grupoBE.salir(gid); }catch(e){} const sig=await grupoDejar(); grupoCerrar(); if(sig){ grupoAbrir(sig.gid); openSheet({view:"grupo"}); toast("Saliste del grupo · ahora ves «"+(sig.n||sig.gid)+"»"); } else { closeSheet(); toast("Saliste del grupo"); } },
+  async gSalir(){ if(!(await confirmar("¿Salir del grupo?","Dejás de ver el chat y las intenciones del grupo; podés volver con el código.","Salir","Quedarme"))) return; const gid=grupo.gid; try{ await grupoBE.salir(gid); }catch(e){} const sig=await grupoDejar(); grupoCerrar(); if(sig){ grupoAbrir(sig.gid); openSheet({view:"grupo"}); toast("Saliste del grupo · ahora ves «"+(sig.n||sig.gid)+"»"); } else { closeSheet(); toast("Saliste del grupo"); } },
   async gCambiar(p){ if(p===grupo.gid) return; const x=gOtros.find(y=>y.gid===p); if(!x) return; await grupoEntrar(p,x.n); grupoAbrir(p); if(sheet) renderSheet(); },
   gOtro(){ if(!esPlus()){ openSheet({view:"plus",desde:"grupos"}); return; } openSheet({view:"grupo",nuevo:1}); },
   async gUnirme(p){ const gid=String(p||"").toUpperCase().trim(); if(!gid) return; let G=null; try{ G=await grupoBE.leer(gid); }catch(e){} if(!G){ sheet.err="No encontramos un grupo con ese código."; sheet.m="codigo"; renderSheet(); return; }
@@ -1988,7 +2025,7 @@ const ACC={ ...CANC.ACC,
   hojaPaso(p){ hojaNotas(); sheet.p=Math.max(0,Math.min(exLista().length+1,sheet.p+(+p))); renderSheet(); },
   confModo(p){ sheet.modo=p; renderSheet(); },
   hojaQ(p){ hojaNotas(); const k=exLista()[sheet.p-1].n, i=+p, m=sheet.h.m[k]||(sheet.h.m[k]=[]); const j=m.indexOf(i); if(j>=0) m.splice(j,1); else m.push(i); m.sort((a,b)=>a-b); hojaGuardar(sheet.h); renderSheet(); },
-  async hojaBorrar(){ try{ localStorage.removeItem(HOJA_K); }catch(e){} sheet.h={m:{},n:{},u:""}; sheet.p=0; if(await confirmar("¿Ya te confesaste?","Si hoy te confesaste, lo marcamos y el ánimo vuelve a 100.","Sí, me confesé","Solo borrar")) await marcar("cj"); renderSheet(); toast("Hoja borrada"); }, confNinos(p){ sheet.ninos=p==="1"; renderSheet(); },
+  async hojaBorrar(){ try{ localStorage.removeItem(HOJA_K); }catch(e){} sheet.h={m:{},n:{},u:""}; sheet.p=0; if(await confirmar("¿Ya te confesaste?",sobrio()?"Si hoy te confesaste, lo marcamos en tu día.":"Si hoy te confesaste, lo marcamos y el ánimo vuelve a 100.","Sí, me confesé","Solo borrar")) await marcar("cj"); renderSheet(); toast("Hoja borrada"); }, confNinos(p){ sheet.ninos=p==="1"; renderSheet(); },
   misa(){ openSheet({view:"misa"}); }, async misaOk(){ await marcar("misa"); closeSheet(); amenToast("misa"); },
   cerrar(){ if(rosEnCurso()) ACC.rosSalir(); else closeSheet(); },
   async rosSalir(){ const P=PJ.normal(profile||{}), r=rosario, M=r&&MISTERIOS[r.set], q=P.sx==="f"?"¿Estás segura?":"¿Estás seguro?";
@@ -2001,11 +2038,11 @@ const ACC={ ...CANC.ACC,
     else pr[c]=/^(piel|pelo)$/.test(c)?+v:v;
     await backend.setDoc("daily_settings/profile",pr); },
   async diaria(p){ const d=dayOf(hoy()); if(DIARIAS.some(x=>x[0]===p)){ await setDay(hoy(),{[p]:d[p]?0:1,t:Date.now()}); } else { const dd={...(d.dd||{})}; if(dd[p]) delete dd[p]; else dd[p]=1; await setDay(hoy(),{dd,t:Date.now()}); } },
-  async habMas(p){ const f=view==="dia"?habFecha():hoy(); await ACC.habAj(p+"|p|1|"+f); toast("+1 · +"+XP.hab+" exp · "+(((rutina.habitos||[]).find(h=>h.id===p)||{}).t||""),()=>ACC.habAj(p+"|p|-1|"+f)); if(view==="hoy") render(); },
+  async habMas(p){ const f=view==="dia"?habFecha():hoy(); await ACC.habAj(p+"|p|1|"+f); toast((sobrio()?"Anotado · ":"+1 · +"+XP.hab+" exp · ")+(((rutina.habitos||[]).find(h=>h.id===p)||{}).t||""),()=>ACC.habAj(p+"|p|-1|"+f)); if(view==="hoy") render(); },
   habDia(p){ const x=$(".habtira"), sl=x?x.scrollLeft:0; habDiaSel=p===hoy()?null:p; render(); const y=$(".habtira"); if(y) y.scrollLeft=sl; },
   habIr(p){ habEd=p; irA("dia"); requestAnimationFrame(()=>{ const e=document.querySelector('.hrow.h3 [data-a="habEd"][data-p="'+p+'"]'); if(e) e.scrollIntoView({block:"center"}); }); },
   irDia(){ irA("dia"); },
-  async habMenos(p){ const f=view==="dia"?habFecha():hoy(); await ACC.habAj(p+"|m|1|"+f); toast("−1 · −5 de ánimo · "+(((rutina.habitos||[]).find(h=>h.id===p)||{}).t||""),()=>ACC.habAj(p+"|m|-1|"+f)); },
+  async habMenos(p){ const f=view==="dia"?habFecha():hoy(); await ACC.habAj(p+"|m|1|"+f); toast((sobrio()?"Caída anotada · ":"−1 · −5 de ánimo · ")+(((rutina.habitos||[]).find(h=>h.id===p)||{}).t||""),()=>ACC.habAj(p+"|m|-1|"+f)); },
   rutEdit(){ editRut=!editRut; render(); },
   habEd(p){ habEd=habEd===p?null:p; render(); },
   async habAj(p){ const [id,k,dl,ff]=String(p).split("|"); const f=ff||(view==="dia"?habFecha():hoy()), d=dayOf(f), hb={...(d.hb||{})}, x={...(hb[id]||{})}; x[k]=Math.max(0,(x[k]||0)+(+dl)); hb[id]=x; await setDay(f,{hb,t:Date.now()}); },
@@ -2023,6 +2060,11 @@ const ACC={ ...CANC.ACC,
   async oraFav(p){ const o=TODAS_ORA()[+p]; if(!o) return; const F=oraFavs(), on=F.includes(o.n), N=on?F.filter(x=>x!==o.n):F.concat(o.n);
     profile={...(profile||{}),oraFav:N}; renderSheetQuieto(); toast(on?"Se quitó de favoritas":"Fijada arriba, en Favoritas"); await backend.setDoc("daily_settings/profile",{...(profile||{}),oraFav:N}); },
   async prefLat(){ await backend.setDoc("daily_settings/profile",{...(profile||{}),lat:!(profile&&profile.lat)}); },
+  /* 2.10 · modo sobrio y ranking de grupos opcional (en la cuenta) */
+  async sobrioSet(){ const on=!sobrio(); await backend.setDoc("daily_settings/profile",{...(profile||{}),sobrio:on}); toast(on?"Modo sobrio: solo la oración":"Volvió tu personaje"); },
+  async rankOff(){ const off=!(profile&&profile.rankOff); await backend.setDoc("daily_settings/profile",{...(profile||{}),rankOff:off}); toast(off?"El ranking de grupos quedó oculto":"Se ve el ranking de grupos"); },
+  modoVer(){ openSheet({view:"modo"}); },
+  async modoElegir(p){ lsSet("daily_modo_visto","1"); const on=p==="sobrio"; closeSheet(); await backend.setDoc("daily_settings/profile",{...(profile||{}),sobrio:on}); toast(on?"Listo: Scaeli sobrio. Lo cambiás en Yo → Ajustes y más":"Listo: con personaje. Lo cambiás en Yo → Ajustes y más"); },
   async recOn(){ if(esNativo()){ if(!recordatorios.on&&!(await pedirPermisoAvisos())){ toast("Sin permiso para avisar: activalo en los ajustes del teléfono"); return; } }
     else if("Notification" in window&&Notification.permission!=="granted"){ const r=await Notification.requestPermission(); if(r!=="granted"){ toast("Sin permiso para avisar"); return; } } recordatorios={...recordatorios,on:!recordatorios.on}; await backend.setDoc("daily_settings/recordatorios",recordatorios); programarAvisos(); },
   palabra(){ openSheet({view:"palabra"}); },
@@ -2036,7 +2078,7 @@ const ACC={ ...CANC.ACC,
   sobreRasgar(){ if(!sheet||sheet.view!=="sobre") return; sheet.abierto=1; renderSheet(); },
   diploma(){ if(Object.keys(albGrupo()).length<CARTAS.length) return; openSheet({view:"diploma",full:1}); },
   async premUsar(p){ const [t,id]=String(p).split(":"); if(!tengo(p)) return; await backend.setDoc("daily_settings/profile",{...(profile||{}),[t==="ros"?"ros":"acento"]:id}); toast(t==="ros"?"Vas a rezar con el "+premioNom(p).toLowerCase():"Listo: "+premioNom(p).toLowerCase()); },
-  premInfo(p){ toast(premioNom(p)+": premio semanal. Se gana con 7 días con Dios, las misiones 5 días o el primer puesto del grupo."); },
+  premInfo(p){ toast(premioNom(p)+": premio semanal. Se gana con 7 días con Dios, las misiones 5 días o la meta del grupo."); },
   pjIr(){ irA("yo"); setTimeout(()=>{ const e=document.getElementById("pjsec"); if(e) e.scrollIntoView({behavior:"smooth",block:"start"}); },60); },
   tema(){ const claro=document.documentElement.getAttribute("data-theme")==="light"; if(claro) document.documentElement.removeAttribute("data-theme"); else document.documentElement.setAttribute("data-theme","light"); try{ localStorage.setItem("daily_theme",claro?"dark":"light"); }catch(e){} render(); },
   exportar(){ exportar(); }, importar(){ $("#impFile").click(); },
@@ -2103,6 +2145,7 @@ try{ if(localStorage.getItem("daily_theme")==="light") document.documentElement.
    2) Al abrir la versión nueva: una vez, la hoja «Novedades» con lo que cambió desde la última que viste (NOVEDADES, la más nueva primero).
    En cada versión nueva hay que sumar su entrada acá (t38 lo comprueba). */
 const NOVEDADES=[   /* 2.4 (Lorenzo: «presentemos lo más importante, no cosas mínimas»): pocas líneas por versión, solo lo que alguien notaría; una versión de arreglos lleva [] y no abre el aviso */
+  ["2.10",["Modo sobrio: Scaeli sin personaje ni juego, solo la oración. Está en Yo → Ajustes y más.","El ranking de grupos ahora es «Constancia de los grupos», y lo podés ocultar.","Las vestimentas de consagrados aparecen al marcar tu estado de vida en Yo.","El rango más alto ahora se llama Glorioso."]],
   ["2.9",["El cancionero, ordenado por momento de la Misa: entrada, ofrendas, comunión, salida…","Se suma el ordinario en latín: Kyrie, Gloria, Credo, Sanctus, Pater noster y Agnus Dei.","Quedan solo cantos litúrgicos."]],
   ["2.8.2",[]],
   ["2.8.1",[]],
@@ -2127,6 +2170,15 @@ function novedadesVer(){ let v=null; const viejo=USO_PREVIO; try{ v=localStorage
   lsSet("daily_ver_vista",VERSION); if(!L.length||sheet) return; openSheet({view:"novedades",L:L.slice(0,5)}); }
 function shNovedades(){ const L=sheet.L||[];
   return shTop("Novedades","Scaeli Daily "+VERSION)+'<div class="scroll nov-lista"><div class="card pad"><div class="eyebrow">Lo más importante · versión '+esc(VERSION)+'</div><ul>'+L.map(t=>'<li>'+esc(t)+'</li>').join("")+'</ul></div></div><button class="primary" data-a="cerrar">Amén, ¡vamos!</button>'; }
+/* 2.10 · una vez al entrar: «¿Cómo querés usar Scaeli?» (con personaje o sobrio). No bloquea: se cierra y queda como estaba.
+   Se ofrece a quien todavía no eligió (profile.sobrio sin definir); después se cambia en Yo → Ajustes y más. */
+function shModo(){ const op=(k,ilus,t,s)=>'<button class="modop" data-a="modoElegir" data-p="'+k+'"><img src="'+ilu(ilus)+'" alt="" loading="lazy"><span class="n"><b>'+t+'</b><small>'+s+'</small></span>'+ic("right")+'</button>';
+  return shTop("¿Cómo querés usar Scaeli?","Lo podés cambiar cuando quieras")+'<div class="scroll modo">'+
+   op("pj","mediodia","Con personaje","Tu personaje, niveles, rangos, el álbum de santos y los premios de la semana.")+
+   op("sobrio","oraciones","Sobrio","Solo la oración: Evangelio, Rosario, Horas, examen y tu grupo, sin personaje ni juego.")+
+   '<p class="hint" style="margin-top:12px">Lo que rezás es lo mismo en los dos. Está en Yo → Ajustes y más.</p></div><button class="ghost g" data-a="cerrar" style="justify-content:center;height:48px">Ahora no</button>'; }
+function modoOfrecer(){ try{ if(navigator.webdriver&&!localStorage.getItem("daily_prueba_modo")) return; }catch(e){ return; }   // en las pruebas automáticas no tapa la pantalla (t46 lo prueba a propósito)
+  if(!ready||!profile||profile.sobrio!==undefined||lsGet("daily_modo_visto")||sheet) return; lsSet("daily_modo_visto","1"); openSheet({view:"modo"}); }
 function avisoVersionNueva(){ if(document.getElementById("avisoNueva")) return; const d=document.createElement("div"); d.id="avisoNueva"; d.className="aviso-nueva"; d.setAttribute("role","status");
   d.innerHTML='<span>'+ic("star")+' Hay una versión nueva de Scaeli</span><button type="button">Actualizar</button>'; d.querySelector("button").onclick=()=>location.reload(); document.body.appendChild(d); }
 if(!esNativo()&&navigator.serviceWorker&&navigator.serviceWorker.register&&location.protocol!=="file:"){ window.addEventListener("load",()=>{
