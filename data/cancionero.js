@@ -3,10 +3,13 @@
 // cada uno puede cargar los suyos en «Mis cantos» (quedan en su dispositivo).
 // Los acordes son una armonización sencilla hecha para Scaeli (cifrado americano; la app los muestra en Do Re Mi y los transporta).
 // Formato: [Acorde] delante de la sílaba donde cae · una línea en blanco separa estrofas · «> » al empezar la línea = estribillo.
+// mo (2.9): el momento de la Misa en que se canta (CANTOS_MOM); el primero es el principal. Solo cantos litúrgicos:
+// los villancicos de fiesta (Los peces en el río, Campana sobre campana, A la nanita nana, Ay del chiquirritín) se sacaron en la 2.9.
 // cat: adviento · navidad · cuaresma · pascua · eucaristia · maria · espiritu · alabanza        lat: 1 = en latín
 export const CANTOS_CAT = [["adviento", "Adviento"], ["navidad", "Navidad"], ["cuaresma", "Cuaresma"], ["pascua", "Pascua"], ["eucaristia", "Eucaristía"], ["maria", "María"], ["espiritu", "Espíritu Santo"], ["alabanza", "Alabanza"]];
+export const CANTOS_MOM = [["entrada", "Entrada"], ["piedad", "Señor, ten piedad"], ["gloria", "Gloria"], ["evangelio", "Antes del Evangelio"], ["credo", "Credo"], ["ofrendas", "Ofrendas"], ["santo", "Santo"], ["padrenuestro", "Padrenuestro"], ["cordero", "Cordero de Dios"], ["comunion", "Comunión"], ["salida", "Salida"], ["adoracion", "Adoración eucarística"]];
 export const CANTOS = [
-  { id: "noche-de-paz", t: "Noche de paz", a: "F. Gruber (1818) · letra tradicional en español", cat: ["navidad"], ton: "G", l:
+  { id: "noche-de-paz", t: "Noche de paz", a: "F. Gruber (1818) · letra tradicional en español", cat: ["navidad"], mo: ["comunion", "salida"], ton: "G", l:
 `[G]Noche de paz, noche de amor,
 [D7]todo duerme [G]en derredor.
 [C]Entre los astros que es[G]parcen su luz,
@@ -27,7 +30,7 @@ export const CANTOS = [
 [C]en el pesebre, del [G]mundo la luz,
 [D7]astro de eterno ful[G]gor,
 [G]astro de e[D7]terno ful[G]gor.` },
-  { id: "venid-fieles", t: "Venid, fieles todos", a: "Adeste fideles · J. F. Wade (s. XVIII) · versión tradicional", cat: ["navidad"], ton: "G", l:
+  { id: "venid-fieles", t: "Venid, fieles todos", a: "Adeste fideles · J. F. Wade (s. XVIII) · versión tradicional", cat: ["navidad"], mo: ["entrada"], ton: "G", l:
 `Ve[G]nid, fieles [D]todos, a Be[G]lén mar[D]chemos,
 de [Em]gozo triun[A7]fantes, hen[D]chidos [A7]de a[D]mor.
 Y al [G]Rey de los [D7]cie[G]los hu[C]mildes ve[D]remos.
@@ -42,7 +45,7 @@ al [G]seno hu[D7]mil[G]de vi[C]no de una [D]madre.
 En [G]pobre pe[D]sebre yace [G]recli[D]nado,
 al [Em]hombre o[A7]frece e[D]terna [A7]salva[D]ción
 el [G]santo Me[D7]sí[G]as, el [C]Verbo humi[D]llado.` },
-  { id: "adeste-fideles", t: "Adeste fideles", a: "J. F. Wade (s. XVIII)", cat: ["navidad"], ton: "G", lat: 1, l:
+  { id: "adeste-fideles", t: "Adeste fideles", a: "J. F. Wade (s. XVIII)", cat: ["navidad"], mo: ["entrada", "comunion"], ton: "G", lat: 1, l:
 `A[G]deste fi[D]deles, [G]laeti trium[D]phantes,
 ve[Em]nite, ve[A7]nite in [D]Beth[A7]le[D]hem.
 [G]Natum vi[D7]de[G]te [C]Regem ange[D]lorum.
@@ -57,55 +60,7 @@ vo[Em]cati pas[A7]tores ap[D]pro[A7]pe[D]rant.
 Ae[G]terni Pa[D]rentis [G]splendorem ae[D]ternum
 ve[Em]latum sub [A7]carne vi[D]de[A7]bi[D]mus,
 [G]Deum in[D7]fan[G]tem, [C]pannis invo[D]lutum.` },
-  { id: "peces-en-el-rio", t: "Los peces en el río", a: "Villancico tradicional", cat: ["navidad"], ton: "Am", l:
-`La [Am]Virgen se está peinando
-entre cor[E7]tina y cortina;
-los cabellos son de oro
-y el peine de plata [Am]fina.
-
-> Pero [Am]mira cómo beben
-> los peces en el [E7]río,
-> pero mira cómo beben
-> por ver al Dios na[Am]cido.
-> Beben y beben
-> y vuelven a be[E7]ber,
-> los peces en el río
-> por ver a Dios na[Am]cer.
-
-La [Am]Virgen lava pañales
-y los tiende [E7]en el romero,
-los pajarillos cantando
-y el romero flore[Am]ciendo.
-
-La [Am]Virgen se está lavando
-con un po[E7]co de jabón;
-se le han picado las manos,
-manos de mi cora[Am]zón.` },
-  { id: "campana-sobre-campana", t: "Campana sobre campana", a: "Villancico tradicional", cat: ["navidad"], ton: "G", l:
-`Cam[G]pana sobre cam[D7]pana,
-y sobre campana [G]una,
-asómate a la ven[D7]tana,
-verás al Niño en la [G]cuna.
-
-> Be[G]lén, cam[C]panas de Be[G]lén,
-> que los [C]ángeles [G]tocan,
-> ¿qué [D7]nuevas me tra[G]éis?
-
-Reco[G]gido tu re[D7]baño,
-¿a dónde vas, pastor[G]cillo?
-Voy a llevar al por[D7]tal
-requesón, manteca y [G]vino.
-
-Cam[G]pana sobre cam[D7]pana,
-y sobre campana [G]dos,
-asómate a esa ven[D7]tana,
-porque está naciendo [G]Dios.
-
-Cami[G]nando a media[D7]noche,
-¿dónde caminas, pas[G]tor?
-Le llevo al Niño que [D7]nace,
-como a Dios, mi cora[G]zón.` },
-  { id: "veni-emmanuel", t: "Veni, veni, Emmanuel", a: "Himno latino de Adviento (antífonas «O»)", cat: ["adviento"], ton: "Em", lat: 1, l:
+  { id: "veni-emmanuel", t: "Veni, veni, Emmanuel", a: "Himno latino de Adviento (antífonas «O»)", cat: ["adviento"], mo: ["entrada"], ton: "Em", lat: 1, l:
 `[Em]Veni, veni, Em[Am]ma[D]nu[Em]el,
 cap[Em]tivum [Am]solve [Bm]Isra[Em]el,
 qui [Am]gemit in ex[Em]si[D]lio,
@@ -128,7 +83,7 @@ di[Em]rasque [Am]mortis [Bm]tene[Em]bras.
 reg[Em]na re[Am]clude [Bm]caeli[Em]ca,
 fac [Am]iter tutum [Em]su[D]perum,
 et [Em]claude [Am]vias [Bm]infe[Em]rum.` },
-  { id: "perdona-a-tu-pueblo", t: "Perdona a tu pueblo", a: "Tradicional", cat: ["cuaresma"], ton: "Dm", l:
+  { id: "perdona-a-tu-pueblo", t: "Perdona a tu pueblo", a: "Tradicional", cat: ["cuaresma"], mo: ["entrada"], ton: "Dm", l:
 `> Per[Dm]dona a tu [Gm]pueblo, Se[Dm]ñor,
 > per[A7]dona a tu pueblo,
 > per[Dm]dónale, Señor.
@@ -148,7 +103,7 @@ per[Dm]dónale, Señor.
 Por [Dm]los tres [Gm]clavos que te cla[Dm]varon,
 y [A7]las espinas que te punzaron,
 per[Dm]dónale, Señor.` },
-  { id: "attende-domine", t: "Attende, Domine", a: "Canto gregoriano de Cuaresma", cat: ["cuaresma"], lat: 1, l:
+  { id: "attende-domine", t: "Attende, Domine", a: "Canto gregoriano de Cuaresma", cat: ["cuaresma"], mo: ["entrada", "ofrendas"], lat: 1, l:
 `> Attende, Domine, et miserere,
 > quia peccavimus tibi.
 
@@ -163,11 +118,11 @@ ablue nostri maculas delicti.
 Rogamus, Deus, tuam maiestatem:
 auribus sacris gemitus exaudi:
 crimina nostra placidus indulge.` },
-  { id: "parce-domine", t: "Parce, Domine", a: "Canto gregoriano de Cuaresma", cat: ["cuaresma"], lat: 1, l:
+  { id: "parce-domine", t: "Parce, Domine", a: "Canto gregoriano de Cuaresma", cat: ["cuaresma"], mo: ["entrada", "comunion"], lat: 1, l:
 `Parce, Domine,
 parce populo tuo:
 ne in aeternum irascaris nobis.` },
-  { id: "stabat-mater", t: "Stabat Mater", a: "Secuencia (s. XIII)", cat: ["cuaresma", "maria"], lat: 1, l:
+  { id: "stabat-mater", t: "Stabat Mater", a: "Secuencia (s. XIII)", cat: ["cuaresma", "maria"], mo: ["evangelio"], lat: 1, l:
 `Stabat Mater dolorosa
 iuxta crucem lacrimosa,
 dum pendebat Filius.
@@ -191,12 +146,12 @@ ut sibi complaceam.
 Quando corpus morietur,
 fac ut animae donetur
 paradisi gloria. Amen.` },
-  { id: "regina-caeli", t: "Regina caeli", a: "Antífona mariana del Tiempo Pascual", cat: ["pascua", "maria"], lat: 1, l:
+  { id: "regina-caeli", t: "Regina caeli", a: "Antífona mariana del Tiempo Pascual", cat: ["pascua", "maria"], mo: ["salida"], lat: 1, l:
 `Regina caeli, laetare, alleluia;
 quia quem meruisti portare, alleluia;
 resurrexit, sicut dixit, alleluia;
 ora pro nobis Deum, alleluia.` },
-  { id: "o-filii-et-filiae", t: "O filii et filiae", a: "Himno pascual (J. Tisserand, s. XV)", cat: ["pascua"], ton: "Dm", lat: 1, l:
+  { id: "o-filii-et-filiae", t: "O filii et filiae", a: "Himno pascual (J. Tisserand, s. XV)", cat: ["pascua"], mo: ["entrada", "comunion"], ton: "Dm", lat: 1, l:
 `> Alle[Dm]luia, alle[C]luia, alle[Dm]lu[A]ia.
 
 O [Dm]filii et [C]fili[Dm]ae,
@@ -214,7 +169,7 @@ ve[Dm]nerunt [Gm]corpus [A]unge[Dm]re. Alle[A]lu[Dm]ia.
 In [Dm]hoc festo sanc[C]tissi[Dm]mo
 sit [F]laus et iubi[C]lati[Dm]o:
 bene[Dm]dica[Gm]mus [A]Domi[Dm]no. Alle[A]lu[Dm]ia.` },
-  { id: "veni-creator", t: "Veni, Creator Spiritus", a: "Himno (atribuido a Rábano Mauro, s. IX)", cat: ["espiritu"], lat: 1, l:
+  { id: "veni-creator", t: "Veni, Creator Spiritus", a: "Himno (atribuido a Rábano Mauro, s. IX)", cat: ["espiritu"], mo: ["entrada"], lat: 1, l:
 `Veni, Creator Spiritus,
 mentes tuorum visita,
 imple superna gratia,
@@ -249,7 +204,7 @@ Deo Patri sit gloria,
 et Filio, qui a mortuis
 surrexit, ac Paraclito,
 in saeculorum saecula. Amen.` },
-  { id: "cantemos-al-amor", t: "Cantemos al Amor de los amores", a: "Letra: R. del Valle · Música: I. Busca de Sagastizábal (1911)", cat: ["eucaristia"], ton: "C", l:
+  { id: "cantemos-al-amor", t: "Cantemos al Amor de los amores", a: "Letra: R. del Valle · Música: I. Busca de Sagastizábal (1911)", cat: ["eucaristia"], mo: ["comunion", "adoracion"], ton: "C", l:
 `Can[C]temos al A[G7]mor de los a[C]mores,
 can[F]temos [G7]al Se[C]ñor.
 ¡[C]Dios está a[G7]quí! Ve[Am]nid, adora[Dm]dores;
@@ -264,12 +219,12 @@ U[C]namos nuestra [G7]voz a los can[C]tares
 del [F]coro [G7]celes[C]tial.
 ¡[C]Dios está a[G7]quí! Al [Am]Dios de los al[Dm]tares
 ala[C]bemos con [G7]gozo angeli[C]cal.` },
-  { id: "alabado-sea", t: "Alabado sea el Santísimo", a: "Tradicional", cat: ["eucaristia"], ton: "C", l:
+  { id: "alabado-sea", t: "Alabado sea el Santísimo", a: "Tradicional", cat: ["eucaristia"], mo: ["adoracion"], ton: "C", l:
 `Ala[C]bado [G7]sea el San[C]tísimo
 Sacra[F]mento [G7]del al[C]tar,
 y la [C]Virgen [G7]conce[C]bida
 sin pe[F]cado o[G7]rigi[C]nal.` },
-  { id: "oh-buen-jesus", t: "Oh buen Jesús", a: "Tradicional (para la comunión)", cat: ["eucaristia"], ton: "D", l:
+  { id: "oh-buen-jesus", t: "Oh buen Jesús", a: "Tradicional (para la comunión)", cat: ["eucaristia"], mo: ["comunion"], ton: "D", l:
 `Oh [D]buen Jesús, yo [A7]creo firme[D]mente
 que [G]por mi [D]bien es[E7]tás en el al[A]tar;
 que [D]das tu cuerpo y [A7]sangre junta[D]mente
@@ -299,7 +254,7 @@ Dul[D]ce maná y ce[A7]lestial co[D]mida,
 go[G]zo y sa[D]lud del [E7]que te come [A]bien;
 ven [D]sin tardar, mi [A7]Dios, mi luz, mi [D]vida;
 des[G]ciende a [D]mí, hasta mi [A7]pecho [D]ven.` },
-  { id: "tantum-ergo", t: "Tantum ergo", a: "Santo Tomás de Aquino (s. XIII)", cat: ["eucaristia"], lat: 1, l:
+  { id: "tantum-ergo", t: "Tantum ergo", a: "Santo Tomás de Aquino (s. XIII)", cat: ["eucaristia"], mo: ["adoracion"], lat: 1, l:
 `Tantum ergo Sacramentum
 veneremur cernui:
 et antiquum documentum
@@ -313,7 +268,7 @@ salus, honor, virtus quoque
 sit et benedictio:
 procedenti ab utroque
 compar sit laudatio. Amen.` },
-  { id: "adoro-te-devote", t: "Adoro te devote", a: "Santo Tomás de Aquino (s. XIII)", cat: ["eucaristia"], lat: 1, l:
+  { id: "adoro-te-devote", t: "Adoro te devote", a: "Santo Tomás de Aquino (s. XIII)", cat: ["eucaristia"], mo: ["comunion", "adoracion"], lat: 1, l:
 `Adoro te devote, latens Deitas,
 quae sub his figuris vere latitas:
 tibi se cor meum totum subiicit,
@@ -333,7 +288,7 @@ Iesu, quem velatum nunc aspicio,
 oro fiat illud quod tam sitio:
 ut te revelata cernens facie,
 visu sim beatus tuae gloriae. Amen.` },
-  { id: "ave-verum", t: "Ave verum Corpus", a: "Himno eucarístico (s. XIV)", cat: ["eucaristia"], lat: 1, l:
+  { id: "ave-verum", t: "Ave verum Corpus", a: "Himno eucarístico (s. XIV)", cat: ["eucaristia"], mo: ["comunion", "adoracion"], lat: 1, l:
 `Ave verum Corpus, natum
 de Maria Virgine,
 vere passum, immolatum
@@ -345,7 +300,7 @@ mortis in examine.
 
 O Iesu dulcis, o Iesu pie,
 o Iesu, fili Mariae.` },
-  { id: "o-salutaris", t: "O salutaris Hostia", a: "Santo Tomás de Aquino (s. XIII)", cat: ["eucaristia"], lat: 1, l:
+  { id: "o-salutaris", t: "O salutaris Hostia", a: "Santo Tomás de Aquino (s. XIII)", cat: ["eucaristia"], mo: ["adoracion"], lat: 1, l:
 `O salutaris Hostia,
 quae caeli pandis ostium:
 bella premunt hostilia,
@@ -355,7 +310,7 @@ Uni trinoque Domino
 sit sempiterna gloria,
 qui vitam sine termino
 nobis donet in patria. Amen.` },
-  { id: "ubi-caritas", t: "Ubi caritas", a: "Antífona del Jueves Santo", cat: ["eucaristia", "cuaresma"], lat: 1, l:
+  { id: "ubi-caritas", t: "Ubi caritas", a: "Antífona del Jueves Santo", cat: ["eucaristia", "cuaresma"], mo: ["ofrendas", "comunion"], lat: 1, l:
 `> Ubi caritas et amor, Deus ibi est.
 
 Congregavit nos in unum Christi amor.
@@ -367,7 +322,7 @@ Simul ergo cum in unum congregamur:
 ne nos mente dividamur, caveamus.
 Cessent iurgia maligna, cessent lites.
 Et in medio nostri sit Christus Deus.` },
-  { id: "oh-maria-madre-mia", t: "Oh María, Madre mía", a: "Tradicional", cat: ["maria"], ton: "G", l:
+  { id: "oh-maria-madre-mia", t: "Oh María, Madre mía", a: "Tradicional", cat: ["maria"], mo: ["salida"], ton: "G", l:
 `> Oh Ma[G]ría, [D7]Madre mía,
 > oh con[G]suelo [D7]del mor[G]tal,
 > ampa[C]radme y [G]guiadme
@@ -387,7 +342,7 @@ Pues te [G]llamo [D7]con fe viva,
 muestra, oh [G]Madre, [D7]tu bon[G]dad;
 a mí [C]vuelve compa[G]siva
 tu mi[D7]rada de pie[G]dad.` },
-  { id: "venid-y-vamos-todos", t: "Venid y vamos todos", a: "Tradicional (mes de María)", cat: ["maria"], ton: "D", l:
+  { id: "venid-y-vamos-todos", t: "Venid y vamos todos", a: "Tradicional (mes de María)", cat: ["maria"], mo: ["salida", "entrada"], ton: "D", l:
 `> Ve[D]nid y vamos [A7]todos
 > con flores a por[D]fía,
 > con [G]flores a Ma[D]ría,
@@ -407,7 +362,7 @@ Por [D]ellas te ro[A7]gamos,
 si cándidas te [D]placen,
 las [G]que en la gloria [D]nacen
 en [A7]cambio tú nos [D]des.` },
-  { id: "trece-de-mayo", t: "El trece de mayo", a: "Tradicional (Ave de Fátima)", cat: ["maria"], ton: "G", l:
+  { id: "trece-de-mayo", t: "El trece de mayo", a: "Tradicional (Ave de Fátima)", cat: ["maria"], mo: ["salida"], ton: "G", l:
 `El [G]trece de [D7]mayo la [G]Virgen Ma[D7]ría
 ba[G]jó de los [C]cielos a [D7]Cova de I[G]ría.
 
@@ -422,7 +377,7 @@ por [G]los peca[C]dores implo[D7]rad per[G]dón.
 
 El [G]santo Ro[D7]sario cons[G]tantes re[D7]zad,
 y [G]la paz del [C]mundo el Se[D7]ñor da[G]rá.` },
-  { id: "o-sanctissima", t: "O sanctissima", a: "Tradicional siciliano (s. XVIII)", cat: ["maria"], ton: "G", lat: 1, l:
+  { id: "o-sanctissima", t: "O sanctissima", a: "Tradicional siciliano (s. XVIII)", cat: ["maria"], mo: ["salida"], ton: "G", lat: 1, l:
 `[G]O sanc[C]tissi[G]ma, [G]o pi[C]issi[G]ma,
 [G]dulcis [D]Virgo Ma[A7]ri[D]a!
 [D7]Mater a[G]mata, [D7]inteme[G]rata,
@@ -432,7 +387,7 @@ y [G]la paz del [C]mundo el Se[D7]ñor da[G]rá.` },
 [G]Virgo [D]Mater Ma[A7]ri[D]a.
 [D7]Quidquid op[G]tamus, [D7]per te spe[G]ramus;
 [C]o[G]ra, [Am]o[G]ra [D7]pro no[G]bis.` },
-  { id: "salve-regina", t: "Salve, Regina", a: "Antífona mariana (s. XI)", cat: ["maria"], lat: 1, l:
+  { id: "salve-regina", t: "Salve, Regina", a: "Antífona mariana (s. XI)", cat: ["maria"], mo: ["salida"], lat: 1, l:
 `Salve, Regina, Mater misericordiae,
 vita, dulcedo, et spes nostra, salve.
 Ad te clamamus, exsules filii Hevae.
@@ -443,7 +398,7 @@ illos tuos misericordes oculos ad nos converte.
 Et Iesum, benedictum fructum ventris tui,
 nobis post hoc exsilium ostende.
 O clemens, o pia, o dulcis Virgo Maria.` },
-  { id: "salve-madre", t: "Salve, Madre", a: "Letra: R. del Valle · Música: E. Torres (1929)", cat: ["maria"], l:
+  { id: "salve-madre", t: "Salve, Madre", a: "Letra: R. del Valle · Música: E. Torres (1929)", cat: ["maria"], mo: ["salida"], l:
 `Salve, Madre, en la tierra de mis amores
 te saludan los cantos que alza el amor.
 Reina de nuestras almas, flor de las flores,
@@ -460,7 +415,7 @@ mas si mi amor te olvidare,
 Madre mía, Madre mía,
 aunque mi amor te olvidare,
 tú no te olvides de mí.` },
-  { id: "tu-reinaras", t: "Tú reinarás", a: "Tradicional (a Cristo Rey)", cat: ["alabanza"], ton: "C", l:
+  { id: "tu-reinaras", t: "Tú reinarás", a: "Tradicional (a Cristo Rey)", cat: ["alabanza"], mo: ["salida", "entrada"], ton: "C", l:
 `Tú [C]reinarás, este es el [G7]grito
 que ardiente exhala nuestra [C]fe.
 Tú reinarás, oh Rey ben[F]dito,
@@ -480,7 +435,7 @@ Tú [C]reinarás en este [G7]suelo,
 te prometemos nuestro a[C]mor.
 Oh buen Jesús, danos con[F]suelo
 en [C]este [G7]valle de do[C]lor.` },
-  { id: "corazon-santo", t: "Corazón santo", a: "Tradicional (al Sagrado Corazón)", cat: ["alabanza", "eucaristia"], ton: "D", l:
+  { id: "corazon-santo", t: "Corazón santo", a: "Tradicional (al Sagrado Corazón)", cat: ["alabanza", "eucaristia"], mo: ["comunion", "salida"], ton: "D", l:
 `> Cora[D]zón santo, [A7]tú reinarás;
 > tú nuestro encanto siempre se[D]rás.
 
@@ -488,16 +443,7 @@ Je[D]sús amable, Je[A7]sús piadoso,
 dueño amoroso, Dios de pie[D]dad,
 vengo a tus plantas, si [G]tú me dejas,
 hu[D]mildes quejas [A7]a presen[D]tar.` },
-  { id: "a-la-nanita-nana", t: "A la nanita nana", a: "Letra: J. F. Muñoz y Pabón · Música: J. R. Gomis (1904)", cat: ["navidad"], ton: "Am", l:
-`> [Am]A la nanita nana, nanita [E7]ea, nanita [Am]ea,
-> mi Je[Dm]sús tiene [Am]sueño, ben[E7]dito sea, bendito [Am]sea.
-
-[A]Fuentecilla que corres [E7]clara y sonora,
-ruiseñor que en la selva can[A]tando lloras,
-ca[D]llad mientras la [A]cuna se [E7]balan[A]cea.
-
-> [Am]A la nanita nana, nanita [E7]e[Am]a.` },
-  { id: "vamos-pastores-vamos", t: "Vamos, pastores, vamos", a: "Villancico tradicional", cat: ["navidad"], ton: "D", l:
+  { id: "vamos-pastores-vamos", t: "Vamos, pastores, vamos", a: "Villancico tradicional", cat: ["navidad"], mo: ["ofrendas", "salida"], ton: "D", l:
 `> [D]Vamos, pastores, vamos,
 > [A7]vamos a Be[D]lén,
 > a [D]ver en ese [G]Niño
@@ -512,18 +458,7 @@ El [D]padre lo acaricia,
 la [A7]madre mira en [D]Él,
 y los [D]dos exta[G]siados
 con[A7]templan aquel [D]ser.` },
-  { id: "ay-del-chiquirritin", t: "Ay del chiquirritín", a: "Villancico tradicional", cat: ["navidad"], ton: "D", l:
-`> [D]Ay del chiquirritín, chiquirriqui[A7]tín,
-> metidito entre [D]pajas;
-> ay del chiquirritín, chiquirriqui[A7]tín,
-> queridín, queridito del [D]alma.
-
-[D]Entre un buey y una mula [A7]Dios ha nacido,
-y en un pobre pesebre [D]lo han recogido.
-
-[D]Por debajo del arco [A7]del portalico
-se descubre a María, [D]José y al Niño.` },
-  { id: "puer-natus", t: "Puer natus in Bethlehem", a: "Himno de Navidad (s. XIV)", cat: ["navidad"], lat: 1, l:
+  { id: "puer-natus", t: "Puer natus in Bethlehem", a: "Himno de Navidad (s. XIV)", cat: ["navidad"], mo: ["entrada", "comunion"], lat: 1, l:
 `Puer natus in Bethlehem, alleluia:
 unde gaudet Ierusalem, alleluia, alleluia.
 
@@ -536,7 +471,7 @@ Dei Patris altissimus, alleluia, alleluia.
 
 Per Gabrielem nuntium, alleluia,
 Virgo concepit Filium, alleluia, alleluia.` },
-  { id: "rorate-caeli", t: "Rorate caeli", a: "Canto gregoriano de Adviento", cat: ["adviento"], lat: 1, l:
+  { id: "rorate-caeli", t: "Rorate caeli", a: "Canto gregoriano de Adviento", cat: ["adviento"], mo: ["entrada"], lat: 1, l:
 `> Rorate caeli desuper,
 > et nubes pluant iustum.
 
@@ -547,7 +482,7 @@ Sion deserta facta est,
 Ierusalem desolata est,
 domus sanctificationis tuae et gloriae tuae,
 ubi laudaverunt te patres nostri.` },
-  { id: "alma-redemptoris", t: "Alma Redemptoris Mater", a: "Antífona mariana de Adviento y Navidad", cat: ["adviento", "navidad", "maria"], lat: 1, l:
+  { id: "alma-redemptoris", t: "Alma Redemptoris Mater", a: "Antífona mariana de Adviento y Navidad", cat: ["adviento", "navidad", "maria"], mo: ["salida"], lat: 1, l:
 `Alma Redemptoris Mater,
 quae pervia caeli porta manes,
 et stella maris, succurre cadenti,
@@ -557,7 +492,7 @@ tuum sanctum Genitorem,
 Virgo prius ac posterius,
 Gabrielis ab ore sumens illud Ave,
 peccatorum miserere.` },
-  { id: "ave-regina-caelorum", t: "Ave, Regina caelorum", a: "Antífona mariana de Cuaresma", cat: ["cuaresma", "maria"], lat: 1, l:
+  { id: "ave-regina-caelorum", t: "Ave, Regina caelorum", a: "Antífona mariana de Cuaresma", cat: ["cuaresma", "maria"], mo: ["salida"], lat: 1, l:
 `Ave, Regina caelorum,
 ave, Domina angelorum:
 salve, radix, salve, porta,
@@ -567,7 +502,7 @@ Gaude, Virgo gloriosa,
 super omnes speciosa;
 vale, o valde decora,
 et pro nobis Christum exora.` },
-  { id: "victimae-paschali", t: "Victimae paschali laudes", a: "Secuencia de Pascua (s. XI)", cat: ["pascua"], lat: 1, l:
+  { id: "victimae-paschali", t: "Victimae paschali laudes", a: "Secuencia de Pascua (s. XI)", cat: ["pascua"], mo: ["evangelio"], lat: 1, l:
 `Victimae paschali laudes
 immolent Christiani.
 
@@ -594,7 +529,7 @@ Scimus Christum surrexisse
 a mortuis vere:
 tu nobis, victor Rex, miserere.
 Amen. Alleluia.` },
-  { id: "veni-sancte-spiritus", t: "Veni, Sancte Spiritus", a: "Secuencia de Pentecostés (s. XIII)", cat: ["espiritu", "pascua"], lat: 1, l:
+  { id: "veni-sancte-spiritus", t: "Veni, Sancte Spiritus", a: "Secuencia de Pentecostés (s. XIII)", cat: ["espiritu", "pascua"], mo: ["evangelio"], lat: 1, l:
 `Veni, Sancte Spiritus,
 et emitte caelitus
 lucis tuae radium.
@@ -635,7 +570,7 @@ Da virtutis meritum,
 da salutis exitum,
 da perenne gaudium.
 Amen. Alleluia.` },
-  { id: "pange-lingua", t: "Pange, lingua", a: "Santo Tomás de Aquino (s. XIII)", cat: ["eucaristia"], lat: 1, l:
+  { id: "pange-lingua", t: "Pange, lingua", a: "Santo Tomás de Aquino (s. XIII)", cat: ["eucaristia"], mo: ["adoracion", "comunion"], lat: 1, l:
 `Pange, lingua, gloriosi
 Corporis mysterium,
 Sanguinisque pretiosi,
@@ -649,7 +584,7 @@ et in mundo conversatus,
 sparso verbi semine,
 sui moras incolatus
 miro clausit ordine.` },
-  { id: "bendito-bendito", t: "Bendito, bendito", a: "Tradicional", cat: ["eucaristia"], ton: "G", l:
+  { id: "bendito-bendito", t: "Bendito, bendito", a: "Tradicional", cat: ["eucaristia"], mo: ["comunion", "adoracion"], ton: "G", l:
 `> Ben[G]dito, ben[D7]dito, ben[G]dito sea [D7]Dios,
 > los [G]ángeles [C]cantan y a[D7]laban a [G]Dios.
 
@@ -661,7 +596,7 @@ su [G]sangre pre[C]ciosa que [D7]dio por mí en la [G]cruz.
 
 Je[G]sús, Rey del [D7]cielo, que es[G]tás en el al[D7]tar,
 tu [G]cuerpo, tu [C]sangre nos [D7]das sin ce[G]sar.` },
-  { id: "iesu-dulcis-memoria", t: "Iesu, dulcis memoria", a: "Himno (s. XII)", cat: ["eucaristia", "alabanza"], lat: 1, l:
+  { id: "iesu-dulcis-memoria", t: "Iesu, dulcis memoria", a: "Himno (s. XII)", cat: ["eucaristia", "alabanza"], mo: ["comunion"], lat: 1, l:
 `Iesu, dulcis memoria,
 dans vera cordis gaudia:
 sed super mel et omnia
@@ -681,11 +616,11 @@ Sis, Iesu, nostrum gaudium,
 qui es futurus praemium:
 sit nostra in te gloria
 per cuncta semper saecula. Amen.` },
-  { id: "christus-vincit", t: "Christus vincit", a: "Aclamaciones carolingias (s. VIII)", cat: ["alabanza"], ton: "D", lat: 1, l:
+  { id: "christus-vincit", t: "Christus vincit", a: "Aclamaciones carolingias (s. VIII)", cat: ["alabanza"], mo: ["entrada", "salida"], ton: "D", lat: 1, l:
 `[D]Christus [G]vin[D]cit,
 Christus [A]reg[D]nat,
 Christus, [G]Christus [A]impe[D]rat.` },
-  { id: "laudate-dominum", t: "Laudate Dominum", a: "Salmo 117 (116)", cat: ["alabanza"], lat: 1, l:
+  { id: "laudate-dominum", t: "Laudate Dominum", a: "Salmo 117 (116)", cat: ["alabanza"], mo: ["comunion", "salida"], lat: 1, l:
 `Laudate Dominum, omnes gentes;
 laudate eum, omnes populi.
 Quoniam confirmata est super nos
@@ -696,12 +631,12 @@ Gloria Patri, et Filio,
 et Spiritui Sancto.
 Sicut erat in principio, et nunc, et semper,
 et in saecula saeculorum. Amen.` },
-  { id: "santo-dios", t: "Santo Dios, Santo fuerte", a: "Trisagio · tradicional", cat: ["alabanza", "cuaresma"], l:
+  { id: "santo-dios", t: "Santo Dios, Santo fuerte", a: "Trisagio · tradicional", cat: ["alabanza", "cuaresma"], mo: ["adoracion"], l:
 `Santo Dios,
 Santo fuerte,
 Santo inmortal,
 líbranos, Señor, de todo mal.` },
-  { id: "magnificat", t: "Magnificat", a: "Cántico de María (Lc 1, 46-55)", cat: ["maria"], lat: 1, l:
+  { id: "magnificat", t: "Magnificat", a: "Cántico de María (Lc 1, 46-55)", cat: ["maria"], mo: ["comunion", "salida"], lat: 1, l:
 `Magnificat anima mea Dominum,
 et exsultavit spiritus meus in Deo salutari meo.
 
@@ -732,7 +667,7 @@ Abraham et semini eius in saecula.
 Gloria Patri, et Filio, et Spiritui Sancto.
 Sicut erat in principio, et nunc, et semper,
 et in saecula saeculorum. Amen.` },
-  { id: "ave-maria-gregoriano", t: "Ave Maria", a: "Canto gregoriano", cat: ["maria"], lat: 1, l:
+  { id: "ave-maria-gregoriano", t: "Ave Maria", a: "Canto gregoriano", cat: ["maria"], mo: ["ofrendas", "salida"], lat: 1, l:
 `Ave Maria, gratia plena,
 Dominus tecum,
 benedicta tu in mulieribus,
@@ -741,14 +676,14 @@ et benedictus fructus ventris tui, Iesus.
 Sancta Maria, Mater Dei,
 ora pro nobis peccatoribus,
 nunc et in hora mortis nostrae. Amen.` },
-  { id: "sub-tuum-praesidium", t: "Sub tuum praesidium", a: "La oración mariana más antigua (s. III)", cat: ["maria"], lat: 1, l:
+  { id: "sub-tuum-praesidium", t: "Sub tuum praesidium", a: "La oración mariana más antigua (s. III)", cat: ["maria"], mo: ["salida"], lat: 1, l:
 `Sub tuum praesidium confugimus,
 Sancta Dei Genetrix.
 Nostras deprecationes ne despicias
 in necessitatibus,
 sed a periculis cunctis libera nos semper,
 Virgo gloriosa et benedicta.` },
-  { id: "bendita-sea-tu-pureza", t: "Bendita sea tu pureza", a: "Tradicional", cat: ["maria"], l:
+  { id: "bendita-sea-tu-pureza", t: "Bendita sea tu pureza", a: "Tradicional", cat: ["maria"], mo: ["salida"], l:
 `Bendita sea tu pureza
 y eternamente lo sea,
 pues todo un Dios se recrea
@@ -761,7 +696,7 @@ alma, vida y corazón.
 
 Mírame con compasión,
 no me dejes, Madre mía.` },
-  { id: "adios-reina-del-cielo", t: "Adiós, Reina del cielo", a: "Tradicional", cat: ["maria"], ton: "D", l:
+  { id: "adios-reina-del-cielo", t: "Adiós, Reina del cielo", a: "Tradicional", cat: ["maria"], mo: ["salida"], ton: "D", l:
 `> A[D]diós, Reina del [A7]cielo,
 > Madre del Salva[D]dor;
 > adiós, oh Madre [G]mía,
@@ -775,5 +710,95 @@ tus [D]plantas [A7]a be[D]sar.
 A [D]dejarte, oh Ma[A7]ría,
 no acierta el cora[D]zón;
 te lo entrego, Se[G]ñora,
-dame [D]tu ben[A7]di[D]ción.` }
+dame [D]tu ben[A7]di[D]ción.` },
+  { id: "kyrie", t: "Kyrie, eleison", a: "Ordinario de la Misa · canto gregoriano", cat: [], mo: ["piedad"], lat: 1, l:
+`Kyrie, eleison.
+Kyrie, eleison.
+
+Christe, eleison.
+Christe, eleison.
+
+Kyrie, eleison.
+Kyrie, eleison.` },
+  { id: "gloria-in-excelsis", t: "Gloria in excelsis Deo", a: "Ordinario de la Misa · canto gregoriano", cat: [], mo: ["gloria"], lat: 1, l:
+`Gloria in excelsis Deo
+et in terra pax hominibus bonae voluntatis.
+
+Laudamus te, benedicimus te,
+adoramus te, glorificamus te,
+gratias agimus tibi propter magnam gloriam tuam,
+Domine Deus, Rex caelestis,
+Deus Pater omnipotens.
+
+Domine Fili unigenite, Iesu Christe,
+Domine Deus, Agnus Dei, Filius Patris,
+qui tollis peccata mundi, miserere nobis;
+qui tollis peccata mundi, suscipe deprecationem nostram.
+Qui sedes ad dexteram Patris, miserere nobis.
+
+Quoniam tu solus Sanctus, tu solus Dominus,
+tu solus Altissimus, Iesu Christe,
+cum Sancto Spiritu: in gloria Dei Patris. Amen.` },
+  { id: "credo", t: "Credo in unum Deum", a: "Ordinario de la Misa · Símbolo niceno-constantinopolitano", cat: [], mo: ["credo"], lat: 1, l:
+`Credo in unum Deum,
+Patrem omnipotentem, factorem caeli et terrae,
+visibilium omnium et invisibilium.
+
+Et in unum Dominum Iesum Christum,
+Filium Dei unigenitum,
+et ex Patre natum ante omnia saecula.
+Deum de Deo, lumen de lumine, Deum verum de Deo vero,
+genitum, non factum, consubstantialem Patri:
+per quem omnia facta sunt.
+Qui propter nos homines et propter nostram salutem
+descendit de caelis.
+
+Et incarnatus est de Spiritu Sancto
+ex Maria Virgine, et homo factus est.
+
+Crucifixus etiam pro nobis sub Pontio Pilato;
+passus et sepultus est,
+et resurrexit tertia die, secundum Scripturas,
+et ascendit in caelum, sedet ad dexteram Patris.
+Et iterum venturus est cum gloria,
+iudicare vivos et mortuos,
+cuius regni non erit finis.
+
+Et in Spiritum Sanctum, Dominum et vivificantem:
+qui ex Patre Filioque procedit.
+Qui cum Patre et Filio simul adoratur et conglorificatur:
+qui locutus est per prophetas.
+
+Et unam, sanctam, catholicam et apostolicam Ecclesiam.
+Confiteor unum baptisma in remissionem peccatorum.
+Et exspecto resurrectionem mortuorum,
+et vitam venturi saeculi. Amen.` },
+  { id: "sanctus", t: "Sanctus", a: "Ordinario de la Misa · canto gregoriano", cat: [], mo: ["santo"], lat: 1, l:
+`Sanctus, Sanctus, Sanctus
+Dominus Deus Sabaoth.
+Pleni sunt caeli et terra gloria tua.
+Hosanna in excelsis.
+
+Benedictus qui venit in nomine Domini.
+Hosanna in excelsis.` },
+  { id: "pater-noster", t: "Pater noster", a: "Ordinario de la Misa · canto gregoriano", cat: [], mo: ["padrenuestro"], lat: 1, l:
+`Pater noster, qui es in caelis,
+sanctificetur nomen tuum;
+adveniat regnum tuum;
+fiat voluntas tua, sicut in caelo et in terra.
+
+Panem nostrum cotidianum da nobis hodie;
+et dimitte nobis debita nostra,
+sicut et nos dimittimus debitoribus nostris;
+et ne nos inducas in tentationem;
+sed libera nos a malo.` },
+  { id: "agnus-dei", t: "Agnus Dei", a: "Ordinario de la Misa · canto gregoriano", cat: [], mo: ["cordero"], lat: 1, l:
+`Agnus Dei, qui tollis peccata mundi,
+miserere nobis.
+
+Agnus Dei, qui tollis peccata mundi,
+miserere nobis.
+
+Agnus Dei, qui tollis peccata mundi,
+dona nobis pacem.` }
 ];
