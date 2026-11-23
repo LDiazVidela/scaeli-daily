@@ -1,7 +1,8 @@
 // Scaeli Daily · rezar todos los días. Hermana de Scaeli Fit (misma base, misma cuenta) y del juego Scaeli.
 import { gruposBackend, gruposLocal, plusBackend } from "./firebase.js";
 import { login, logout, watchAuth, finishRedirect, userBackend, localBackend, calendarioToken, borrarCuenta } from "./firebase.js";
-import { pushActivar, pushDesactivar } from "./firebase.js";
+import { pushActivar, pushDesactivar, idToken } from "./firebase.js";
+import { AVISOS_URL } from "./avisos-url.js";   // 2.11: el servidor de avisos (Cloudflare); la escribe sola .github/workflows/avisos.yml
 import { esNativo, plataforma, pedirPermisoAvisos, programarAvisosNativos, comprasDisponibles, comprasDetalle, comprasIniciar, comprasEstado, comprasPlanes, comprar, restaurarCompras, donacionesProductos, donar } from "./nativo.js";
 import { VIRTUDES, PISTAS_VIRTUD, CAMINOS } from "../data/plus.js";
 import { ROS_MED, LECTIO, PIE_REZAR } from "../data/citas.js";   // 2.1: los textos bíblicos, de la Biblia Platense
@@ -23,7 +24,7 @@ import * as PJ from "./personaje.js";
 import { RETIROS } from "../data/retiros.js";   // 2.2: caminos largos de oración (Scaeli+)
 import { MUSICAS, musicaPlay, musicaStop, musicaEstado, musicaAlCambiar, campana, vozDisponible, decir, callar } from "./audio.js";
 
-export const VERSION="2.10";
+export const VERSION="2.11";
 const LOGO_GOOGLE='<svg class="logo-g" viewBox="0 0 48 48" aria-hidden="true"><path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/><path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/><path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/><path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/></svg>';
 const LOGO_APPLE='<svg class="logo-a" viewBox="0 0 814 1000" aria-hidden="true"><path fill="currentColor" d="M788.1 340.9c-5.8 4.5-108.2 62.2-108.2 190.5 0 148.4 130.3 200.9 134.2 202.2-.6 3.2-20.7 71.9-68.7 141.9-42.8 61.6-87.5 123.1-155.5 123.1s-85.5-39.5-164-39.5c-76.5 0-103.7 40.8-165.9 40.8s-105.6-57-155.5-127C46.7 790.7 0 663 0 541.8c0-194.4 126.4-297.5 250.8-297.5 66.1 0 121.2 43.4 162.7 43.4 39.5 0 101.1-46 176.3-46 28.5 0 130.9 2.6 198.3 99.2zm-234-181.5c31.1-36.9 53.1-88.1 53.1-139.3 0-7.1-.6-14.3-1.9-20.1-50.6 1.9-110.8 33.7-147.1 75.8-28.5 32.4-55.1 83.6-55.1 135.5 0 7.8 1.3 15.6 1.9 18.1 3.2.6 8.4 1.3 13.6 1.3 45.4 0 102.5-30.4 135.5-71.3z"/></svg>';
 /* la dirección publicada: la app de las tiendas lee de acá los Evangelios del día (los genera la GitHub Action cada noche) */
@@ -87,7 +88,13 @@ const momento=(d)=>{const h=(d||new Date()).getHours();return h<4?"noche":h<11?"
 let user=null, backend=null, unsubs=[], ready=false, statusTxt="";
 let view="hoy", sub=null, sheet=null;
 let habEd=null;
-let days={}, entrenos={}, diasOk=0, profile=null, recordatorios={m:"07:30",n:"22:00",on:false}, intents=[], rosario=null, novenas=[], propositos=[], rutina={diarias:[],habitos:[]}, editRut=false;
+/* 2.11 · recordatorios que llegan con la app cerrada. Los manda el servidor de avisos (avisos/worker.js, Cloudflare) a la hora que elige
+   cada uno; en la app de Android los programa el teléfono (nativo.js). daily_settings/recordatorios = {v:2, on, gr, ev|lau|ang|vis|com:{on,h}}.
+   Antes (hasta 2.10): {on, m, n, ang, a}: la oración de la mañana pasa a Laudes y la de la noche a Completas. */
+const REC_TIPOS=[["ev","Evangelio del día","07:00","La cita y el comienzo del Evangelio de hoy"],["lau","Laudes","07:30","Liturgia de las Horas, al empezar el día"],["ang","Ángelus","12:00","El ángel del Señor anunció a María"],["vis","Vísperas","19:00","Liturgia de las Horas, a la tarde"],["com","Completas","22:30","La última oración antes de dormir"]];
+function recN(r){ r=r||{}; if(r.v===2){ const o={...r}; REC_TIPOS.forEach(([k,,h])=>{ o[k]={on:!!(r[k]&&r[k].on),h:(r[k]&&/^\d\d:\d\d$/.test(r[k].h))?r[k].h:h}; }); o.gr=r.gr!==false; o.on=!!r.on; return o; }
+  return {v:2,on:!!r.on,gr:true,ev:{on:true,h:"07:00"},lau:{on:!!(r.on&&r.m),h:r.m||"07:30"},ang:{on:!!r.ang,h:r.a||"12:00"},vis:{on:false,h:"19:00"},com:{on:!!(r.on&&r.n),h:r.n||"22:30"}}; }
+let days={}, entrenos={}, diasOk=0, profile=null, recordatorios=recN({}), intents=[], rosario=null, novenas=[], propositos=[], rutina={diarias:[],habitos:[]}, editRut=false;
 let evHoy=null, evEstado="", lhCache={};
 const hoy=()=>iso();
 const dayOf=(s)=>{ const d=days[s]||{}, w=entrenos[s]; return w?{...d,wo:w}:d; };   // wo: el entreno de Scaeli Fit de ese día (solo lectura)
@@ -529,17 +536,41 @@ const pushFaltaInstalar=()=>/iPhone|iPad|iPod/.test(navigator.userAgent)&&!(wind
 const pushOn=()=>lsGet("daily_push")==="1"&&typeof Notification!=="undefined"&&Notification.permission==="granted";
 const pushLlega=(n)=>{ if(n&&(n.title||n.body)) toast((n.title?n.title+(n.body?": ":""):"")+(n.body||"")); };
 async function pushEncender(callado){ const r=await pushActivar(pushLlega);
-  if(r.ok){ lsSet("daily_push","1"); try{ await backend.setDoc("daily_settings/push",{on:true,t:r.token,f:hoy(),ua:navigator.userAgent.slice(0,120)}); }catch(e){} if(!callado) toast("Avisos de Scaeli activados"); }
+  if(r.ok){ lsSet("daily_push","1"); lsSet("daily_push_t",r.token); try{ await backend.setDoc("daily_settings/push",{on:true,t:r.token,f:hoy(),ua:navigator.userAgent.slice(0,120)}); }catch(e){} if(!callado) toast("Avisos de Scaeli activados"); }
   else if(!callado) toast(r.err==="bloqueado"?"Los avisos están bloqueados para Scaeli: permitilos en los ajustes del navegador":r.err==="nosoporta"?"Este navegador no permite avisos":r.err==="permiso"?"Sin tu permiso no podemos avisarte":"No se pudieron activar los avisos. Probá de nuevo con conexión");
   render(); return !!r.ok; }
-const swt=(a,on,lab)=>'<button class="swt" role="switch" aria-checked="'+!!on+'" aria-label="'+esc(lab)+'" data-a="'+a+'"></button>';
+const swt=(a,on,lab,p)=>'<button class="swt" role="switch" aria-checked="'+!!on+'" aria-label="'+esc(lab)+'" data-a="'+a+'"'+(p?' data-p="'+p+'"':'')+'></button>';
+/* 2.11 · le cuenta al servidor de avisos qué recordatorios querés, a qué hora y si querés los mensajes del grupo (o lo da de baja).
+   Solo en la web con cuenta; se repite si algo cambia o una vez por día (así el servidor sabe que el teléfono sigue usando la app). */
+let avSyncT=null;
+function avisosSync(forzar){ clearTimeout(avSyncT); avSyncT=setTimeout(()=>avisosSyncYa(forzar),600); }
+async function avisosSyncYa(forzar){ if(esNativo()||!AVISOS_URL||!backend||backend.mode==="local") return;
+  const R=recordatorios, tok=lsGet("daily_push_t"), quiere=R.on&&pushOn()&&!!tok, items={};
+  if(quiere) REC_TIPOS.forEach(([k])=>{ if(R[k].on) items[k]=R[k].h; });
+  let tz="America/Argentina/Buenos_Aires"; try{ tz=Intl.DateTimeFormat().resolvedOptions().timeZone||tz; }catch(e){}
+  const cuerpo=quiere?{token:tok,tz,items,gr:R.gr,bloq:(profile&&profile.bloq)||[],plat:/iPhone|iPad/.test(navigator.userAgent)?"ios":"web"}:null;
+  const clave=cuerpo?JSON.stringify(cuerpo):"", ant=lsGet("daily_avisos_k")||"", antF=+(lsGet("daily_avisos_f")||0);
+  if(!cuerpo&&!ant) return; if(!forzar&&clave===ant&&Date.now()-antF<20*36e5) return;
+  try{ const it=await idToken(); if(!it) return; let baja=null; if(!cuerpo){ try{ baja=JSON.parse(ant).token; }catch(e){} if(!baja){ lsSet("daily_avisos_k",null); return; } }
+    const r=await fetch(AVISOS_URL+(cuerpo?"/suscribir":"/baja"),{method:"POST",headers:{"content-type":"application/json",authorization:"Bearer "+it},body:JSON.stringify(cuerpo||{token:baja})});
+    if(r.ok){ lsSet("daily_avisos_k",cuerpo?clave:null); lsSet("daily_avisos_f",String(Date.now())); } }catch(e){} }
+/* al abrir la app: si los avisos están prendidos y ya hay permiso, renueva el token del dispositivo (sin preguntar nada) y se lo pasa al servidor */
+async function avisosArrancar(){ if(esNativo()||!backend||backend.mode==="local"||navigator.webdriver) return;
+  if(recordatorios.on&&typeof Notification!=="undefined"&&Notification.permission==="granted") await pushEncender(true); avisosSync(); }
+/* avisar a los demás del grupo que escribiste (el servidor comprueba que el mensaje es tuyo y que sos miembro) */
+async function avisarGrupo(gid,ref){ try{ if(!AVISOS_URL||!ref||!ref.id||!backend||backend.mode==="local") return; const it=await idToken(); if(!it) return;
+  await fetch(AVISOS_URL+"/grupo",{method:"POST",headers:{"content-type":"application/json",authorization:"Bearer "+it},body:JSON.stringify({gid,mid:ref.id})}); }catch(e){} }
+function recordatoriosHTML(){ const R=recordatorios, nat=esNativo(), local=backend&&backend.mode==="local";
+  const sinPush=!nat&&!(typeof Notification!=="undefined"&&"serviceWorker" in navigator&&"PushManager" in window), bloq=!nat&&typeof Notification!=="undefined"&&Notification.permission==="denied";
+  const estado=nat?(R.on?"Activados":"Desactivados"):pushFaltaInstalar()?"En iPhone, primero agregá Scaeli a la pantalla de inicio":local?"Entrá con tu cuenta para recibirlos con la app cerrada":sinPush?"Este navegador no permite avisos":bloq?"Bloqueados: permitilos en los ajustes del teléfono":R.on&&pushOn()?"Activados en este teléfono":R.on?"Tocá para activarlos en este teléfono":"Desactivados";
+  return '<div class="card recc"><div class="eyebrow">Recordatorios</div><p class="hint" style="margin:6px 0 10px">'+(nat?'Avisos del teléfono, aunque la app esté cerrada (también las tareas con hora).':'Llegan aunque la app esté cerrada, a la hora que elijas.'+(pushFaltaInstalar()?' En iPhone hace falta tener Scaeli en la pantalla de inicio: en Safari tocá Compartir y después «Agregar a inicio», y abrila desde ese ícono.':''))+'</p>'+
+   '<div class="list recl"><div class="row"><div class="n"><b>Avisos</b><small>'+estado+'</small></div>'+swt("recOn",R.on&&(nat||pushOn()||local||!AVISOS_URL),"Avisos")+'</div>'+
+   REC_TIPOS.map(([k,t,,s])=>'<div class="row recit"><div class="n"><b>'+t+'</b><small>'+s+'</small></div><input type="time" data-rec="'+k+'" value="'+esc(R[k].h)+'" aria-label="Hora: '+t+'">'+swt("recTipo",R[k].on,"Aviso: "+t,k)+'</div>').join("")+
+   (nat?'':'<div class="row"><div class="n"><b>Mensajes del grupo</b><small>Cuando alguien escribe en tu grupo</small></div>'+swt("recGr",R.gr,"Avisos de los mensajes del grupo")+'</div>')+'</div>'+
+   (!nat&&!local&&AVISOS_URL&&R.on&&pushOn()?'<button class="ghost g recprueba" data-a="avisoPrueba">'+ic("bell")+' Mandarme un aviso de prueba</button>':'')+'</div>'; }
 function renderMas(){ const claro=document.documentElement.getAttribute("data-theme")==="light";
   return cab("Más","Ajustes",'<button class="iconbtn" data-a="irYo" aria-label="Volver a Yo">'+ic("left")+'</button>')+
-   '<div class="card"><div class="eyebrow">Recordatorios</div><p class="hint" style="margin:6px 0 10px">'+(esNativo()?'Avisos del teléfono, aunque la app esté cerrada (también las tareas con hora).':'Avisos mientras la app está abierta o instalada'+("Notification" in window?'':' (este navegador no los permite)')+'.')+'</p>'+
-   '<div class="grid2"><label class="f">Mañana<input type="time" data-rec="m" value="'+esc(recordatorios.m)+'"></label><label class="f">Noche<input type="time" data-rec="n" value="'+esc(recordatorios.n)+'"></label></div>'+
-   '<div class="list recl"><div class="row"><div class="n"><b>Avisos</b><small>'+(recordatorios.on?"Activados":"Desactivados")+'</small></div>'+swt("recOn",recordatorios.on,"Avisos")+'</div>'+
-   '<div class="row"><div class="n"><b>Ángelus</b><small>Un aviso más, a las 12:00</small></div>'+swt("recAng",recordatorios.ang,"Aviso del Ángelus")+'</div>'+
-   (pushPosible()?'<div class="row"><div class="n"><b>Avisos de Scaeli</b><small>'+(pushOn()?"Activados en este dispositivo":pushFaltaInstalar()?"En iPhone, primero agregá Scaeli a la pantalla de inicio":"De vez en cuando, un recordatorio para rezar o una novedad. Llegan aunque la app esté cerrada.")+'</small></div>'+swt("pushOn",pushOn(),"Avisos de Scaeli")+'</div>':'')+'</div></div>'+
+   recordatoriosHTML()+
    '<button class="card plusmas" data-a="plus"><span class="plus-tag">Scaeli<b>+</b></span><span class="n"><b>'+(esPlus()?"Scaeli+ activo":"Scaeli+")+'</b><small>'+(esPlus()?"Caminos de oración, audio, grupos y diario sin límites":"Caminos de oración, audio, grupos y diario sin límites · desde USD 1,67 por mes")+'</small></span>'+ic("right")+'</button>'+
    '<div class="card list"><div class="row"><div class="n"><b>Ayudar a Scaeli</b><small>Una donación para sostener el proyecto</small></div><button class="ghost g" data-a="donarVer">'+ic("heart")+' Donar</button></div></div>'+
    /* 2.10: modo sobrio (sin personaje ni juego) y el ranking de grupos, opcional */
@@ -867,7 +898,7 @@ async function encGuardar(f){ const F=new FormData(f), ti=String(F.get("ti")||""
   if(!ti||!/^\d{4}-\d\d-\d\d$/.test(fe)||!grupo.gid) return; if(fe<hoy()){ toast("Elegí un día de hoy en adelante"); return; } if(!limpio(ti+" "+lu)){ toast("Elegí otras palabras"); return; }
   if(encuentros().length>=20){ toast("Ya hay muchos encuentros cargados"); return; }
   const m={k:"enc",ti,f:fe,h,lu}, tx=("Encuentro: "+ti+" · "+encCuando(m)+(lu?" · "+lu:"")).slice(0,140);
-  try{ await grupoBE.escribir(grupo.gid,{n:miFicha().n,tx,...m,a:{[yo()]:1}}); await grupoBE.escribir(grupo.gid,{n:miFicha().n,tx,tipo:"rec"}); toast("Encuentro publicado"); }catch(e){ toast("No se pudo publicar"); return; }
+  try{ await grupoBE.escribir(grupo.gid,{n:miFicha().n,tx,...m,a:{[yo()]:1}}); const ref=await grupoBE.escribir(grupo.gid,{n:miFicha().n,tx,tipo:"rec"}); avisarGrupo(grupo.gid,ref); toast("Encuentro publicado"); }catch(e){ toast("No se pudo publicar"); return; }
   openSheet({view:"grupo",gt:"ranking"}); }
 
 /* ── Rango de perseverancia (1.12; ocho rangos desde 2.0): últimos 30 días.
@@ -1313,7 +1344,7 @@ const CANC=cancionero({esc:x=>esc(x),ic:x=>ic(x),shTop:(a,b)=>shTop(a,b),esPlus:
   grupo:{ hay:()=>!!(grupo.gid&&grupo.meta), nombre:()=>(grupo.meta&&grupo.meta.n)||"", yo:()=>yo(), creador:()=>!!(grupo.meta&&grupo.meta.creador===yo()),
     cantos:()=>gExtra.filter(m=>m.k==="canto"&&m.l&&!muroOculto(m)).map(m=>({id:"g-"+m.id,mid:m.id,t:m.ti||"Canto",a:m.au||"",l:m.l,ton:m.ton||"",cat:[],grp:1,por:m.n||"",u:m.u})),
     async compartir(x){ if(!grupo.gid) return false; if(gExtra.filter(m=>m.k==="canto").length>=150){ toast("El grupo ya tiene 150 cantos"); return false; }
-      try{ await grupoBE.escribir(grupo.gid,{n:miFicha().n,tx:("Canto: "+x.t).slice(0,140),k:"canto",ti:x.t,au:x.a||"",l:x.l,ton:x.ton||""}); return true; }catch(e){ return false; } },
+      try{ const ref=await grupoBE.escribir(grupo.gid,{n:miFicha().n,tx:("Canto: "+x.t).slice(0,140),k:"canto",ti:x.t,au:x.a||"",l:x.l,ton:x.ton||""}); avisarGrupo(grupo.gid,ref); return true; }catch(e){ return false; } },
     async quitar(mid){ try{ await grupoBE.borrarMsg(grupo.gid,mid); return true; }catch(e){ return false; } } }});
 /* ── los libros: clásicos católicos libres de derechos (herramientas/libros_mb.py), un archivo por libro en libros/ ── */
 const LIB={}, LIB_K="daily_libros";
@@ -1843,7 +1874,7 @@ function renderLogin(){ $("#nav").hidden=true;
    '<div class="pie"><h1>Tu fe, a otro nivel</h1><p class="hint">El Evangelio, el Rosario, las Horas y el examen del día. Tu semana con Dios, guardada en tu cuenta.</p>'+
    (APPLE_LISTO&&plataforma()!=="android"?'<button class="entrar apple" id="loginApple" data-q="apple">'+LOGO_APPLE+'<span>Continuar con Apple</span></button>':'')+'<button class="entrar google" id="login" data-q="google">'+LOGO_GOOGLE+'<span>Continuar con Google</span></button><button class="ghost g" id="invitado" style="justify-content:center;height:54px;width:100%;font-size:17px">Probar sin cuenta</button>'+
    '<p class="hint" id="status" style="margin:8px 0 0">'+esc(statusTxt||"La misma cuenta que Scaeli Fit y el juego. Nada es público.")+'</p><p class="hint" style="margin:0"><a href="privacidad.html" target="_blank" rel="noopener">Política de privacidad</a></p></div></div>'; }
-function startSession(u,local){ user=u; unsubs.forEach(f=>{try{f()}catch(e){}}); unsubs=[]; setTimeout(novedadesVer,1600); setTimeout(modoOfrecer,2600);
+function startSession(u,local){ user=u; unsubs.forEach(f=>{try{f()}catch(e){}}); unsubs=[]; setTimeout(novedadesVer,1600); setTimeout(modoOfrecer,2600); setTimeout(abrirPendiente,abrirPend&&abrirPend.a==="grupo"?1500:700); setTimeout(avisosArrancar,1800);
   backend=local?localBackend():userBackend(u.uid,e=>{ if(e&&e.code==="permission-denied") setStatus("La base de datos rechazó la operación: hay que publicar firestore.rules.",true); else setStatus("Sin conexión: los cambios se guardan y se sincronizan después."); });
   setStatus(local?"Guardado solo en este dispositivo":"Sincronizado · "+(u.displayName||u.email||"")); $("#nav").hidden=false;
   const w=(fn)=>{ const un=fn(); if(typeof un==="function") unsubs.push(un); };
@@ -1852,7 +1883,7 @@ function startSession(u,local){ user=u; unsubs.forEach(f=>{try{f()}catch(e){}});
     render(); grupoSync(); nivelAviso(); }));
   w(()=>backend.watchCol("workouts",L=>{ entrenos={}; (L||[]).forEach(d=>{ const {id,...r}=d; if(/^\d{4}-\d\d-\d\d$/.test(id)&&r.done) entrenos[id]=r; }); render(); grupoSync(); }));
   w(()=>backend.watchDoc("daily_settings/profile",p=>{ profile=p||{}; acentoAplicar(); premiosRevisar(); render(); if(sheet&&sheet.view==="rosario") renderSheet(); grupoSync(); consentPedir(); }));
-  w(()=>backend.watchDoc("daily_settings/recordatorios",r=>{ if(r) recordatorios=r; programarAvisos(); if(view==="mas") render(); }));
+  w(()=>backend.watchDoc("daily_settings/recordatorios",r=>{ recordatorios=recN(r); programarAvisos(); if(view==="mas") render(); }));
   w(()=>backend.watchDoc("daily_settings/intents",v=>{ intents=(v&&v.list)||[]; render(); }));
   w(()=>backend.watchDoc("daily_settings/rosario",r=>{ rosario=r||null; if(sheet&&sheet.view==="rosario") renderSheet(); }));
   w(()=>backend.watchCol("daily_novenas",L=>{ novenas=L; if(sheet&&/novena/.test(sheet.view)) renderSheet(); }));
@@ -1868,14 +1899,25 @@ function startSession(u,local){ user=u; unsubs.forEach(f=>{try{f()}catch(e){}});
   const inv=lsGet("daily_grupo_inv"); if(inv){ if(local) setTimeout(()=>openSheet({view:"grupo"}),300); else setTimeout(()=>openSheet({view:"grupo",m:"codigo",inv,nuevo:1}),300); } }
 function endSession(){ nivelAntes=null; retiros={}; gOtros=[]; rosVoz=false; rosVozK=""; callar(); musicaStop(); plusBE=null; plusDoc=null; grupoCerrar(); grupoBE=null; user=null; backend=null; ready=false; unsubs.forEach(f=>{try{f()}catch(e){}}); unsubs=[]; days={}; entrenos={}; diasOk=0; profile=null; intents=[]; rosario=null; novenas=[]; propositos=[]; rutina={diarias:[],habitos:[]}; sheet=null; $("#scrim").hidden=true; $("#sheet").hidden=true; renderLogin(); }
 
-/* ── recordatorios (mientras la app esté abierta o instalada) ── */
+/* ── recordatorios ──
+   2.11: en la web los manda el servidor de avisos (llegan con la app cerrada; avisosSync). Las tareas con hora se avisan solo con la app
+   abierta, desde el service worker (en Android Chrome «new Notification» no está permitido). En la app de Android, todo lo programa el teléfono. */
 let avisosT=[];
 function programarAvisos(){ avisosT.forEach(clearTimeout); avisosT=[];
   if(esNativo()){ programarAvisosNativos(recordatorios,propositos); return; }
-  if(!recordatorios.on||!("Notification" in window)||Notification.permission!=="granted") return;
-  [["m",recordatorios.m,"Oración de la mañana","Señor, en tus manos pongo este día."],["n",recordatorios.n,"Oración de la noche","Dos minutos para dejar el día en manos de Dios."]].concat(recordatorios.ang?[["a",recordatorios.a||"12:00","Ángelus","El ángel del Señor anunció a María."]]:[]).forEach(([k,hm,t,b])=>{ if(!hm) return; const [h,m]=hm.split(":").map(Number); const d=new Date(); d.setHours(h,m,0,0); if(d<=new Date()) d.setDate(d.getDate()+1);
-    avisosT.push(setTimeout(()=>{ try{ new Notification(t,{body:b,icon:"icons/icon-192.png"}); }catch(e){} programarAvisos(); },d-new Date())); });
-  propositos.filter(p=>!p.ok&&p.f===hoy()&&p.hr).forEach(p=>{ const [h,m]=p.hr.split(":").map(Number); const d=new Date(); d.setHours(h,m,0,0); if(d>new Date()) avisosT.push(setTimeout(()=>{ try{ new Notification(p.t,{body:"Tarea de hoy · "+p.hr,icon:"icons/icon-192.png"}); }catch(e){} },d-new Date())); }); }
+  avisosSync();
+  if(!recordatorios.on||!("Notification" in window)||Notification.permission!=="granted"||!navigator.serviceWorker) return;
+  propositos.filter(p=>!p.ok&&p.f===hoy()&&p.hr).forEach(p=>{ const [h,m]=p.hr.split(":").map(Number); const d=new Date(); d.setHours(h,m,0,0); if(d>new Date()) avisosT.push(setTimeout(()=>{ navigator.serviceWorker.ready.then(r=>r.showNotification(p.t,{body:"Tarea de hoy · "+p.hr,icon:"icons/icon-192.png",tag:"tarea-"+p.id,data:{link:"./"}})).catch(()=>{}); },d-new Date())); }); }
+/* 2.11 · al tocar un aviso se abre lo suyo: ?abrir=evangelio | horas&h=laudes | angelus | grupo&gid=… (lo arma el servidor de avisos) */
+let abrirPend=null;
+try{ const q=new URLSearchParams(location.search), a=q.get("abrir"); if(a){ abrirPend={a,h:q.get("h"),gid:q.get("gid")}; history.replaceState(null,"",location.pathname); } }catch(e){}
+function abrirPendiente(){ const x=abrirPend; abrirPend=null; if(!x||!ready) return; try{
+  if(x.a==="evangelio") ACC.evangelio();
+  else if(x.a==="horas"&&/^(oficio|laudes|tercia|sexta|nona|visperas|completas)$/.test(x.h||"")) ACC.horaLH(x.h);
+  else if(x.a==="horas") ACC.horas();
+  else if(x.a==="angelus") ACC.hora("mediodia");
+  else if(x.a==="grupo"){ irA("grupo"); const g=String(x.gid||""); (async()=>{ if(g&&g!==grupo.gid&&gOtros.some(y=>y.gid===g)) await ACC.gCambiar(g); ACC.grupoEn("muro"); })(); }
+  }catch(e){} }
 
 /* ── exportar / importar ── */
 const COLS=["daily_days","daily_settings","daily_novenas"];
@@ -2056,7 +2098,13 @@ const ACC={ ...CANC.ACC,
   async propDel(p){ propositos=propositos.filter(q=>q.id!==p); await backend.setDoc("daily_settings/propositos",{list:propositos}); },
   async notaOk(){ const t=$("textarea[data-nota]"); if(!t) return; await setDay(hoy(),{nota:t.value.trim(),t:Date.now()}); toast("Guardado"); },
   async intDel(p){ intents.splice(+p,1); await backend.setDoc("daily_settings/intents",{list:intents}); },
-  async recAng(){ recordatorios={...recordatorios,ang:!recordatorios.ang}; await backend.setDoc("daily_settings/recordatorios",recordatorios); programarAvisos(); render(); },
+  /* 2.11 · cada recordatorio con su interruptor y su hora; los mensajes del grupo; un aviso de prueba */
+  async recTipo(k){ if(!recordatorios[k]) return; const on=!recordatorios[k].on; recordatorios={...recordatorios,[k]:{...recordatorios[k],on}}; await backend.setDoc("daily_settings/recordatorios",recordatorios); programarAvisos(); render();
+    if(on&&!recordatorios.on) toast("Prendé «Avisos» para que te lleguen"); },
+  async recAng(){ return ACC.recTipo("ang"); },
+  async recGr(){ recordatorios={...recordatorios,gr:!recordatorios.gr}; await backend.setDoc("daily_settings/recordatorios",recordatorios); programarAvisos(); render(); },
+  async avisoPrueba(){ try{ await avisosSyncYa(true); const it=await idToken(); const r=await fetch(AVISOS_URL+"/prueba",{method:"POST",headers:{"content-type":"application/json",authorization:"Bearer "+it},body:"{}"}); const j=await r.json();
+    toast(j.ok?"Te mandamos un aviso: tiene que llegar en unos segundos":"No se pudo mandar el aviso. Apagá y prendé «Avisos» y probá de nuevo"); }catch(e){ toast("No se pudo mandar el aviso. Probá de nuevo con conexión"); } },
   async oraFav(p){ const o=TODAS_ORA()[+p]; if(!o) return; const F=oraFavs(), on=F.includes(o.n), N=on?F.filter(x=>x!==o.n):F.concat(o.n);
     profile={...(profile||{}),oraFav:N}; renderSheetQuieto(); toast(on?"Se quitó de favoritas":"Fijada arriba, en Favoritas"); await backend.setDoc("daily_settings/profile",{...(profile||{}),oraFav:N}); },
   async prefLat(){ await backend.setDoc("daily_settings/profile",{...(profile||{}),lat:!(profile&&profile.lat)}); },
@@ -2065,8 +2113,15 @@ const ACC={ ...CANC.ACC,
   async rankOff(){ const off=!(profile&&profile.rankOff); await backend.setDoc("daily_settings/profile",{...(profile||{}),rankOff:off}); toast(off?"El ranking de grupos quedó oculto":"Se ve el ranking de grupos"); },
   modoVer(){ openSheet({view:"modo"}); },
   async modoElegir(p){ lsSet("daily_modo_visto","1"); const on=p==="sobrio"; closeSheet(); await backend.setDoc("daily_settings/profile",{...(profile||{}),sobrio:on}); toast(on?"Listo: Scaeli sobrio. Lo cambiás en Yo → Ajustes y más":"Listo: con personaje. Lo cambiás en Yo → Ajustes y más"); },
-  async recOn(){ if(esNativo()){ if(!recordatorios.on&&!(await pedirPermisoAvisos())){ toast("Sin permiso para avisar: activalo en los ajustes del teléfono"); return; } }
-    else if("Notification" in window&&Notification.permission!=="granted"){ const r=await Notification.requestPermission(); if(r!=="granted"){ toast("Sin permiso para avisar"); return; } } recordatorios={...recordatorios,on:!recordatorios.on}; await backend.setDoc("daily_settings/recordatorios",recordatorios); programarAvisos(); },
+  /* 2.11: en la web, prender los avisos pide el permiso y suscribe este teléfono al servidor de avisos; apagarlos lo da de baja */
+  async recOn(){ const local=backend&&backend.mode==="local"; let on=!recordatorios.on;
+    if(esNativo()){ if(on&&!(await pedirPermisoAvisos())){ toast("Sin permiso para avisar: activalo en los ajustes del teléfono"); return; } }
+    else if(pushFaltaInstalar()){ toast("En iPhone, primero agregá Scaeli a la pantalla de inicio (Compartir → Agregar a inicio) y abrila desde ahí"); return; }
+    else if(!local&&AVISOS_URL){ if(recordatorios.on&&!pushOn()) on=true; if(on&&!(await pushEncender())) return; }
+    else if(on&&"Notification" in window&&Notification.permission!=="granted"){ const r=await Notification.requestPermission(); if(r!=="granted"){ toast("Sin permiso para avisar"); return; } }
+    recordatorios={...recordatorios,on}; await backend.setDoc("daily_settings/recordatorios",recordatorios); programarAvisos(); render();
+    if(on&&!esNativo()&&!local&&AVISOS_URL) toast("Listo: los avisos te van a llegar aunque la app esté cerrada");
+    if(!on&&!esNativo()&&!local){ lsSet("daily_push",null); try{ await pushDesactivar(); }catch(e){} } },
   palabra(){ openSheet({view:"palabra"}); },
   async palOk(){ const q=(document.getElementById("palQ")||{}).value||"", v=(document.getElementById("palV")||{}).value||""; const p=palDe(), cita=sheet.cita||palCita(p); const antes=palHecha(dayOf(hoy()));
     await setDay(hoy(),{pal:{r:cita,q:q.trim().slice(0,600),v:v.trim().slice(0,600),t:Date.now()},t:Date.now()}); closeSheet(); toast(q.trim()||v.trim()?(antes?"Guardado en Mis oraciones":"Amén · guardado en Mis oraciones"):"Amén"); grupoSync(); },
@@ -2097,7 +2152,7 @@ document.addEventListener("click",e=>{ const b=e.target.closest("button,a[data-a
   const a=b.dataset.a; if(a&&ACC[a]){ e.preventDefault(); ACC[a](b.dataset.p); } });
 async function muroEscribir(t,tipo){ t=String(t||"").trim().slice(0,CHAT_MAX); if(!t||!grupo.gid||!grupoBE.escribir) return; if(!limpio(t)){ toast("Elegí otras palabras"); return; }
   const ult=muro.find(m=>m.u===yo()); if(ult&&Date.now()-ult.t<2000&&!tipo){ toast("Esperá un momento antes de escribir de nuevo"); return; }
-  try{ await grupoBE.escribir(grupo.gid,{n:miFicha().n,tx:t.slice(0,140),...(t.length>140?{tl:t}:{}),...(tipo?{tipo}:{})}); lsSet("daily_muro_visto",Date.now()); chatAbajo(); }catch(e){ toast("No se pudo enviar"); } }
+  try{ const ref=await grupoBE.escribir(grupo.gid,{n:miFicha().n,tx:t.slice(0,140),...(t.length>140?{tl:t}:{}),...(tipo?{tipo}:{})}); avisarGrupo(grupo.gid,ref); lsSet("daily_muro_visto",Date.now()); chatAbajo(); }catch(e){ toast("No se pudo enviar"); } }
 async function portadaSubir(file){ if(!file||!grupo.gid) return; try{ const url=await new Promise((ok,no)=>{ const r=new FileReader(); r.onload=()=>ok(r.result); r.onerror=no; r.readAsDataURL(file); });
     const img=await new Promise((ok,no)=>{ const i=new Image(); i.onload=()=>ok(i); i.onerror=no; i.src=url; });
     const W=800, H=450, c=document.createElement("canvas"); c.width=W; c.height=H; const x=c.getContext("2d"); const k=Math.max(W/img.width,H/img.height), w=img.width*k, h=img.height*k; x.drawImage(img,(W-w)/2,(H-h)/2,w,h);
@@ -2126,7 +2181,7 @@ document.addEventListener("submit",e=>{ const f=e.target; if(!f.dataset.f) retur
   if(f.dataset.f==="int"){ const t=String(F.get("t")||"").trim(); if(t){ intents.push(t); backend.setDoc("daily_settings/intents",{list:intents}); } f.reset(); } });
 document.addEventListener("change",e=>{ const t=e.target; if(t.id==="impFile"&&t.files[0]) importar(t.files[0]);
   if(t.id==="gPortada"&&t.files[0]){ portadaSubir(t.files[0]); t.value=""; }
-  if(t.dataset.rec){ recordatorios={...recordatorios,[t.dataset.rec]:t.value}; backend.setDoc("daily_settings/recordatorios",recordatorios); }
+  if(t.dataset.rec){ const k=t.dataset.rec; if(recordatorios[k]&&/^\d\d:\d\d$/.test(t.value)){ recordatorios={...recordatorios,[k]:{...recordatorios[k],h:t.value}}; backend.setDoc("daily_settings/recordatorios",recordatorios); } }
   if(t.dataset.nombre!==undefined){ backend.setDoc("daily_settings/profile",{...(profile||{}),nombre:t.value.trim()}); }
   if(t.dataset.ex){ sheet.ex[t.dataset.ex]=t.value; } });
 document.addEventListener("input",e=>{ const t=e.target; if(t.dataset.ex) sheet.ex[t.dataset.ex]=t.value;
@@ -2145,6 +2200,7 @@ try{ if(localStorage.getItem("daily_theme")==="light") document.documentElement.
    2) Al abrir la versión nueva: una vez, la hoja «Novedades» con lo que cambió desde la última que viste (NOVEDADES, la más nueva primero).
    En cada versión nueva hay que sumar su entrada acá (t38 lo comprueba). */
 const NOVEDADES=[   /* 2.4 (Lorenzo: «presentemos lo más importante, no cosas mínimas»): pocas líneas por versión, solo lo que alguien notaría; una versión de arreglos lleva [] y no abre el aviso */
+  ["2.11",["Los recordatorios llegan aunque la app esté cerrada: Evangelio del día, Laudes, Ángelus, Vísperas y Completas, cada uno a la hora que elijas.","Avisos cuando alguien escribe en tu grupo.","En iPhone, con Scaeli agregada a la pantalla de inicio. Se prenden en Yo → Ajustes y más."]],
   ["2.10",["Modo sobrio: Scaeli sin personaje ni juego, solo la oración. Está en Yo → Ajustes y más.","El ranking de grupos ahora es «Constancia de los grupos», y lo podés ocultar.","Las vestimentas de consagrados aparecen al marcar tu estado de vida en Yo.","El rango más alto ahora se llama Glorioso."]],
   ["2.9",["El cancionero, ordenado por momento de la Misa: entrada, ofrendas, comunión, salida…","Se suma el ordinario en latín: Kyrie, Gloria, Credo, Sanctus, Pater noster y Agnus Dei.","Quedan solo cantos litúrgicos."]],
   ["2.8.2",[]],

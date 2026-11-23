@@ -1,0 +1,60 @@
+name: Servidor de avisos
+
+# Despliega avisos/ en Cloudflare (Worker «scaeli-avisos») y anota su dirección en js/avisos-url.js.
+# Necesita tres secretos del repo (Settings → Secrets and variables → Actions):
+#   CLOUDFLARE_API_TOKEN, CLOUDFLARE_ACCOUNT_ID y FIREBASE_SA (ver avisos/LEEME.md).
+on:
+  push:
+    branches: [main]
+    paths: ["avisos/**", ".github/workflows/avisos.yml"]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  actions: write
+
+concurrency:
+  group: avisos
+  cancel-in-progress: false
+
+jobs:
+  desplegar:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Pruebas del servidor
+        run: node --experimental-sqlite avisos/prueba.mjs
+      - name: ¿Están las claves?
+        id: claves
+        env:
+          T: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          S: ${{ secrets.FIREBASE_SA }}
+        run: |
+          if [ -n "$T" ] && [ -n "$S" ]; then echo "ok=1" >> "$GITHUB_OUTPUT"
+          else echo "::warning::Faltan los secretos CLOUDFLARE_API_TOKEN y FIREBASE_SA: el servidor no se desplegó (ver avisos/LEEME.md)"; fi
+      - name: Desplegar en Cloudflare
+        if: steps.claves.outputs.ok == '1'
+        id: deploy
+        uses: cloudflare/wrangler-action@v3
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          workingDirectory: avisos
+          secrets: |
+            FIREBASE_SA
+        env:
+          FIREBASE_SA: ${{ secrets.FIREBASE_SA }}
+      - name: Anotar la dirección del servidor en la app
+        if: steps.claves.outputs.ok == '1'
+        env:
+          URL: ${{ steps.deploy.outputs.deployment-url }}
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          URL="${URL%/}"
+          if [ -z "$URL" ]; then echo "::warning::wrangler no devolvió la dirección"; exit 0; fi
+          echo "Servidor: $URL"
+          printf '// La escribe sola .github/workflows/avisos.yml al desplegar el servidor de avisos (Cloudflare).\nexport const AVISOS_URL = "%s";\n' "$URL" > js/avisos-url.js
+          if git diff --quiet js/avisos-url.js; then echo "La dirección no cambió"; exit 0; fi
+          git config user.name "github-actions[bot]"; git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add js/avisos-url.js && git commit -m "Avisos: dirección del servidor" && git push
+          gh workflow run pages.yml --ref main

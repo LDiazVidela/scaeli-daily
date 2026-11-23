@@ -41,8 +41,8 @@ const { chromium } = require('playwright');
   // Más: interruptores, Ángelus y latín
   await p.evaluate(() => window.DAILY.ir('mas')); await p.waitForTimeout(400);
   ok((await p.$$('.swt[role="switch"]')).length >= 5, 'interruptores en Más');
-  await p.click('.swt[data-a="recAng"]'); await p.waitForTimeout(500); let st = await LS();
-  ok(st['daily_settings/recordatorios'] && st['daily_settings/recordatorios'].ang === true && await p.evaluate(() => document.querySelector('.swt[data-a="recAng"]').getAttribute('aria-checked')) === 'true', 'aviso del Ángelus activado');
+  await p.click('.swt[data-a="recTipo"][data-p="ang"]'); await p.waitForTimeout(500); let st = await LS();   // 2.11: cada recordatorio con su interruptor
+  ok(st['daily_settings/recordatorios'] && st['daily_settings/recordatorios'].ang.on === true && await p.evaluate(() => document.querySelector('.swt[data-a="recTipo"][data-p="ang"]').getAttribute('aria-checked')) === 'true', 'aviso del Ángelus activado');
   await p.click('.swt[data-a="prefLat"]'); await p.waitForTimeout(600); st = await LS(); ok(st['daily_settings/profile'] && st['daily_settings/profile'].lat === true, 'preferencia de latín guardada');
   await A('oraciones'); ok(await p.evaluate(() => { const x = document.querySelector('#sheet .lat-seg button[aria-pressed="true"]'); return !!x && /Lat/.test(x.innerText); }), 'Oraciones abre en latín');
   await A('oracion', 1); t = await p.evaluate(() => document.querySelector('#sheet').innerText); ok(/Pater noster/i.test(t), 'el Padrenuestro en latín: ' + t.slice(0, 60).replace(/\n/g, ' | '));

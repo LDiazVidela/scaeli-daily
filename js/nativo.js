@@ -6,7 +6,9 @@ export const plataforma = () => (C() && C().getPlatform ? C().getPlatform() : "w
 export const plugin = (n) => (esNativo() && C().Plugins ? C().Plugins[n] : null);
 
 /* ── avisos del teléfono (llegan aunque la app esté cerrada) ── */
-const ID_MANANA = 1, ID_NOCHE = 2, ID_ANGELUS = 3, ID_TAREAS = 1000;
+const ID_TAREAS = 1000;
+// 2.11: los mismos recordatorios que manda el servidor de avisos en la web (Evangelio, Laudes, Ángelus, Vísperas, Completas)
+const AV_NAT = [["ev", 1, "Evangelio del día", "Un rato con la Palabra de hoy."], ["lau", 2, "Laudes", "Alabá a Dios al empezar el día."], ["ang", 3, "Ángelus", "El ángel del Señor anunció a María."], ["vis", 4, "Vísperas", "Agradecé a Dios el día que termina."], ["com", 5, "Completas", "La última oración antes de dormir."]];
 let permiso = null;
 export async function pedirPermisoAvisos() {
   const LN = plugin("LocalNotifications"); if (!LN) return false;
@@ -15,7 +17,7 @@ export async function pedirPermisoAvisos() {
 }
 function hashId(s) { let h = 0; for (const c of String(s)) h = (h * 31 + c.charCodeAt(0)) | 0; return ID_TAREAS + (Math.abs(h) % 900000); }
 
-/* rec: {on, m:"07:30", n:"21:30"} · tareas: [{id,t,f:"AAAA-MM-DD",hr:"HH:MM",ok}] */
+/* rec: {v:2, on, ev|lau|ang|vis|com:{on,h:"07:30"}} · tareas: [{id,t,f:"AAAA-MM-DD",hr:"HH:MM",ok}] */
 export async function programarAvisosNativos(rec, tareas) {
   const LN = plugin("LocalNotifications"); if (!LN) return false;
   try {
@@ -24,9 +26,7 @@ export async function programarAvisosNativos(rec, tareas) {
     if (permiso === null) await pedirPermisoAvisos(); if (!permiso) return false;
     const L = [];
     const diario = (id, hm, title, body) => { if (!hm) return; const [h, m] = hm.split(":").map(Number); L.push({ id, title, body, schedule: { on: { hour: h, minute: m }, allowWhileIdle: true }, smallIcon: "ic_stat_vela" }); };
-    diario(ID_MANANA, rec.m, "Oración de la mañana", "Señor, en tus manos pongo este día.");
-    diario(ID_NOCHE, rec.n, "Oración de la noche", "Dos minutos para dejar el día en manos de Dios.");
-    if (rec.ang) diario(ID_ANGELUS, rec.a || "12:00", "Ángelus", "El ángel del Señor anunció a María.");
+    AV_NAT.forEach(([k, id, title, body]) => { if (rec[k] && rec[k].on) diario(id, rec[k].h, title, body); });
     const ahora = Date.now();
     (tareas || []).filter((p) => !p.ok && (p.f || p.d) && p.hr).forEach((p) => {
       const at = new Date((p.f || p.d) + "T" + p.hr); if (at.getTime() > ahora) L.push({ id: hashId(p.id), title: p.t, body: "Tarea · " + p.hr, schedule: { at, allowWhileIdle: true }, smallIcon: "ic_stat_vela" });

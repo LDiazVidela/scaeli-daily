@@ -21,7 +21,7 @@ const { chromium } = require('playwright'); const fs = require('fs');
   // 2 · Más vive dentro de Yo
   await p.click('#nav button[data-view="yo"]'); await p.waitForTimeout(500); ok(await p.$('#app .yomas') && await p.$('#app .irmas'), 'Yo: «Ajustes y más»');
   await p.click('#app .yomas'); await p.waitForTimeout(500); t = await T();
-  ok(await p.evaluate(() => window.DAILY.get().view === 'mas') && /Avisos de Scaeli/.test(t), 'abre Más, con «Avisos de Scaeli»');
+  ok(await p.evaluate(() => window.DAILY.get().view === 'mas') && /Recordatorios/i.test(t) && /Mensajes del grupo/i.test(t), 'abre Más, con los recordatorios y los avisos del grupo (2.11)');
   ok(await p.evaluate(() => document.querySelector('#nav button[data-view="yo"]').getAttribute('aria-current') === 'page' || document.querySelector('#nav button[data-view="yo"]').classList.contains('on') || document.querySelector('#nav button[data-view="yo"]').getAttribute('aria-pressed') === 'true'), 'en Más queda marcado Yo');
   await A('irYo'); ok(await p.evaluate(() => window.DAILY.get().view === 'yo'), 'y se vuelve a Yo');
   // 3 · avisos (push): la clave pública, el service worker y la privacidad

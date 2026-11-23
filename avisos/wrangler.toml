@@ -1,0 +1,13 @@
+# Servidor de avisos de Scaeli (ver avisos/LEEME.md). Lo despliega .github/workflows/avisos.yml.
+name = "scaeli-avisos"
+main = "worker.js"
+compatibility_date = "2025-09-01"
+workers_dev = true
+
+[triggers]
+crons = ["* * * * *"]   # cada minuto: los recordatorios que tocan
+
+[[d1_databases]]
+binding = "DB"
+database_name = "scaeli-avisos"
+database_id = "5d23d505-756a-436b-83ef-8efa17527345"

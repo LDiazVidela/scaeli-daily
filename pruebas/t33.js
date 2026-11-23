@@ -1,7 +1,9 @@
 // t33 · Daily 2.1: textos con derechos cuidados (Biblia Platense, traducciones propias), créditos, caminos nuevos, bloquear en el grupo, sin Google Fonts
 const { chromium } = require('playwright');
 (async () => { const b = await chromium.launch(); const errs = [], fails = []; const ok = (c, m) => { if (!c) fails.push('FALLA ' + m); };
-  const ctx = await b.newContext({ viewport: { width: 390, height: 844 } }); const p = await ctx.newPage(); const afuera = [];
+  const ctx = await b.newContext({ viewport: { width: 390, height: 844 }, serviceWorkers: 'block' }); const p = await ctx.newPage(); const afuera = [];
+  // 2.11: el trabajo de cada noche borra los Evangelios de más de 7 días; el del 15/11 (el día de esta prueba) va guardado en pruebas/datos
+  await p.route('**/evangelio/2026-11-15.json', r => r.fulfill({ contentType: 'application/json', body: require('fs').readFileSync(require('path').join(__dirname, 'datos', 'evangelio-2026-11-15.json'), 'utf8') }));
   p.on('request', r => { const u = r.url(); if (!/^http:\/\/localhost:8765/.test(u) && !/^data:/.test(u)) afuera.push(u); });
   p.on('pageerror', e => errs.push('PAGEERROR ' + e.message)); p.on('console', m => { if (m.type() === 'error' && !/Failed to load resource/.test(m.text())) errs.push('CONSOLE ' + m.text()); });
   await p.clock.setFixedTime(new Date('2026-11-15T10:00:00-03:00'));

@@ -36,6 +36,6 @@ const { chromium } = require('playwright');
   // Ajustes: botones de fila del mismo ancho y campos de hora sin alto fijo
   await p.evaluate(() => window.DAILY.ir('mas')); await p.waitForTimeout(400);
   const anchos = await p.evaluate(() => [...document.querySelectorAll('.card.list>.row>.ghost')].map(e => Math.round(e.getBoundingClientRect().width))); ok(anchos.length >= 5 && Math.max(...anchos) - Math.min(...anchos) <= 2, 'botones de fila parejos: ' + anchos);
-  const hr = await p.evaluate(() => { const e = document.querySelector('input[data-rec=m]'); const s = getComputedStyle(e); return [s.paddingTop, s.paddingBottom]; }); ok(hr[0] === hr[1], 'hora centrada en alto');
+  const hr = await p.evaluate(() => { const e = document.querySelector('input[data-rec=ev]'); const s = getComputedStyle(e); return [s.paddingTop, s.paddingBottom]; }); ok(hr[0] === hr[1], 'hora centrada en alto');
   const VER = require('fs').readFileSync(require('path').join(__dirname, '..', 'js', 'app.js'), 'utf8').match(/VERSION="([^"]+)"/)[1]; t = await p.evaluate(() => document.body.innerText); ok(t.includes('Scaeli Daily ' + VER), 'versión ' + VER);
   console.log('T27', errs.concat(fails).join('\n') || 'OK'); await b.close(); })();

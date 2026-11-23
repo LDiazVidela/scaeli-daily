@@ -38,6 +38,8 @@ export async function pushActivar(alLlegar){ const M=await pushSDK(); if(!M) ret
   try{ const reg=await navigator.serviceWorker.ready, msg=M.getMessaging(app); const token=await M.getToken(msg,{vapidKey:PUSH_VAPID,serviceWorkerRegistration:reg}); if(!token) return {err:"token"};
     if(alLlegar) M.onMessage(msg,p=>{ try{ alLlegar((p&&p.notification)||{}, p&&p.data); }catch(e){} }); return {ok:true,token}; }catch(e){ return {err:"token",det:String(e&&e.message||e)}; } }
 export async function pushDesactivar(){ const M=await pushSDK(); if(!M) return false; try{ return await M.deleteToken(M.getMessaging(app)); }catch(e){ return false; } }
+/* 2.11: el token de la sesión (Firebase Auth) para hablar con el servidor de avisos (avisos/worker.js lo verifica) */
+export async function idToken(){ try{ return auth&&auth.currentUser?await auth.currentUser.getIdToken():null; }catch(e){ return null; } }
 export function evento(nombre, datos){ try{ if(analytics&&medirEv) medirEv(analytics,nombre,datos||{}); }catch(e){} }
 
 let app=null, auth=null, db=null, provider=null;
